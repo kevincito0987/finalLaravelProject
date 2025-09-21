@@ -6,9 +6,7 @@ Históricamente, la comunicación alternativa se ha abordado mediante el uso de 
 
 Frente a esta necesidad, surge la oportunidad de construir una plataforma interactiva que integre **tecnología accesible** 💻, herramientas visuales 👁️, auditivas 👂 y táctiles, así como recursos multilingües, para promover la autonomía y el aprendizaje de las personas con dificultades del lenguaje en Colombia. Este tipo de solución también puede ser utilizada por docentes de educación especial, terapeutas del lenguaje y cuidadores. 👩‍🏫👨‍⚕️
 
-------
-
-
+---
 
 ## ⚙️ Contexto y Especificaciones: 🎯
 
@@ -70,9 +68,7 @@ Un sistema de estas características no puede depender únicamente del backend. 
 - **Aprendizaje guiado**: las lecciones deben estar presentadas de manera progresiva, con botones grandes, navegación intuitiva y retroalimentación visual o sonora. ➡️
 - **Panel administrativo usable**: permite al terapeuta o cuidador gestionar tarjetas, cargar audios, revisar progreso y asignar lecciones de forma eficiente. 👩‍💻
 
-------
-
-
+---
 
 ## 💻 Herramientas y tecnologías: ⚙️
 
@@ -97,9 +93,7 @@ Para optimizar el tiempo y enfocarnos en la lógica del backend, se utilizará l
 - Multilenguaje con Laravel Localization.
 - Middleware para protección de rutas administrativas.
 
-------
-
-
+---
 
 ## ✅ Recomendaciones
 
@@ -109,17 +103,13 @@ Para optimizar el tiempo y enfocarnos en la lógica del backend, se utilizará l
 - Validar con FormRequest y proteger rutas críticas con middleware de roles. 🛡️
 - Documentar los endpoints de la API con Swagger o Postman. 📝
 
-------
-
-
+---
 
 ## 🧑‍💻 Desarrolladores Principales
 
-- **kevincito0987**: [GitHub](https://www.google.com/search?q=https://github.com/kevincito0987) 🚀
+- **kevincito0987**: [GitHub](https://github.com/kevincito0987) 🚀
 
-------
-
-
+---
 
 ## 📚 Recursos
 
@@ -129,29 +119,25 @@ Para optimizar el tiempo y enfocarnos en la lógica del backend, se utilizará l
 - [Uso de Composer](https://getcomposer.org/)
 - [Principios SOLID](https://dev.to/nadlambino/solid-principle-with-laravel-1ej7)
 
-------
-
-
+---
 
 ## ✨ Frase Estelar ✨
 
 **Cada línea de código es un 🧠 eco de esperanza; juntos, forjamos el puente 🌉 donde el silencio se rompe 🗣️ y las voces encuentran su camino para resonar en el corazón ❤️ del mundo. 🌎**
 
-------
-
-
+---
 
 ## 💯 Rúbricas
 
-| #    | Criterio de Evaluación                   | Puntaje | Porcentaje | Nivel 1 (0-1)           | Nivel 2 (25)                                    | Nivel 3 (50)                                         | Nivel 4 (75)                                                 | Nivel 5 (100)                                                |
-| ---- | ---------------------------------------- | ------- | ---------- | ----------------------- | ----------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| 1    | Dominio y manejo del código              | 73      | 50%        |                         |                                                 |                                                      |                                                              |                                                              |
-| 2    | Administración de tarjetas y validación  | 10      | 6,8%       | No implementado.        | CRUD mínimo sin validaciones ni multimedia.     | CRUD funcional con imagen y traducción básica.       | CRUD con validaciones y archivos multimedia simples.         | CRUD completo con validaciones FormRequest, multimedia y métodos de interacción. ✅ |
-| 3    | Asociación RFID/UUID y lógica de audio   | 8       | 5,5%       | No implementado.        | Identificador único sin integración de audio.   | Identificador UUID con reproducción de audio básica. | Asociación UUID con simulación de RFID y audio funcional. 🔊  | Asociación UUID/RFID simulada y audio integrado estable.     |
-| 4    | Lecciones diarias, refuerzo y progreso   | 8       | 5,5%       | No implementado.        | Lecciones parciales sin seguimiento.            | Lecciones básicas con relación a usuario.            | Lecciones asignadas y progreso simple registrado. 📈          | Lecciones diarias y refuerzo con seguimiento funcional.      |
-| 5    | POO y principios SOLID                   | 8       | 5,5%       | Código procedural.      | Uso parcial de clases sin SRP.                  | Uso básico de clases e interfaces con SRP parcial.   | Aplicación clara de principios SOLID en clases y servicios. 🏛️ | Principios SOLID aplicados completamente (SRP, OCP, DI).     |
-| 7    | Traducciones y audios multilingües       | 7       | 4,8%       | No implementado.        | Traducciones parciales sin coherencia.          | Traducciones implementadas por idioma con un audio.  | Uso correcto de Localization y audios por idioma básico. 🗣️   | Múltiples idiomas con audio por código, integración funcional. |
-| 8    | Registro de usuarios y roles             | 6       | 4,1%       | No implementado.        | Registro básico sin roles.                      | Autenticación y roles básicos sin middleware.        | Roles funcionales con middleware mínimo. 🔑                   | Roles definidos y protegidos con middleware/scopes.          |
-| 9    | Uso de Patrones de Diseño                | 6       | 4,1%       | No implementado.        | Intento parcial de Repository sin consistencia. | Repository funcional básico.                         | Repository funcional + simulación de Strategy Pattern.       | Uso correcto de Repository y Strategy como prototipo justificado. ♟️ |
-| 10   | Validaciones y seguridad de rutas        | 6       | 4,1%       | No implementado.        | Validaciones en controlador sin middleware.     | FormRequest básico sin protección de rutas.          | Validaciones centralizadas con middleware parcial. 🛡️         | Validaciones completas con FormRequest + middleware de roles. |
-| 11   | Presentación, organización y entregables | 6       | 4,1%       | Proyecto desorganizado. | Estructura parcial sin documentación.           | Proyecto organizado, entregable básico.              | Proyecto organizado con documentación mínima. 📁              | Organización impecable: carpetas claras, Readme, Postman, Seeders. ✨ |
+| #   | Criterio de Evaluación                   | Puntaje | Porcentaje | Nivel 1 (0-1)           | Nivel 2 (25)                                    | Nivel 3 (50)                                         | Nivel 4 (75)                                                   | Nivel 5 (100)                                                                       |
+| --- | ---------------------------------------- | ------- | ---------- | ----------------------- | ----------------------------------------------- | ---------------------------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| 1   | Dominio y manejo del código              | 73      | 50%        |                         |                                                 |                                                      |                                                                |                                                                                     |
+| 2   | Administración de tarjetas y validación  | 10      | 6,8%       | No implementado.        | CRUD mínimo sin validaciones ni multimedia.     | CRUD funcional con imagen y traducción básica.       | CRUD con validaciones y archivos multimedia simples.           | CRUD completo con validaciones FormRequest, multimedia y métodos de interacción. ✅ |
+| 3   | Asociación RFID/UUID y lógica de audio   | 8       | 5,5%       | No implementado.        | Identificador único sin integración de audio.   | Identificador UUID con reproducción de audio básica. | Asociación UUID con simulación de RFID y audio funcional. 🔊   | Asociación UUID/RFID simulada y audio integrado estable.                            |
+| 4   | Lecciones diarias, refuerzo y progreso   | 8       | 5,5%       | No implementado.        | Lecciones parciales sin seguimiento.            | Lecciones básicas con relación a usuario.            | Lecciones asignadas y progreso simple registrado. 📈           | Lecciones diarias y refuerzo con seguimiento funcional.                             |
+| 5   | POO y principios SOLID                   | 8       | 5,5%       | Código procedural.      | Uso parcial de clases sin SRP.                  | Uso básico de clases e interfaces con SRP parcial.   | Aplicación clara de principios SOLID en clases y servicios. 🏛️ | Principios SOLID aplicados completamente (SRP, OCP, DI).                            |
+| 7   | Traducciones y audios multilingües       | 7       | 4,8%       | No implementado.        | Traducciones parciales sin coherencia.          | Traducciones implementadas por idioma con un audio.  | Uso correcto de Localization y audios por idioma básico. 🗣️    | Múltiples idiomas con audio por código, integración funcional.                      |
+| 8   | Registro de usuarios y roles             | 6       | 4,1%       | No implementado.        | Registro básico sin roles.                      | Autenticación y roles básicos sin middleware.        | Roles funcionales con middleware mínimo. 🔑                    | Roles definidos y protegidos con middleware/scopes.                                 |
+| 9   | Uso de Patrones de Diseño                | 6       | 4,1%       | No implementado.        | Intento parcial de Repository sin consistencia. | Repository funcional básico.                         | Repository funcional + simulación de Strategy Pattern.         | Uso correcto de Repository y Strategy como prototipo justificado. ♟️                |
+| 10  | Validaciones y seguridad de rutas        | 6       | 4,1%       | No implementado.        | Validaciones en controlador sin middleware.     | FormRequest básico sin protección de rutas.          | Validaciones centralizadas con middleware parcial. 🛡️          | Validaciones completas con FormRequest + middleware de roles.                       |
+| 11  | Presentación, organización y entregables | 6       | 4,1%       | Proyecto desorganizado. | Estructura parcial sin documentación.           | Proyecto organizado, entregable básico.              | Proyecto organizado con documentación mínima. 📁               | Organización impecable: carpetas claras, Readme, Postman, Seeders. ✨               |
