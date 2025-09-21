@@ -27,37 +27,40 @@ Para el desarrollo del frontend, se utilizará **React** con una arquitectura de
 La organización del proyecto se basará en los patrones de diseño para mantener el código modular y escalable.
 
 ```
-src/ 📁
-├── assets/ 🖼️                      # Imágenes, íconos, fuentes
-├── components/ 🏗️                  # Componentes de presentación y compuestos
-│   ├── Card/ 🎟                    # Componente compuesto para las tarjetas
-│   │   ├── Card.jsx ⚛️
-│   │   └── Card.css 💅
-│   ├── LessonSelector/ 📖          # Componente compuesto para lecciones
-│   │   └── LessonSelector.jsx ⚛️
-│   └── Shared/ 🤝                  # Componentes reutilizables (botones, modales, etc.)
-├── context/ 🌐                     # Contextos globales de la aplicación
-│   ├── AuthContext.jsx 🔒
-│   ├── LanguageContext.jsx 🗣️
-│   └── ProgressContext.jsx 📈
-├── hooks/ 🪝                       # Hooks personalizados para lógica reutilizable
-│   ├── useFetch.js 📡
-│   ├── useAudioPlayer.js 🎧
-│   └── useProgressTracker.js 🎯
-├── pages/ 📄                       # Componentes que representan páginas/vistas
-│   ├── HomePage.jsx 🏠
-│   ├── LessonsPage.jsx 🧑‍🏫
-│   └── AdminDashboard.jsx 📊
-├── services/ 📡                    # Lógica de comunicación con la API
-│   ├── cardService.js 🃏
-│   └── userService.js 👤
-├── App.jsx 🚀                      # Componente principal de la aplicación
-└── main.jsx 🏁                     # Punto de entrada de la aplicación
+.Frontend
+├── assets/ 🖼️                     # Archivos estáticos (imágenes, íconos, etc.)
+├── src/ 📁                     # 📦 El código fuente del proyecto
+│   ├── components/ 🏗️           # Componentes de presentación y compuestos
+│   │   ├── Card/ 🎟            # Componente compuesto para las tarjetas
+│   │   │   ├── Card.jsx ⚛️
+│   │   │   └── Card.css 💅
+│   │   ├── LessonSelector/ 📖   # Componente compuesto para lecciones
+│   │   │   └── LessonSelector.jsx ⚛️
+│   │   └── Shared/ 🤝          # Componentes reutilizables (botones, modales, etc.)
+│   ├── context/ 🌐             # Contextos globales de la aplicación
+│   │   ├── AuthContext.jsx 🔒
+│   │   ├── LanguageContext.jsx 🗣️
+│   │   └── ProgressContext.jsx 📈
+│   ├── hooks/ 🪝               # Hooks personalizados para lógica reutilizable
+│   │   ├── useFetch.js 📡
+│   │   ├── useAudioPlayer.js 🎧
+│   │   └── useProgressTracker.js 🎯
+│   ├── pages/ 📄               # Componentes que representan páginas/vistas
+│   │   ├── HomePage.jsx 🏠
+│   │   ├── LessonsPage.jsx 🧑‍🏫
+│   │   └── AdminDashboard.jsx 📊
+│   ├── services/ 📡            # Lógica de comunicación con la API
+│   │   ├── cardService.js 🃏
+│   │   └── userService.js 👤
+│   ├── App.jsx 🚀              # Componente principal de la aplicación
+│   └── main.jsx 🏁             # Punto de entrada de la aplicación
+├── .gitignore 👻               # Archivos y carpetas ignorados por Git
+├── eslint.config.js ⚙️         # Configuración de Eslint
+├── index.html 📄               # El punto de entrada principal del HTML
+├── package.json 📦             # Dependencias de Node (para frontend)
+├── postcss.config.js ⚙️        # Configuración de PostCSS
+└── vite.config.js ⚙️           # Configuración de Vite
 ```
-
-------
-
-
 
 ## 🛠️ Tecnologías Principales 💻
 
