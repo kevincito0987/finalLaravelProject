@@ -81,6 +81,8 @@ La organización refleja las capas de la Arquitectura Limpia, manteniendo el ord
 - **Traducción:** `libre-translate` 📖
 - **Documentación API:** Swagger API 📝
 - **Correos:** Laravel Mail 📧
+- **Almacenamiento:** Laravel File Storage 📁
+- **Validaciones:** Validaciones a nivel de Form Request 🛡️
 
 ## 🧑‍💻 Desarrollador Principal 👨‍💻
 
