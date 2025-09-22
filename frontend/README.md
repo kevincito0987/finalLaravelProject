@@ -1,86 +1,69 @@
-# 🗣️🧠 Plataforma Interactiva de Comunicación y Aprendizaje para Personas con Trastornos de Lenguaje 🗣️🧠
+# React + TypeScript + Vite
 
-En Colombia, miles de personas enfrentan retos comunicativos debido a condiciones como el **Trastorno del Espectro Autista (TEA)**, la **afasia**, la **disartria** y otras alteraciones del lenguaje. 🇨🇴 Según estimaciones del Ministerio de Salud y Protección Social, uno de cada 160 niños presenta algún tipo de autismo, y el país aún enfrenta desafíos significativos en términos de inclusión educativa, accesibilidad comunicativa y atención especializada. 🏥
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Frente a esta necesidad, surge la oportunidad de construir una plataforma interactiva que integre **tecnología accesible** 💻, herramientas visuales 👁️, auditivas 👂 y táctiles, así como recursos multilingües, para promover la autonomía y el aprendizaje de las personas con dificultades del lenguaje en Colombia. Este tipo de solución también puede ser utilizada por docentes de educación especial, terapeutas del lenguaje y cuidadores. 👩‍🏫👨‍⚕️
+Currently, two official plugins are available:
 
-------
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
+## Expanding the ESLint configuration
 
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-## 💻 Frontend: Arquitectura y Desarrollo ⚙️
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
 
-Para el desarrollo del frontend, se utilizará **React** con una arquitectura de patrones de diseño que asegura la escalabilidad, mantenibilidad y accesibilidad del proyecto.
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
 
-### 🏗️ Patrones de Diseño del Frontend ✨
-
-1. **Patrón de Hooks Personalizados (`Custom Hooks`):** Permite encapsular y reutilizar la lógica de negocio entre diferentes componentes. Se crearán hooks específicos para manejar interacciones con la API (ej. `useFetchCards`), el estado del audio (`useAudioPlayer`), y el seguimiento del progreso del usuario (`useProgressTracker`), evitando la duplicación de código.
-2. **Patrón de Proveedor (`Provider Pattern`):** Esencial para gestionar el estado global de la aplicación utilizando la Context API de React. Se establecerán contextos para compartir datos cruciales como la configuración de idioma, el estado de autenticación del usuario y el método de comunicación preferido, evitando el "prop drilling".
-3. **Patrón de Componentes Compuestos (`Compound Components`):** Se utilizará para construir componentes de la interfaz de usuario con múltiples partes que trabajan en conjunto, como un selector de lecciones o un visor de tarjetas. Este patrón mejora la flexibilidad y la legibilidad del código.
-
-------
-
-
-
-## 📂 Estructura de Carpetas 🌳
-
-La organización del proyecto se basará en los patrones de diseño para mantener el código modular y escalable.
-
-```
-.Frontend
-├── assets/ 🖼️                     # Archivos estáticos (imágenes, íconos, etc.)
-├── src/ 📁                     # 📦 El código fuente del proyecto
-│   ├── components/ 🏗️           # Componentes de presentación y compuestos
-│   │   ├── Card/ 🎟            # Componente compuesto para las tarjetas
-│   │   │   ├── Card.jsx ⚛️
-│   │   │   └── Card.css 💅
-│   │   ├── LessonSelector/ 📖   # Componente compuesto para lecciones
-│   │   │   └── LessonSelector.jsx ⚛️
-│   │   └── Shared/ 🤝          # Componentes reutilizables (botones, modales, etc.)
-│   ├── context/ 🌐             # Contextos globales de la aplicación
-│   │   ├── AuthContext.jsx 🔒
-│   │   ├── LanguageContext.jsx 🗣️
-│   │   └── ProgressContext.jsx 📈
-│   ├── hooks/ 🪝               # Hooks personalizados para lógica reutilizable
-│   │   ├── useFetch.js 📡
-│   │   ├── useAudioPlayer.js 🎧
-│   │   └── useProgressTracker.js 🎯
-│   ├── pages/ 📄               # Componentes que representan páginas/vistas
-│   │   ├── HomePage.jsx 🏠
-│   │   ├── LessonsPage.jsx 🧑‍🏫
-│   │   └── AdminDashboard.jsx 📊
-│   ├── services/ 📡            # Lógica de comunicación con la API
-│   │   ├── cardService.js 🃏
-│   │   └── userService.js 👤
-│   ├── App.jsx 🚀              # Componente principal de la aplicación
-│   └── main.jsx 🏁             # Punto de entrada de la aplicación
-├── .gitignore 👻               # Archivos y carpetas ignorados por Git
-├── eslint.config.js ⚙️         # Configuración de Eslint
-├── index.html 📄               # El punto de entrada principal del HTML
-├── package.json 📦             # Dependencias de Node (para frontend)
-├── postcss.config.js ⚙️        # Configuración de PostCSS
-└── vite.config.js ⚙️           # Configuración de Vite
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
 
-## 🛠️ Tecnologías Principales 💻
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-- **Frontend:** React ✅
-- **Estilos:** Tailwind CSS 🎨
-- **Despliegue:** Docker 🐳
-- **Gestor de paquetes:** npm / yarn 📦
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
 
-------
-
-
-
-## 🧑‍💻 Desarrollador Principal 👨‍💻
-
-- **kevincito0987**: [GitHub](https://github.com/kevincito0987) 🚀
-
-------
-
-
-
-## ✨ Frase Estelar ✨
-
-**Cada componente 🧩 que escribimos es un paso hacia la creación de una experiencia fluida 🌊 y un mundo digital más accesible. 💻**
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
