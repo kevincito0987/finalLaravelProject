@@ -7,7 +7,7 @@ services:
     volumes:
       - .:/workspaces/finalLaravelProject:cached
     working_dir: /workspace
-    command: bash -lc "tail -f /dev/null"º
+    command: bash -lc "tail -f /dev/null"
     environment:
       - TZ=UTC
     ports:
