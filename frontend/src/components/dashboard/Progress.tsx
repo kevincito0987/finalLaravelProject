@@ -18,10 +18,7 @@ import {
   Area,
   AreaChart
 } from 'recharts';
-import { useEmotionalBlogs } from '../../hooks/useEmotionalBlogs';
-import { useHabits } from '../../hooks/useHabits';
-import { useEmotionalTypes } from '../../hooks/useEmotionalTypes';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import AnimatedCard, { useTypewriter, ParticleEffect } from '../ui/AnimatedCard';
 import PowerPointTransition from '../ui/PowerPointTransition';
 

@@ -1,19 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import Sidebar from './dashboard/Sidebar';
 import Header from './dashboard/Header';
 import Overview from './dashboard/Overview';
 import CheckIn from './dashboard/CheckIn';
 import Activities from './dashboard/Activities';
 import Progress from './dashboard/Progress';
-import Community from './dashboard/Community';
-import VoiceInterface from './dashboard/VoiceInterface';
-import Emergency from './dashboard/Emergency';
-import Billing from './dashboard/Billing';
 import Profile from './dashboard/Profile';
 import RouteTransition from './ui/RouteTransition';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../context/ThemeContext';
 import { Globe } from 'lucide-react';
 
 export default function Dashboard() {
@@ -98,8 +93,6 @@ export default function Dashboard() {
       </div>
 
       <div className="relative z-10 flex w-full">
-        {/* Responsive Sidebar */}
-        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} currentLanguage={currentLanguage} />
         
         <div className="flex-1 overflow-hidden flex flex-col">
           {/* Responsive Header */}
@@ -113,11 +106,6 @@ export default function Dashboard() {
                 <Route path="/" element={<Overview currentLanguage={currentLanguage} />} />
                 <Route path="/checkin" element={<CheckIn currentLanguage={currentLanguage} />} />
                 <Route path="/activities" element={<Activities currentLanguage={currentLanguage} />} />
-                <Route path="/progress" element={<Progress currentLanguage={currentLanguage} />} />
-                <Route path="/community" element={<Community currentLanguage={currentLanguage} />} />
-                <Route path="/voice" element={<VoiceInterface currentLanguage={currentLanguage} />} />
-                <Route path="/emergency" element={<Emergency currentLanguage={currentLanguage} />} />
-                <Route path="/billing" element={<Billing currentLanguage={currentLanguage} />} />
                 <Route path="/profile" element={<Profile currentLanguage={currentLanguage} />} />
               </Routes>
             </RouteTransition>

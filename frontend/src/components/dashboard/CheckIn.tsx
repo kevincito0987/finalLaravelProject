@@ -1,14 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Heart, MessageCircle, Calendar, Target, Award, Clock, Loader, CheckCircle, Play, Pause, Mic, MicOff, Volume2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useEmotionalBlogs } from '../../hooks/useEmotionalBlogs';
-import { useEmotionalTypes } from '../../hooks/useEmotionalTypes';
-import { useHabits } from '../../hooks/useHabits';
-import { useTheme } from '../../contexts/ThemeContext';
-import { useElevenLabsVoice } from '../../hooks/useElevenLabsVoice';
+import { useTheme } from '../../context/ThemeContext';
 import AnimatedCard, { useTypewriter, ParticleEffect } from '../ui/AnimatedCard';
 import PowerPointTransition from '../ui/PowerPointTransition';
-import * as Sentry from "@sentry/react";
 
 function CheckIn({ currentLanguage = 'es' }) {
   const [selectedMood, setSelectedMood] = useState<number | null>(null);

@@ -1,7 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { mockUser, simulateNetworkDelay } from '../lib/mockData';
-import { SafeStorage } from '../utils/storage';
-import type { Database } from '../lib/database.types';
 import { jwtDecode } from 'jwt-decode';
 
 type Member = Database['public']['Tables']['members']['Row'];

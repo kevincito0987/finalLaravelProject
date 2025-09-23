@@ -29,18 +29,11 @@ import {
   Image as ImageIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../../contexts/AuthContext';
-import { useTheme } from '../../contexts/ThemeContext';
-import { useEmotionalBlogs } from '../../hooks/useEmotionalBlogs';
-import { useHabits } from '../../hooks/useHabits';
+import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import AnimatedCard, { useTypewriter, ParticleEffect } from '../ui/AnimatedCard';
 import PowerPointTransition from '../ui/PowerPointTransition';
-import jsPDF from 'jspdf';
-import Pica from 'pica';
 import { useTranslation } from 'react-i18next';
-import { supabase } from '../../infrastructure/api/supabase';
-import * as Sentry from "@sentry/react";
-
 interface ProfileData {
   name: string;
   lastname: string;

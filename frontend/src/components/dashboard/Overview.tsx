@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Heart, TrendingUp, MessageCircle, Target, Calendar, Award, Loader, Globe } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useEmotionalBlogs } from '../../hooks/useEmotionalBlogs';
-import { useHabits } from '../../hooks/useHabits';
-import { useEmotionalTypes } from '../../hooks/useEmotionalTypes';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import AnimatedCard, { useTypewriter, ParticleEffect } from '../ui/AnimatedCard';
 import PowerPointTransition from '../ui/PowerPointTransition';
 import {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Brain, Users, Shield, Sparkles, Zap, Hexagon, Layers, Aperture, Star, CheckCircle, Globe, Mic, Target } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../context/ThemeContext';
 import HabitaLogo from './ui/HabitaLogo';
 import { useTranslation } from 'react-i18next';
 

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Activity, Plus, Clock, Target, Trophy, Calendar, Loader, CheckCircle, Globe } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useHabits } from '../../hooks/useHabits';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import AnimatedCard, { useTypewriter, ParticleEffect } from '../ui/AnimatedCard';
 import PowerPointTransition from '../ui/PowerPointTransition';
 
