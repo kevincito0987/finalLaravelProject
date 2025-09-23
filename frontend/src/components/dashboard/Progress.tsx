@@ -1,0 +1,804 @@
+import React, { useState, useEffect } from 'react';
+import { TrendingUp, Calendar, Target, Award, BarChart3, Loader } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  Area,
+  AreaChart
+} from 'recharts';
+import { useEmotionalBlogs } from '../../hooks/useEmotionalBlogs';
+import { useHabits } from '../../hooks/useHabits';
+import { useEmotionalTypes } from '../../hooks/useEmotionalTypes';
+import { useTheme } from '../../contexts/ThemeContext';
+import AnimatedCard, { useTypewriter, ParticleEffect } from '../ui/AnimatedCard';
+import PowerPointTransition from '../ui/PowerPointTransition';
+
+export default function Progress({ currentLanguage = 'es' }) {
+  const [timeRange, setTimeRange] = useState('week');
+  const { blogs, loading: blogsLoading } = useEmotionalBlogs();
+  const { userHabits, loading: habitsLoading } = useHabits();
+  const { emotionalTypes } = useEmotionalTypes();
+  const { theme } = useTheme();
+
+  // Generar datos de la semana basados en datos reales de la DB
+  const generateWeeklyData = () => {
+    const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+    const now = new Date();
+    
+    return days.map((day, index) => {
+      const date = new Date(now);
+      date.setDate(date.getDate() - (6 - index));
+      
+      const dayBlogs = blogs.filter(blog => {
+        const blogDate = new Date(blog.blog_date || '');
+        return blogDate.toDateString() === date.toDateString();
+      });
+      
+      const dayHabits = userHabits.filter(habit => {
+        const habitDate = new Date(habit.registration_date || '');
+        return habitDate.toDateString() === date.toDateString();
+      });
+      
+      const avgMood = dayBlogs.length > 0 
+        ? dayBlogs.reduce((sum, blog) => sum + blog.emotional_type_id, 0) / dayBlogs.length
+        : 3;
+      
+      return {
+        day,
+        mood: Math.round(avgMood * 10) / 10, // Redondear a 1 decimal
+        activities: dayHabits.length,
+        date: date.toISOString().split('T')[0],
+        moodLabel: emotionalTypes.find(t => t.id === Math.round(avgMood))?.description || 'Neutral'
+      };
+    });
+  };
+
+  const weeklyData = generateWeeklyData();
+
+  // Datos para distribución emocional
+  const emotionalDistribution = emotionalTypes.reduce((acc, type) => {
+    const count = blogs.filter(blog => blog.emotional_type_id === type.id).length;
+    if (count > 0) {
+      acc.push({
+        name: type.description,
+        value: count,
+        percentage: Math.round((count / blogs.length) * 100)
+      });
+    }
+    return acc;
+  }, [] as Array<{ name: string; value: number; percentage: number }>);
+
+  // Colores para los gráficos
+  const colors = {
+    primary: theme === 'light' ? '#10b981' : '#34d399',
+    secondary: theme === 'light' ? '#3b82f6' : '#60a5fa',
+    accent: theme === 'light' ? '#8b5cf6' : '#a78bfa',
+    warning: theme === 'light' ? '#f59e0b' : '#fbbf24',
+    danger: theme === 'light' ? '#ef4444' : '#f87171',
+    success: theme === 'light' ? '#22c55e' : '#4ade80',
+    info: theme === 'light' ? '#06b6d4' : '#22d3ee',
+    purple: theme === 'light' ? '#a855f7' : '#c084fc',
+    pink: theme === 'light' ? '#ec4899' : '#f472b6',
+    orange: theme === 'light' ? '#f97316' : '#fb923c'
+  };
+
+  const pieColors = [
+    colors.primary,
+    colors.secondary,
+    colors.accent,
+    colors.warning,
+    colors.danger,
+    colors.success,
+    colors.info,
+    colors.purple,
+    colors.pink,
+    colors.orange
+  ];
+
+  // Custom tooltip para los gráficos
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className={`p-4 rounded-xl shadow-lg border ${
+          theme === 'light'
+            ? 'bg-white border-gray-200'
+            : 'bg-gray-800 border-gray-600'
+        }`}>
+          <p className={`font-semibold ${
+            theme === 'light' ? 'text-gray-900' : 'text-white'
+          }`}>
+            {label}
+          </p>
+          {payload.map((entry: any, index: number) => (
+            <p key={index} style={{ color: entry.color }} className="text-sm">
+              {entry.name}: {entry.value}
+              {entry.name === 'mood' && ` (${entry.payload?.moodLabel})`}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const calculateAchievements = () => {
+    const consecutiveDays = Math.min(blogs.length, 7);
+    const totalActivities = userHabits.length;
+    const avgMood = blogs.length > 0 
+      ? blogs.reduce((sum, blog) => sum + blog.emotional_type_id, 0) / blogs.length 
+      : 3;
+
+    return [
+      { 
+        title: '7-Day Streak', 
+        description: 'Completar check-ins por 7 días consecutivos', 
+        earned: consecutiveDays >= 7, 
+        icon: '🔥' 
+      },
+      { 
+        title: 'Semana Mindful', 
+        description: 'Completar 5+ actividades de bienestar esta semana', 
+        earned: totalActivities >= 5, 
+        icon: '🧘' 
+      },
+      { 
+        title: 'Estado Positivo', 
+        description: 'Mantener un estado emocional promedio positivo', 
+        earned: avgMood >= 4, 
+        icon: '😊' 
+      },
+      { 
+        title: 'Seguimiento Constante', 
+        description: 'Usar todas las funciones de seguimiento', 
+        earned: blogs.length > 0 && userHabits.length > 0, 
+        icon: '📊' 
+      },
+    ];
+  };
+
+  const achievements = calculateAchievements();
+
+  const translations = {
+    es: {
+      progressTracking: "Seguimiento de Progreso",
+      averageState: "Estado Promedio",
+      activities: "Actividades",
+      checkIns: "Check-ins",
+      achievements: "Logros",
+      weeklyTrends: "Tendencias de Bienestar Semanal",
+      emotionalDistribution: "Distribución de Estados Emocionales",
+      emotionalSummary: "Resumen Emocional",
+      wellnessAchievements: "Logros de Bienestar",
+      obtained: "Obtenido"
+    },
+    en: {
+      progressTracking: "Progress Tracking",
+      averageState: "Average State",
+      activities: "Activities",
+      checkIns: "Check-ins",
+      achievements: "Achievements",
+      weeklyTrends: "Weekly Wellness Trends",
+      emotionalDistribution: "Emotional States Distribution",
+      emotionalSummary: "Emotional Summary",
+      wellnessAchievements: "Wellness Achievements",
+      obtained: "Obtained"
+    },
+    fr: {
+      progressTracking: "Suivi des Progrès",
+      averageState: "État Moyen",
+      activities: "Activités",
+      checkIns: "Check-ins",
+      achievements: "Réalisations",
+      weeklyTrends: "Tendances Hebdomadaires de Bien-être",
+      emotionalDistribution: "Distribution des États Émotionnels",
+      emotionalSummary: "Résumé Émotionnel",
+      wellnessAchievements: "Réalisations de Bien-être",
+      obtained: "Obtenu"
+    },
+    pt: {
+      progressTracking: "Acompanhamento de Progresso",
+      averageState: "Estado Médio",
+      activities: "Atividades",
+      checkIns: "Check-ins",
+      achievements: "Conquistas",
+      weeklyTrends: "Tendências Semanais de Bem-estar",
+      emotionalDistribution: "Distribuição de Estados Emocionais",
+      emotionalSummary: "Resumo Emocional",
+      wellnessAchievements: "Conquistas de Bem-estar",
+      obtained: "Obtido"
+    }
+  };
+
+  const t = translations[currentLanguage as keyof typeof translations];
+
+  const titleText = t.progressTracking;
+  const typedTitle = useTypewriter(titleText, 70);
+
+  if (blogsLoading || habitsLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <motion.div
+          animate={{ 
+            rotate: 360,
+            scale: [1, 1.3, 1],
+            filter: ['hue-rotate(0deg)', 'hue-rotate(360deg)']
+          }}
+          transition={{ 
+            rotate: { duration: 2, repeat: Infinity, ease: "linear" },
+            scale: { duration: 1.5, repeat: Infinity, repeatType: "reverse" },
+            filter: { duration: 3, repeat: Infinity, ease: "linear" }
+          }}
+        >
+          <Loader className="w-8 h-8 text-emerald-600" />
+        </motion.div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 relative">
+      {/* Efecto de partículas de progreso */}
+      <ParticleEffect count={20} color="blue" />
+
+      {/* Header con animación de máquina de escribir y selector */}
+      <PowerPointTransition type="flip" duration={1200}>
+        <motion.div 
+          className="flex items-center justify-between"
+          whileHover={{ scale: 1.01 }}
+        >
+          <div className="flex items-center">
+            <motion.div
+              animate={{ 
+                rotate: [0, 360],
+                scale: [1, 1.2, 1],
+                y: [0, -5, 0]
+              }}
+              transition={{ 
+                duration: 4, 
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              <TrendingUp className="w-6 h-6 text-emerald-600 dark:text-emerald-400 mr-3" />
+            </motion.div>
+            <motion.h2 
+              className={`text-2xl font-bold ${
+                theme === 'light' ? 'text-gray-900' : 'text-gray-900 dark:text-white'
+              }`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              {typedTitle}
+              <motion.span
+                animate={{ opacity: [1, 0] }}
+                transition={{ duration: 0.8, repeat: Infinity, repeatType: "reverse" }}
+              >
+                |
+              </motion.span>
+            </motion.h2>
+          </div>
+          
+          <motion.div 
+            className={`flex rounded-lg ${
+              theme === 'light' ? 'bg-emerald-100' : 'bg-gray-100 dark:bg-gray-700'
+            }`}
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 1 }}
+            whileHover={{ scale: 1.05 }}
+          >
+            {['week', 'month', 'year'].map((range, index) => (
+              <motion.button
+                key={range}
+                onClick={() => setTimeRange(range)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  timeRange === range
+                    ? 'bg-emerald-600 text-white'
+                    : theme === 'light'
+                    ? 'text-emerald-800 hover:text-emerald-900 hover:bg-emerald-200'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                }`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.2 + index * 0.1 }}
+              >
+                {range === 'week' ? 'Semana' : range === 'month' ? 'Mes' : 'Año'}
+              </motion.button>
+            ))}
+          </motion.div>
+        </motion.div>
+      </PowerPointTransition>
+
+      {/* Key Metrics con animaciones tipo PowerPoint */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {[
+          {
+            icon: TrendingUp,
+            label: t.averageState,
+            value: weeklyData.length > 0 
+              ? (weeklyData.reduce((sum, d) => sum + d.mood, 0) / weeklyData.length).toFixed(1) + '/5'
+              : '0/5',
+            gradient: 'from-emerald-400 to-emerald-600',
+            bgLight: 'bg-gradient-to-br from-emerald-50 to-emerald-100',
+            borderLight: 'border-emerald-200',
+            type: 'glow' as const,
+            delay: 0.2
+          },
+          {
+            icon: Target,
+            label: t.activities,
+            value: weeklyData.reduce((sum, d) => sum + d.activities, 0),
+            gradient: 'from-blue-400 to-blue-600',
+            bgLight: 'bg-gradient-to-br from-blue-50 to-blue-100',
+            borderLight: 'border-blue-200',
+            type: 'bounce' as const,
+            delay: 0.4
+          },
+          {
+            icon: Calendar,
+            label: t.checkIns,
+            value: blogs.length,
+            gradient: 'from-purple-400 to-purple-600',
+            bgLight: 'bg-gradient-to-br from-purple-50 to-purple-100',
+            borderLight: 'border-purple-200',
+            type: 'flip' as const,
+            delay: 0.6
+          },
+          {
+            icon: Award,
+            label: t.achievements,
+            value: `${achievements.filter(a => a.earned).length}/${achievements.length}`,
+            gradient: 'from-orange-400 to-orange-600',
+            bgLight: 'bg-gradient-to-br from-orange-50 to-orange-100',
+            borderLight: 'border-orange-200',
+            type: 'zoom' as const,
+            delay: 0.8
+          }
+        ].map((stat, index) => (
+          <AnimatedCard
+            key={index}
+            delay={stat.delay}
+            type={stat.type}
+            hoverScale={1.08}
+            hoverRotate={index % 2 === 0 ? 4 : -4}
+            className={`rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform relative overflow-hidden ${
+              theme === 'light'
+                ? `${stat.bgLight} border-2 ${stat.borderLight}`
+                : 'bg-white dark:bg-gray-800 shadow-sm'
+            }`}
+          >
+            {/* Efecto de ondas en hover */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+              initial={{ x: '-100%', skewX: -15 }}
+              whileHover={{ x: '100%' }}
+              transition={{ duration: 0.8 }}
+            />
+            
+            <div className="flex items-center relative z-10">
+              <motion.div 
+                className={`p-3 rounded-lg ${
+                  theme === 'light' ? 'bg-white/80' : 'bg-gray-100 dark:bg-gray-700'
+                }`}
+                whileHover={{ 
+                  scale: 1.3, 
+                  rotate: 20,
+                  boxShadow: "0 15px 30px -5px rgba(0, 0, 0, 0.15)"
+                }}
+                transition={{ type: "spring", stiffness: 400 }}
+              >
+                <stat.icon className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+              </motion.div>
+              <div className="ml-4">
+                <motion.p 
+                  className={`text-sm font-medium ${
+                    theme === 'light' ? 'text-gray-700' : 'text-gray-600 dark:text-gray-400'
+                  }`}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: stat.delay + 0.2 }}
+                >
+                  {stat.label}
+                </motion.p>
+                <motion.p 
+                  className={`text-2xl font-bold ${
+                    theme === 'light' ? 'text-gray-900' : 'text-gray-900 dark:text-white'
+                  }`}
+                  initial={{ opacity: 0, scale: 0.3 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: stat.delay + 0.4, type: "spring", stiffness: 200 }}
+                >
+                  {stat.value}
+                </motion.p>
+              </div>
+            </div>
+          </AnimatedCard>
+        ))}
+      </div>
+
+      {/* Charts mejorados con Recharts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <PowerPointTransition type="wipe" delay={1000}>
+          <motion.div 
+            className={`rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden ${
+              theme === 'light'
+                ? 'bg-gradient-to-br from-white to-emerald-50 border-2 border-emerald-200'
+                : 'bg-white dark:bg-gray-800 shadow-sm'
+            }`}
+            whileHover={{ scale: 1.02, y: -5 }}
+          >
+            <div className="flex items-center mb-4">
+              <motion.div
+                animate={{ 
+                  rotate: [0, 360],
+                  scale: [1, 1.2, 1]
+                }}
+                transition={{ 
+                  duration: 5, 
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
+              >
+                <BarChart3 className="w-5 h-5 text-gray-600 dark:text-gray-400 mr-2" />
+              </motion.div>
+              <h3 className={`text-lg font-semibold ${
+                theme === 'light' ? 'text-emerald-900' : 'text-gray-900 dark:text-white'
+              }`}>
+                {t.weeklyTrends}
+              </h3>
+            </div>
+            
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={weeklyData}>
+                  <defs>
+                    <linearGradient id="moodGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={colors.primary} stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor={colors.primary} stopOpacity={0.1}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke={theme === 'light' ? '#e5e7eb' : '#374151'} />
+                  <XAxis 
+                    dataKey="day" 
+                    stroke={theme === 'light' ? '#6b7280' : '#9ca3af'}
+                    fontSize={12}
+                  />
+                  <YAxis 
+                    domain={[1, 5]}
+                    stroke={theme === 'light' ? '#6b7280' : '#9ca3af'}
+                    fontSize={12}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area
+                    type="monotone"
+                    dataKey="mood"
+                    stroke={colors.primary}
+                    strokeWidth={3}
+                    fill="url(#moodGradient)"
+                    dot={{ fill: colors.primary, strokeWidth: 2, r: 6 }}
+                    activeDot={{ r: 8, stroke: colors.primary, strokeWidth: 2 }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </motion.div>
+        </PowerPointTransition>
+
+        <PowerPointTransition type="shimmer" delay={1200}>
+          <motion.div 
+            className={`rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden ${
+              theme === 'light'
+                ? 'bg-gradient-to-br from-white to-blue-50 border-2 border-blue-200'
+                : 'bg-white dark:bg-gray-800 shadow-sm'
+            }`}
+            whileHover={{ scale: 1.02, y: -5 }}
+          >
+            <div className="flex items-center mb-4">
+              <motion.div
+                animate={{ 
+                  scale: [1, 1.3, 1],
+                  rotate: [0, 180, 360]
+                }}
+                transition={{ 
+                  duration: 4, 
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                <Target className="w-5 h-5 text-gray-600 dark:text-gray-400 mr-2" />
+              </motion.div>
+              <h3 className={`text-lg font-semibold ${
+                theme === 'light' ? 'text-blue-900' : 'text-gray-900 dark:text-white'
+              }`}>
+                {t.activities}
+              </h3>
+            </div>
+            
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={weeklyData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={theme === 'light' ? '#e5e7eb' : '#374151'} />
+                  <XAxis 
+                    dataKey="day" 
+                    stroke={theme === 'light' ? '#6b7280' : '#9ca3af'}
+                    fontSize={12}
+                  />
+                  <YAxis 
+                    stroke={theme === 'light' ? '#6b7280' : '#9ca3af'}
+                    fontSize={12}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar 
+                    dataKey="activities" 
+                    fill={colors.secondary}
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </motion.div>
+        </PowerPointTransition>
+      </div>
+
+      {/* Distribución emocional con gráfico de dona */}
+      <PowerPointTransition type="spiral" delay={1400}>
+        <motion.div 
+          className={`rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden ${
+            theme === 'light'
+              ? 'bg-gradient-to-br from-white to-purple-50 border-2 border-purple-200'
+              : 'bg-white dark:bg-gray-800 shadow-sm'
+          }`}
+          whileHover={{ scale: 1.01, y: -3 }}
+        >
+          <div className="flex items-center mb-4">
+            <motion.div
+              animate={{ 
+                rotate: [0, 360],
+                scale: [1, 1.4, 1],
+                filter: ['hue-rotate(0deg)', 'hue-rotate(360deg)']
+              }}
+              transition={{ 
+                duration: 6, 
+                repeat: Infinity,
+                ease: "linear"
+              }}
+            >
+              <Award className="w-5 h-5 text-gray-600 dark:text-gray-400 mr-2" />
+            </motion.div>
+            <h3 className={`text-lg font-semibold ${
+              theme === 'light' ? 'text-purple-900' : 'text-gray-900 dark:text-white'
+            }`}>
+              {t.emotionalDistribution}
+            </h3>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+            <div className="h-64">
+              {emotionalDistribution.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={emotionalDistribution}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={100}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {emotionalDistribution.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      formatter={(value: any, name: any, props: any) => [
+                        `${value} veces (${props.payload.percentage}%)`,
+                        'Frecuencia'
+                      ]}
+                    />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p className={`text-center ${
+                    theme === 'light' ? 'text-gray-600' : 'text-gray-400'
+                  }`}>
+                    No hay datos suficientes para mostrar la distribución
+                  </p>
+                </div>
+              )}
+            </div>
+            
+            <div className="space-y-3">
+              <h4 className={`font-semibold ${
+                theme === 'light' ? 'text-purple-900' : 'text-gray-900 dark:text-white'
+              }`}>
+                {t.emotionalSummary}
+              </h4>
+              {emotionalDistribution.slice(0, 5).map((item, index) => (
+                <motion.div 
+                  key={item.name}
+                  className="flex items-center justify-between"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.6 + index * 0.1 }}
+                >
+                  <div className="flex items-center">
+                    <div 
+                      className="w-4 h-4 rounded-full mr-3"
+                      style={{ backgroundColor: pieColors[index % pieColors.length] }}
+                    />
+                    <span className={`text-sm ${
+                      theme === 'light' ? 'text-purple-800' : 'text-gray-700 dark:text-gray-300'
+                    }`}>
+                      {item.name}
+                    </span>
+                  </div>
+                  <span className={`text-sm font-semibold ${
+                    theme === 'light' ? 'text-purple-900' : 'text-gray-900 dark:text-white'
+                  }`}>
+                    {item.percentage}%
+                  </span>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      </PowerPointTransition>
+
+      {/* Achievements con animaciones individuales espectaculares */}
+      <PowerPointTransition type="cube" delay={1600}>
+        <motion.div 
+          className={`rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden ${
+            theme === 'light'
+              ? 'bg-gradient-to-br from-white to-orange-50 border-2 border-orange-200'
+              : 'bg-white dark:bg-gray-800 shadow-sm'
+          }`}
+          whileHover={{ scale: 1.01, y: -3 }}
+        >
+          <div className="flex items-center mb-4">
+            <motion.div
+              animate={{ 
+                rotate: [0, 360],
+                scale: [1, 1.4, 1],
+                filter: ['hue-rotate(0deg)', 'hue-rotate(360deg)']
+              }}
+              transition={{ 
+                duration: 6, 
+                repeat: Infinity,
+                ease: "linear"
+              }}
+            >
+              <Award className="w-5 h-5 text-gray-600 dark:text-gray-400 mr-2" />
+            </motion.div>
+            <h3 className={`text-lg font-semibold ${
+              theme === 'light' ? 'text-orange-900' : 'text-gray-900 dark:text-white'
+            }`}>
+              {t.wellnessAchievements}
+            </h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {achievements.map((achievement, index) => (
+              <motion.div
+                key={index}
+                className={`p-4 rounded-2xl border-2 transition-all duration-300 relative overflow-hidden group ${
+                  achievement.earned
+                    ? theme === 'light'
+                      ? 'border-emerald-300 bg-emerald-100 shadow-lg'
+                      : 'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30'
+                    : theme === 'light'
+                    ? 'border-gray-300 bg-gray-50 hover:bg-gray-100'
+                    : 'border-gray-200 dark:border-gray-600'
+                }`}
+                initial={{ opacity: 0, scale: 0.5, rotate: 45 }}
+                animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                transition={{ 
+                  delay: 1.8 + index * 0.2,
+                  type: "spring",
+                  stiffness: 200
+                }}
+                whileHover={{ 
+                  scale: 1.05, 
+                  rotate: achievement.earned ? 2 : 0,
+                  transition: { duration: 0.2 }
+                }}
+              >
+                {/* Efecto de celebración para logros obtenidos */}
+                <AnimatePresence>
+                  {achievement.earned && (
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-emerald-400/20 to-blue-400/20"
+                      initial={{ scale: 0, rotate: 180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ duration: 0.5 }}
+                    />
+                  )}
+                </AnimatePresence>
+                
+                <div className="flex items-start relative z-10">
+                  <motion.div 
+                    className={`text-2xl mr-3 ${achievement.earned ? '' : 'grayscale opacity-50'}`}
+                    animate={achievement.earned ? {
+                      scale: [1, 1.3, 1],
+                      rotate: [0, 10, -10, 0]
+                    } : {}}
+                    transition={{ 
+                      duration: 2, 
+                      repeat: Infinity,
+                      repeatDelay: 3
+                    }}
+                  >
+                    {achievement.icon}
+                  </motion.div>
+                  <div>
+                    <motion.h4 
+                      className={`font-medium ${
+                        achievement.earned
+                          ? theme === 'light'
+                            ? 'text-emerald-900'
+                            : 'text-emerald-900 dark:text-emerald-100'
+                          : theme === 'light'
+                          ? 'text-gray-800'
+                          : 'text-gray-900 dark:text-white'
+                      }`}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 2 + index * 0.2 }}
+                    >
+                      {achievement.title}
+                    </motion.h4>
+                    <motion.p 
+                      className={`text-sm mt-1 ${
+                        theme === 'light' 
+                          ? achievement.earned ? 'text-emerald-800' : 'text-gray-600'
+                          : 'text-gray-600 dark:text-gray-400'
+                      }`}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 2.2 + index * 0.2 }}
+                    >
+                      {achievement.description}
+                    </motion.p>
+                    <AnimatePresence>
+                      {achievement.earned && (
+                        <motion.span 
+                          className={`inline-block mt-2 px-2 py-1 text-xs rounded-full ${
+                            theme === 'light'
+                              ? 'bg-emerald-200 text-emerald-900'
+                              : 'bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200'
+                          }`}
+                          initial={{ opacity: 0, scale: 0, rotate: -180 }}
+                          animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                          transition={{ delay: 2.4 + index * 0.2, type: "spring" }}
+                        >
+                          ✓ {t.obtained}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </PowerPointTransition>
+    </div>
+  );
+}
