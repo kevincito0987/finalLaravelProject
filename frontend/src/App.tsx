@@ -10,6 +10,7 @@ import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import SplashScreen from './components/SplashScreen';
 import ResponsiveWrapper from './components/ui/ResponsiveWrapper';
+import { motion } from 'framer-motion';
 
 function AppRoutes() {
   const { user, loading } = useAuth();
