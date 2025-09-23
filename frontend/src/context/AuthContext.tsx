@@ -5,7 +5,7 @@ interface User {
   email: string;
   name: string;
   avatar?: string;
-  // Puedes extender esto según tu modelo Laravel
+  // Si Laravel incluye más campos, agrégalos aquí
 }
 
 interface AuthContextType {
@@ -22,7 +22,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-
   const tokenKey = 'habita_token';
 
   const fetchUser = async () => {

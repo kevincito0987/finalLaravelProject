@@ -56,7 +56,8 @@ function AppRoutes() {
 
   // Mostrar el splash screen si el usuario está autenticado y showSplash es true
   if (user && showSplash) {
-    return <SplashScreen onComplete={() => setShowSplash(false)} userName={user.profile?.name} />;
+    return <SplashScreen onComplete={() => setShowSplash(false)} userName={user.name} />
+    ;
   }
 
   return (
