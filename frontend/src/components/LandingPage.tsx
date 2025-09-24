@@ -3,7 +3,6 @@ import Navigation from './landing/Navigation';
 import Hero from './landing/Hero';
 import Features from './landing/Features';
 import HowItWorks from './landing/HowItWorks';
-import Team from './landing/Team';
 import Benefits from './landing/Benefits';
 import CallToAction from './landing/CallToAction';
 import Footer from './landing/Footer';
@@ -24,12 +23,16 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen relative">
+      
+      {/* 🟢 2. INSERCIÓN DEL FONDO DE PARTÍCULAS */}
+      {/* Es clave que esté aquí para que tenga un zIndex bajo (el ParticleBackground tiene zIndex: -1 por defecto) */}
+
       {/* Animated background elements for light mode */}
       {theme === 'light' && (
         <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
           {/* Floating gradient blobs */}
           <motion.div
-            className="absolute w-96 h-96 rounded-full bg-blue-200/30 blur-3xl"
+            className="absolute w-96 h-96 rounded-full bg-blue-500/30 blur-3xl"
             animate={{
               x: [0, 100, 0],
               y: [0, 50, 0],
@@ -109,12 +112,14 @@ export default function LandingPage() {
         </div>
       )}
       
+      {/* 3. El contenido principal debe tener un zIndex superior al fondo (z-10 o más) 
+         Ya que tus otros componentes (Navigation, Hero, etc.) no tienen z-index explícito
+         y están envueltos en divs, esto suele funcionar correctamente. */}
       <Navigation/>
       <Hero />
       <Features />
       <HowItWorks />
       <Benefits />
-      <Team/>
       <CallToAction />
       <Footer />
       

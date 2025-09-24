@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, Sun, Moon } from 'lucide-react'; // Se eliminó 'Globe'
+import { Menu, X, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
-import HabitaLogo from '../ui/HabitaLogo';
+import CommTechLogo from '../ui/CommTechLogo';
 
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -29,16 +29,16 @@ export default function Navigation() {
     setIsMenuOpen(false);
   };
 
-  // ¡Se eliminó la función toggleLanguage!
-
   return (
     <nav className={`fixed top-0 w-full backdrop-blur-xl border-b z-50 transition-all duration-500 ${
       scrolled 
         ? theme === 'light'
-          ? 'bg-white/90 border-white/40 shadow-md'
+          // MODO CLARO CON SCROLL
+          ? 'bg-white/95 border-gray-200/90 shadow-lg' 
           : 'bg-gray-900/95 border-gray-700/60 shadow-md'
         : theme === 'light'
-        ? 'bg-white/80 border-white/30'
+        // MODO CLARO SIN SCROLL
+        ? 'bg-white/90 border-transparent' 
         : 'bg-gray-900/90 border-gray-700/50'
     }`}>
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
@@ -50,7 +50,7 @@ export default function Navigation() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <HabitaLogo size="md" animated />
+              <CommTechLogo size="md" animated /> 
             </motion.div>
           </div>
 
@@ -61,8 +61,8 @@ export default function Navigation() {
                 onClick={() => scrollToSection('features')}
                 className={`px-2 lg:px-3 py-2 text-xs lg:text-sm font-medium transition-all duration-200 hover:scale-105 hover:-translate-y-1 ${
                   theme === 'light'
-                    ? 'text-slate-700 hover:text-emerald-600'
-                    : 'text-gray-300 hover:text-emerald-400'
+                    ? 'text-gray-800 hover:text-indigo-600' // CAMBIADO
+                    : 'text-gray-300 hover:text-indigo-400'
                 }`}
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
@@ -73,26 +73,15 @@ export default function Navigation() {
                 onClick={() => scrollToSection('how-it-works')}
                 className={`px-2 lg:px-3 py-2 text-xs lg:text-sm font-medium transition-all duration-200 hover:scale-105 hover:-translate-y-1 ${
                   theme === 'light'
-                    ? 'text-slate-700 hover:text-emerald-600'
-                    : 'text-gray-300 hover:text-emerald-400'
+                    ? 'text-gray-800 hover:text-indigo-600' // CAMBIADO
+                    : 'text-gray-300 hover:text-indigo-400'
                 }`}
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
               >
                 Cómo Funciona
               </motion.button>
-              <motion.button
-                onClick={() => scrollToSection('team')}
-                className={`px-2 lg:px-3 py-2 text-xs lg:text-sm font-medium transition-all duration-200 hover:scale-105 hover:-translate-y-1 ${
-                  theme === 'light'
-                    ? 'text-slate-700 hover:text-emerald-600'
-                    : 'text-gray-300 hover:text-emerald-400'
-                }`}
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Equipo
-              </motion.button>
+              
               <motion.div
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
@@ -101,8 +90,8 @@ export default function Navigation() {
                   to="/login"
                   className={`px-2 lg:px-3 py-2 text-xs lg:text-sm font-medium transition-all duration-200 ${
                     theme === 'light'
-                      ? 'text-slate-700 hover:text-emerald-600'
-                      : 'text-gray-300 hover:text-emerald-400'
+                      ? 'text-gray-800 hover:text-indigo-600' // CAMBIADO
+                      : 'text-gray-300 hover:text-indigo-400'
                   }`}
                 >
                   Iniciar Sesión
@@ -114,7 +103,8 @@ export default function Navigation() {
               >
                 <Link
                   to="/register"
-                  className="bg-gradient-to-r from-emerald-600 to-blue-600 text-white hover:from-emerald-700 hover:to-blue-700 px-3 lg:px-6 py-1.5 lg:py-2 rounded-xl text-xs lg:text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
+                  // Degradado de color: Mantenido para el CTA principal
+                  className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 px-3 lg:px-6 py-1.5 lg:py-2 rounded-xl text-xs lg:text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
                   Comenzar Gratis
                 </Link>
@@ -123,8 +113,8 @@ export default function Navigation() {
                 onClick={toggleTheme}
                 className={`p-1.5 lg:p-2 rounded-lg transition-all duration-200 ${
                   theme === 'light'
-                    ? 'text-slate-700 hover:text-emerald-600 hover:bg-white/60'
-                    : 'text-gray-300 hover:text-emerald-400 hover:bg-gray-800/60'
+                    ? 'text-gray-800 hover:text-indigo-600 hover:bg-gray-100/60' // CAMBIADO
+                    : 'text-gray-300 hover:text-indigo-400 hover:bg-gray-800/60'
                 }`}
                 whileHover={{ scale: 1.1, rotate: 12 }}
                 whileTap={{ scale: 0.9, rotate: 0 }}
@@ -143,8 +133,8 @@ export default function Navigation() {
               onClick={toggleTheme}
               className={`p-1.5 rounded-lg transition-all duration-200 ${
                 theme === 'light'
-                  ? 'text-slate-700 hover:text-emerald-600'
-                  : 'text-gray-300 hover:text-emerald-400'
+                  ? 'text-gray-800 hover:text-indigo-600' // CAMBIADO
+                  : 'text-gray-300 hover:text-indigo-400'
               }`}
               whileHover={{ scale: 1.1, rotate: 12 }}
               whileTap={{ scale: 0.9, rotate: 0 }}
@@ -158,8 +148,8 @@ export default function Navigation() {
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className={`p-1.5 rounded-lg transition-all duration-200 ${
                 theme === 'light'
-                  ? 'text-slate-700 hover:text-emerald-600'
-                  : 'text-gray-300 hover:text-emerald-400'
+                  ? 'text-gray-800 hover:text-indigo-600' // CAMBIADO
+                  : 'text-gray-300 hover:text-indigo-400'
               }`}
               whileHover={{ scale: 1.1, rotate: isMenuOpen ? -90 : 0 }}
               whileTap={{ scale: 0.9 }}
@@ -184,21 +174,20 @@ export default function Navigation() {
           >
             <div className={`px-2 pt-2 pb-3 space-y-1 sm:px-3 border-b shadow-lg backdrop-blur-xl ${
               theme === 'light'
-                ? 'bg-white/90 border-white/40'
+                ? 'bg-white/95 border-gray-200/90' // Fondo y borde de menú móvil claro
                 : 'bg-gray-900/95 border-gray-700/50'
             }`}>
               {[
                 { label: 'Características', action: () => scrollToSection('features') },
                 { label: 'Cómo Funciona', action: () => scrollToSection('how-it-works') },
-                { label: 'Equipo', action: () => scrollToSection('team') }
               ].map((item, index) => (
                 <motion.button
                   key={item.label}
                   onClick={item.action}
                   className={`block px-3 py-2 text-xs font-medium rounded-lg transition-all w-full text-left hover:scale-105 hover:translate-x-2 animate-fade-in-up ${
                     theme === 'light'
-                      ? 'text-slate-700 hover:text-emerald-600 hover:bg-white/60'
-                      : 'text-gray-300 hover:text-emerald-400 hover:bg-gray-800/60'
+                      ? 'text-gray-800 hover:text-indigo-600 hover:bg-gray-100/60' // CAMBIADO
+                      : 'text-gray-300 hover:text-indigo-400 hover:bg-gray-800/60'
                   }`}
                   style={{ animationDelay: `${index * 0.1}s` }}
                   whileHover={{ x: 10, scale: 1.02 }}
@@ -221,8 +210,8 @@ export default function Navigation() {
                   to="/login"
                   className={`block px-3 py-2 text-xs font-medium rounded-lg transition-all hover:scale-105 hover:translate-x-2 w-full text-left ${
                     theme === 'light'
-                      ? 'text-slate-700 hover:text-emerald-600 hover:bg-white/60'
-                      : 'text-gray-300 hover:text-emerald-400 hover:bg-gray-800/60'
+                      ? 'text-gray-800 hover:text-indigo-600 hover:bg-gray-100/60' // CAMBIADO
+                      : 'text-gray-300 hover:text-indigo-400 hover:bg-gray-800/60'
                   }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
@@ -238,7 +227,8 @@ export default function Navigation() {
               >
                 <Link
                   to="/register"
-                  className="block px-3 py-2 text-xs font-medium bg-gradient-to-r from-emerald-600 to-blue-600 text-white hover:from-emerald-700 hover:to-blue-700 rounded-lg transition-all duration-200 text-center transform hover:scale-105 w-full"
+                  // Mantenido: Degradado de color para el CTA principal
+                  className="block px-3 py-2 text-xs font-medium bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 rounded-lg transition-all duration-200 text-center transform hover:scale-105 w-full"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Comenzar Gratis
@@ -249,7 +239,7 @@ export default function Navigation() {
         )}
       </AnimatePresence>
 
-      {/* Custom CSS for animations */}
+      {/* Custom CSS for animations (mantenido) */}
       <style>{`
         @keyframes slide-down {
           from {

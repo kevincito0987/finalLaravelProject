@@ -37,7 +37,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     
     // Apply theme-specific body background for enhanced visuals
     if (theme === 'light') {
-      document.body.style.background = 'linear-gradient(135deg, #f0f4ff, #e0e7ff, #ede9fe)';
+      document.body.style.background = 'linear-gradient(135deg,rgb(154, 176, 236),rgb(141, rgb(163, 147, 231)), #ede9fe)';
     } else {
       document.body.style.background = 'linear-gradient(135deg, #111827, #1f2937, #111827)';
     }

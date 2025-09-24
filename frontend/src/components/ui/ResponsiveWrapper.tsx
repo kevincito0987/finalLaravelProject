@@ -48,7 +48,7 @@ export default function ResponsiveWrapper({ children, className = '' }: Responsi
         {/* Device indicator for development */}
         {process.env.NODE_ENV === 'development' && (
           <motion.div 
-            className="fixed top-2 right-2 z-50 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full px-2 py-1 text-xs flex items-center space-x-1 cursor-pointer shadow-lg"
+            className="fixed top-2 right-2 z-50 bg-blue-100 dark:bg-blue-900/30 text-white-100 dark:text-white-400 rounded-full px-2 py-1 text-xs flex items-center space-x-1 cursor-pointer shadow-lg"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setShowDeviceInfo(!showDeviceInfo)}
@@ -69,7 +69,7 @@ export default function ResponsiveWrapper({ children, className = '' }: Responsi
       {/* Device indicator for development */}
       {process.env.NODE_ENV === 'development' && (
         <motion.div 
-          className="fixed top-2 right-2 z-50 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full px-2 py-1 text-xs flex items-center space-x-1 cursor-pointer shadow-lg"
+          className="fixed top-2 right-2 z-50 bg-blue-100 dark:bg-blue-900/30 text-white-800 dark:white-white-300 rounded-full px-2 py-1 text-xs flex items-center space-x-1 cursor-pointer shadow-lg"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={() => setShowDeviceInfo(!showDeviceInfo)}

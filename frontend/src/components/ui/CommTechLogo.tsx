@@ -257,7 +257,7 @@ export default function HabitaLogo({
 
   const LogoText = () => (
     <span className={`${textSizes[size]} font-bold bg-gradient-to-r from-emerald-600 via-blue-600 to-purple-600 bg-clip-text text-transparent tracking-wide`}>
-      Habita
+      ComunicaTech
     </span>
   );
 

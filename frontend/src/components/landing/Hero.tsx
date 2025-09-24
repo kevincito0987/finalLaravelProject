@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Play, Mic } from 'lucide-react';
+import { ArrowRight, BookOpen, Volume2 } from 'lucide-react'; // Cambié Play por Volume2 y Mic por BookOpen
 import { motion } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
-import HabitaLogo from '../ui/HabitaLogo';
+import CommTechLogo from '../ui/CommTechLogo'; // Asumiendo un nuevo logo para ComunicaTech
 
 export default function Hero()  {
   const { theme } = useTheme();
@@ -14,12 +14,13 @@ export default function Hero()  {
         ? 'bg-gradient-to-br from-blue-100 via-blue-200 to-purple-200' 
         : 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900' 
     }`}>
-      {/* Background landscape image */}
+      {/* El fondo animado se mantiene similar pero con colores que evocan tranquilidad y concentración */}
       <div className="absolute inset-0 z-0">
         <motion.div 
           className="absolute inset-0 w-full h-full bg-cover bg-center opacity-20"
           style={{
-            backgroundImage: `url('https://images.pexels.com/photos/1261728/pexels-photo-1261728.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop&crop=center')`
+            // Cambiado a una imagen que evoque aprendizaje, comunicación o comunidad
+            backgroundImage: `url('https://images.pexels.com/photos/3769138/pexels-photo-3769138.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop&crop=center')`
           }}
           animate={{ 
             scale: [1, 1.05, 1],
@@ -28,7 +29,7 @@ export default function Hero()  {
           transition={{ duration: 8, repeat: Infinity }}
         />
         
-        {/* Enhanced floating particles */}
+        {/* Partículas y Overlay para legibilidad se mantienen igual */}
         <div className="absolute inset-0 overflow-hidden">
           {[...Array(50)].map((_, i) => (
             <motion.div
@@ -64,7 +65,6 @@ export default function Hero()  {
           ))}
         </div>
         
-        {/* Enhanced gradient overlay for better text readability */}
         <div className={`absolute inset-0 ${
           theme === 'light'
             ? 'bg-gradient-to-br from-blue-100/90 via-blue-200/85 to-purple-200/90'
@@ -78,26 +78,26 @@ export default function Hero()  {
             <div className="mb-2 sm:mb-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               <span className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium transition-all duration-300 hover:scale-105 ${
                 theme === 'light'
-                  ? 'bg-white/90 text-emerald-800 backdrop-blur-sm shadow-sm hover:shadow-md'
-                  : 'bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 hover:bg-emerald-200 dark:hover:bg-emerald-800'
+                  ? 'bg-white/90 text-indigo-800 backdrop-blur-sm shadow-sm hover:shadow-md'
+                  : 'bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 hover:bg-indigo-200 dark:hover:bg-indigo-800'
               }`}>
-                🌱 Tu compañero de bienestar diario
+                🗣️ Comunicación alternativa y aprendizaje inclusivo
               </span>
             </div>
             <h1 className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold animate-fade-in-up leading-tight ${
               theme === 'light' ? 'text-slate-800' : 'text-gray-900 dark:text-white'
             }`} style={{ animationDelay: '0.4s' }}>
-              Tu espacio digital de
-              <span className="text-emerald-600 dark:text-emerald-400 animate-pulse block sm:inline"> bienestar emocional</span>
-              <span className="block">y productividad personal</span>
+              El puente digital para
+              <span className="text-indigo-600 dark:text-indigo-400 animate-pulse block sm:inline"> romper el silencio</span>
+              <span className="block">y conectar con el mundo</span>
             </h1>
             <p className={`mt-3 sm:mt-6 mx-auto text-sm sm:text-base lg:text-lg xl:text-xl md:mt-8 md:max-w-3xl lg:mx-0 animate-fade-in-up leading-relaxed ${
               theme === 'light' ? 'text-slate-700' : 'text-gray-600 dark:text-gray-300'
             }`} style={{ animationDelay: '0.6s' }}>
-              Habita combina <strong>voz e inteligencia artificial</strong> para ayudarte a gestionar tus emociones, 
-              cultivar hábitos de autocuidado y mantenerte motivado cada día. 
-              <span className="text-emerald-700 dark:text-emerald-300 font-medium">No es terapia</span> — 
-              es tu herramienta de bienestar personal.
+              ComunicaTech es una plataforma web inclusiva para TEA, afasia y disartria. Usa tarjetas visuales interactivas con audio multilingüe y lecciones personalizadas para fomentar la autonomía y el aprendizaje.
+              <span className="text-indigo-700 dark:text-indigo-300 font-medium block">
+                 Diseñada para usuarios, terapeutas y cuidadores.
+              </span>
             </p>
             
             <div className="mt-4 sm:mt-8 mx-auto sm:max-w-lg sm:text-center lg:text-left lg:mx-0 animate-fade-in-up" style={{ animationDelay: '0.8s' }}>
@@ -108,24 +108,24 @@ export default function Hero()  {
                 >
                   <Link
                     to="/register"
-                    className="inline-flex items-center justify-center px-4 sm:px-6 lg:px-8 py-3 sm:py-4 border border-transparent text-sm sm:text-base font-medium rounded-xl text-white bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl group"
+                    className="inline-flex items-center justify-center px-4 sm:px-6 lg:px-8 py-3 sm:py-4 border border-transparent text-sm sm:text-base font-medium rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl group"
                   >
-                    <Mic className="mr-2 h-4 w-4 sm:h-5 sm:w-5 group-hover:animate-bounce" />
-                    <span className="text-xs sm:text-sm lg:text-base">Comenzar mi bienestar</span>
+                    <BookOpen className="mr-2 h-4 w-4 sm:h-5 sm:w-5 group-hover:animate-bounce" />
+                    <span className="text-xs sm:text-sm lg:text-base">Explorar lecciones y tarjetas</span>
                     <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4 group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </motion.div>
                 <motion.button 
                   className={`inline-flex items-center justify-center px-4 sm:px-6 lg:px-8 py-3 sm:py-4 border-2 text-sm sm:text-base font-medium rounded-xl transition-all duration-300 group ${
                     theme === 'light'
-                      ? 'border-emerald-600 text-emerald-700 bg-white/80 hover:bg-white/90 backdrop-blur-sm shadow-sm hover:shadow-md'
-                      : 'border-emerald-600 dark:border-emerald-400 text-emerald-700 dark:text-emerald-300 bg-transparent hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
+                      ? 'border-indigo-600 text-indigo-700 bg-white/80 hover:bg-white/90 backdrop-blur-sm shadow-sm hover:shadow-md'
+                      : 'border-indigo-600 dark:border-indigo-400 text-indigo-700 dark:text-indigo-300 bg-transparent hover:bg-indigo-50 dark:hover:bg-indigo-900/20'
                   }`}
                   whileHover={{ scale: 1.05, y: -5 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Play className="mr-2 h-3 w-3 sm:h-4 sm:w-4 group-hover:animate-pulse" />
-                  <span className="text-xs sm:text-sm lg:text-base">Ver cómo funciona</span>
+                  <Volume2 className="mr-2 h-3 w-3 sm:h-4 sm:w-4 group-hover:animate-pulse" />
+                  <span className="text-xs sm:text-sm lg:text-base">Ver demo de tarjetas</span>
                 </motion.button>
               </div>
             </div>
@@ -133,25 +133,25 @@ export default function Hero()  {
             <div className="mt-4 sm:mt-8 flex flex-col space-y-2 sm:space-y-0 sm:flex-row items-center justify-center lg:justify-start sm:space-x-4 lg:space-x-8 animate-fade-in-up text-xs sm:text-sm" style={{ animationDelay: '1s' }}>
               <div className="flex items-center group hover:scale-105 transition-transform duration-300">
                 <div className="w-4 h-4 sm:w-5 sm:h-5 mr-2 animate-spin" style={{ animationDuration: '3s' }}>
-                  <HabitaLogo variant="icon" size="sm" />
+                  <CommTechLogo variant="icon" size="sm" /> 
                 </div>
                 <span className={`${
                   theme === 'light' ? 'text-slate-600' : 'text-gray-600 dark:text-gray-400'
-                }`}>Más de 10,000 usuarios activos</span>
+                }`}>✅ Accesibilidad y estándares web</span>
               </div>
               <div className="flex items-center group hover:scale-105 transition-transform duration-300">
                 <span className={`${
                   theme === 'light' ? 'text-slate-600' : 'text-gray-600 dark:text-gray-400'
-                }`}>⭐ 4.9/5 en bienestar diario</span>
+                }`}>🗣️ Audio y frases en múltiples idiomas</span>
               </div>
               <div className="flex items-center group hover:scale-105 transition-transform duration-300">
                 <span className={`${
                   theme === 'light' ? 'text-slate-600' : 'text-gray-600 dark:text-gray-400'
-                }`}>🔒 100% privado y seguro</span>
+                }`}>📊 Seguimiento de progreso y lecciones</span>
               </div>
             </div>
 
-            {/* Disclaimer */}
+            {/* Disclaimer actualizado para el contexto de comunicación */}
             <div className={`mt-4 sm:mt-8 p-3 sm:p-4 rounded-lg border transition-all duration-300 hover:shadow-md animate-fade-in-up mx-auto lg:mx-0 max-w-md ${
               theme === 'light'
                 ? 'bg-white/80 border-blue-200 backdrop-blur-sm shadow-sm'
@@ -160,13 +160,12 @@ export default function Hero()  {
               <p className={`text-xs sm:text-sm leading-relaxed ${
                 theme === 'light' ? 'text-slate-700' : 'text-blue-800 dark:text-blue-200'
               }`}>
-                <strong>Importante:</strong> Habita no es una herramienta médica ni reemplaza la atención profesional en salud mental. 
-                Si necesitas ayuda clínica, consulta con un psicólogo certificado.
+                <strong>Nota:</strong> Esta es una herramienta de apoyo a la comunicación y el aprendizaje, no reemplaza la **terapia del lenguaje** o la intervención profesional.
               </p>
             </div>
           </div>
           
-          {/* Mockup section */}
+          {/* Sección de Mockup: Tarjeta de Comunicación Interactiva */}
           <div className="mt-8 sm:mt-12 relative sm:max-w-lg sm:mx-auto lg:mt-0 lg:max-w-none lg:mx-0 lg:col-span-6 lg:flex lg:items-center animate-fade-in-left" style={{ animationDelay: '0.6s' }}>
             <div className="relative mx-auto w-full rounded-2xl shadow-2xl lg:max-w-md transform hover:scale-105 transition-all duration-500">
               <div className={`rounded-2xl p-4 sm:p-6 lg:p-8 shadow-xl border transition-all duration-300 hover:shadow-2xl ${
@@ -176,153 +175,109 @@ export default function Hero()  {
               }`}>
                 <div className="text-center">
                   <motion.div 
-                    className={`mx-auto h-12 w-12 sm:h-14 sm:w-14 lg:h-16 lg:w-16 rounded-full flex items-center justify-center mb-4 sm:mb-6 ${
+                    className={`mx-auto h-24 w-24 sm:h-32 sm:w-32 lg:h-40 lg:w-40 rounded-xl flex items-center justify-center mb-4 sm:mb-6 ${
                       theme === 'light'
-                        ? 'bg-gradient-to-br from-emerald-100 to-blue-100'
-                        : 'bg-gradient-to-br from-emerald-100 to-blue-100 dark:from-emerald-900 dark:to-blue-900'
+                        ? 'bg-gradient-to-br from-indigo-100 to-blue-100'
+                        : 'bg-gradient-to-br from-indigo-900/80 to-blue-900/80'
                     }`}
                     animate={{ 
-                      y: [0, -10, 0],
-                      scale: [1, 1.1, 1],
+                      scale: [1, 1.05, 1],
                       boxShadow: [
-                        "0 0 0 rgba(16, 185, 129, 0)",
-                        "0 0 20px rgba(16, 185, 129, 0.5)",
-                        "0 0 0 rgba(16, 185, 129, 0)"
+                        "0 0 0 rgba(99, 102, 241, 0)",
+                        "0 0 30px rgba(99, 102, 241, 0.5)",
+                        "0 0 0 rgba(99, 102, 241, 0)"
                       ]
                     }}
                     transition={{ 
-                      duration: 2, 
+                      duration: 3, 
                       repeat: Infinity,
                       repeatType: "loop"
                     }}
                   >
-                    <Mic className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-emerald-600 dark:text-emerald-400" />
+                    <span className="text-5xl sm:text-6xl" role="img" aria-label="Manzana">🍎</span>
                   </motion.div>
-                  <h3 className={`text-lg sm:text-xl font-semibold mb-2 sm:mb-3 ${
+                  <h3 className={`text-xl sm:text-2xl font-bold mb-2 sm:mb-3 ${
                     theme === 'light' ? 'text-slate-800' : 'text-gray-900 dark:text-white'
                   }`}>
-                    Check-in Emocional Diario
+                    "Quiero una manzana"
                   </h3>
-                  <p className={`text-xs sm:text-sm mb-4 sm:mb-6 ${
+                  <p className={`text-sm sm:text-base mb-4 sm:mb-6 ${
                     theme === 'light' ? 'text-slate-600' : 'text-gray-600 dark:text-gray-300'
                   }`}>
-                    "Hola, soy tu compañero de bienestar. ¿Cómo te sientes hoy?"
+                    Frase clave y traducción (Español/Inglés)
                   </p>
                   
-                  {/* Mood Selection */}
-                  <div className="grid grid-cols-5 gap-1 sm:gap-2 mb-4 sm:mb-6">
-                    {[
-                      { emoji: '😢', label: 'Triste' },
-                      { emoji: '😕', label: 'Bajo' },
-                      { emoji: '😐', label: 'Neutral' },
-                      { emoji: '😊', label: 'Bien' },
-                      { emoji: '😄', label: 'Genial' }
-                    ].map((mood, index) => (
-                      <motion.button
-                        key={index}
-                        className={`p-2 sm:p-3 rounded-xl transition-all duration-300 ${
-                          index === 3 
-                            ? theme === 'light'
-                              ? 'bg-emerald-100 scale-110 shadow-md'
-                              : 'bg-emerald-100 dark:bg-emerald-900 scale-110 shadow-md'
-                            : theme === 'light'
-                            ? 'hover:bg-white/80'
-                            : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                        }`}
-                        whileHover={{ scale: 1.1, rotate: index % 2 === 0 ? 5 : -5 }}
-                        whileTap={{ scale: 0.9 }}
-                        animate={index === 3 ? {
-                          scale: [1.1, 1.15, 1.1],
-                          boxShadow: [
-                            "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                            "0 10px 15px -3px rgba(16, 185, 129, 0.3)",
-                            "0 4px 6px -1px rgba(0, 0, 0, 0.1)"
-                          ]
-                        } : {}}
-                        transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
-                      >
-                        <span className="text-xl sm:text-2xl">{mood.emoji}</span>
-                      </motion.button>
-                    ))}
+                  {/* Botones de Interacción (Visual/Auditivo/Táctil) */}
+                  <div className="flex justify-center gap-4 mb-4 sm:mb-6">
+                    <motion.button
+                      className="p-3 rounded-full bg-indigo-500 text-white shadow-lg hover:bg-indigo-600 transition-colors"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <Volume2 className="h-5 w-5" />
+                    </motion.button>
+                    <motion.button
+                      className="p-3 rounded-full bg-purple-500 text-white shadow-lg hover:bg-purple-600 transition-colors"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <BookOpen className="h-5 w-5" />
+                    </motion.button>
+                    <motion.button
+                      className="p-3 rounded-full bg-emerald-500 text-white shadow-lg hover:bg-emerald-600 transition-colors"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <span role="img" aria-label="Mano">🖐️</span>
+                    </motion.button>
                   </div>
-                  
-                  {/* Voice Interaction */}
-                  <motion.div 
-                    className={`rounded-xl p-3 sm:p-4 mb-3 sm:mb-4 ${
-                      theme === 'light'
-                        ? 'bg-gradient-to-r from-emerald-50 to-blue-50'
-                        : 'bg-gradient-to-r from-emerald-50 to-blue-50 dark:from-emerald-900/20 dark:to-blue-900/20'
-                    }`}
-                    animate={{
-                      boxShadow: [
-                        "0 0 0 rgba(16, 185, 129, 0)",
-                        "0 0 15px rgba(16, 185, 129, 0.3)",
-                        "0 0 0 rgba(16, 185, 129, 0)"
-                      ]
-                    }}
-                    transition={{ duration: 3, repeat: Infinity }}
-                  >
-                    <div className="flex items-center justify-center space-x-1 sm:space-x-2 mb-2">
+
+                  {/* Simulación de Registro de Uso / RFID */}
+                  <div className={`rounded-xl p-3 sm:p-4 mb-3 sm:mb-4 ${
+                    theme === 'light'
+                      ? 'bg-gradient-to-r from-indigo-50 to-blue-50'
+                      : 'bg-gradient-to-r from-indigo-900/20 to-blue-900/20'
+                  }`}>
+                    <div className="flex items-center justify-center space-x-2">
                       <motion.div 
-                        className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-emerald-500 rounded-full"
+                        className="w-2 h-2 bg-indigo-500 rounded-full"
                         animate={{ 
-                          height: [6, 12, 6],
+                          scale: [1, 1.5, 1],
                           opacity: [0.7, 1, 0.7]
                         }}
-                        transition={{ duration: 1, repeat: Infinity }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
                       />
-                      <motion.div 
-                        className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-500 rounded-full"
-                        animate={{ 
-                          height: [6, 16, 6],
-                          opacity: [0.7, 1, 0.7]
-                        }}
-                        transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
-                      />
-                      <motion.div 
-                        className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-purple-500 rounded-full"
-                        animate={{ 
-                          height: [6, 10, 6],
-                          opacity: [0.7, 1, 0.7]
-                        }}
-                        transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
-                      />
+                      <p className={`text-xs font-medium ${
+                        theme === 'light' ? 'text-slate-600' : 'text-gray-600 dark:text-gray-400'
+                      }`}>
+                        Tarjeta escaneada/tocada: Audio reproducido
+                      </p>
                     </div>
-                    <p className={`text-xs ${
-                      theme === 'light' ? 'text-slate-600' : 'text-gray-600 dark:text-gray-400'
-                    }`}>
-                      Interacción por voz activada
-                    </p>
-                  </motion.div>
+                  </div>
                   
                   <div className={`flex items-center justify-between text-xs ${
                     theme === 'light' ? 'text-slate-500' : 'text-gray-500 dark:text-gray-400'
                   }`}>
                     <motion.span 
                       animate={{ 
-                        scale: [1, 1.1, 1],
+                        scale: [1, 1.05, 1],
                         color: [
                           theme === 'light' ? '#64748b' : '#9ca3af',
-                          theme === 'light' ? '#ef4444' : '#f87171',
+                          theme === 'light' ? '#6366f1' : '#a5b4fc',
                           theme === 'light' ? '#64748b' : '#9ca3af'
                         ]
                       }}
                       transition={{ duration: 2, repeat: Infinity }}
                     >
-                      🔥 Racha: 7 días
+                      🏷️ Código: UUID-45678
                     </motion.span>
                     <motion.span 
                       animate={{ 
-                        y: [0, -3, 0],
-                        color: [
-                          theme === 'light' ? '#64748b' : '#9ca3af',
-                          theme === 'light' ? '#10b981' : '#34d399',
-                          theme === 'light' ? '#64748b' : '#9ca3af'
-                        ]
+                        y: [0, -3, 0]
                       }}
                       transition={{ duration: 2, repeat: Infinity, delay: 1 }}
                     >
-                      🎯 Meta diaria: ✅
+                      📈 Lección N° 5 completada
                     </motion.span>
                   </div>
                 </div>
@@ -332,7 +287,7 @@ export default function Hero()  {
         </div>
       </div>
 
-      {/* Custom CSS for animations */}
+      {/* Custom CSS for animations (se mantiene el CSS inyectado al final) */}
       <style>{`
         @keyframes fade-in-up {
           from {
@@ -368,4 +323,4 @@ export default function Hero()  {
       `}</style>
     </section>
   );
-}
+};

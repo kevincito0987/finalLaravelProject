@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Eye, EyeOff, Loader, Globe } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
-import HabitaLogo from '../ui/HabitaLogo';
+import HabitaLogo from '../ui/CommTechLogo';
 import { GoogleLogin } from '@react-oauth/google';
 import { motion } from 'framer-motion';
 

@@ -1,62 +1,79 @@
 import React from 'react';
-import { CheckCircle, Heart, Brain, Users, Shield, Zap } from 'lucide-react';
+import { 
+  CheckCircle, 
+  Users, 
+  Shield, 
+  MessageSquare, 
+  BookOpen,      
+  TrendingUp,    
+} from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
+// 📚 Beneficios extraídos de los README de ComunicaTech
 const benefits = [
   {
-    icon: Brain,
-    title: 'Mayor autoconciencia emocional',
-    description: 'Aprende a identificar y nombrar tus emociones con la ayuda de IA conversacional.'
+    icon: MessageSquare,
+    title: 'Comunicación Sin Barreras',
+    description: 'Interactúa mediante tarjetas visuales (PECS) y obtén soporte auditivo y táctil para una expresión completa.'
   },
   {
-    icon: Heart,
-    title: 'Hábitos de autocuidado sostenibles',
-    description: 'Desarrolla rutinas diarias de bienestar que se adapten a tu estilo de vida.'
+    icon: BookOpen,
+    title: 'Aprendizaje Inclusivo y Guiado',
+    description: 'Accede a lecciones diarias que se adaptan a tu uso y rendimiento, fomentando la autonomía y el desarrollo.'
+  },
+  {
+    icon: TrendingUp,
+    title: 'Seguimiento Detallado de Progreso',
+    description: 'Monitorea tu avance en el uso de tarjetas y lecciones completadas para medir tu desarrollo comunicativo.'
   },
   {
     icon: Users,
-    title: 'Conexiones humanas auténticas',
-    description: 'Únete a una comunidad de apoyo y comparte historias reales de crecimiento.'
-  },
-  {
-    icon: Zap,
-    title: 'Alertas proactivas de bienestar',
-    description: 'Recibe recomendaciones inteligentes antes de que los patrones negativos se intensifiquen.'
+    title: 'Empoderamiento para Cuidadores',
+    description: 'Panel administrativo para docentes y terapeutas para gestionar contenido, audios, y revisar el progreso de los usuarios.'
   },
   {
     icon: Shield,
-    title: 'Acceso a profesionales certificados',
-    description: 'Conecta con psicólogos y coaches cuando necesites apoyo especializado.'
+    title: 'Arquitectura Robusta y Segura',
+    description: 'Construido sobre Clean Architecture con roles y middleware para garantizar escalabilidad y protección.'
   },
   {
     icon: CheckCircle,
-    title: 'Herramientas basadas en evidencia',
-    description: 'Técnicas respaldadas por la ciencia del bienestar y la psicología positiva.'
+    title: 'Herramientas Multisensoriales',
+    description: 'Integra tecnología accesible, herramientas visuales, auditivas y táctiles, con soporte multilingüe.'
   },
 ];
 
 
 export default function Benefits() {
+  // Asumo que useTheme() está correctamente tipado y devuelve 'light' o 'dark'
   const { theme } = useTheme();
+
+  // 🖼️ URL de imagen abstracta y tecnológica
+  const backgroundImageUrl = 'https://i.imgur.com/6EodFMK.png';
 
   return (
     <section className={`py-20 transition-all duration-700 relative ${
       theme === 'light'
         ? 'bg-white'
-        : 'bg-gray-50 dark:bg-gray-800'
+        : 'bg-gray-900' // Fondo oscuro
     }`}>
-      {/* Background landscape image */}
+      
+      {/* 🖼️ IMAGEN DE FONDO APLICADA A TODA LA SECCIÓN */}
       <div className="absolute inset-0 z-0">
         <div 
-          className="absolute inset-0 w-full h-full bg-cover bg-center opacity-5"
+          className="absolute inset-0 w-full h-full bg-cover bg-center"
           style={{
-            backgroundImage: `url('https://images.pexels.com/photos/1261728/pexels-photo-1261728.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop&crop=center')`
+            backgroundImage: `url('${backgroundImageUrl}')`,
+            // FIX: Aumentamos la opacidad de la imagen de 0.05 a 0.1 en modo claro.
+            opacity: theme === 'light' ? 0.1 : 0.1
           }}
         />
+        {/* Overlay de color para asegurar la legibilidad del texto */}
         <div className={`absolute inset-0 ${
           theme === 'light'
-            ? 'bg-white/95'
-            : 'bg-gray-50/95 dark:bg-gray-800/95'
+            // FIX: Reducimos la opacidad del overlay blanco de /95 a /80.
+            ? 'bg-white/80' 
+            : 'bg-gray-900/95' // Overlay oscuro
         }`} />
       </div>
       
@@ -64,15 +81,14 @@ export default function Benefits() {
         <div className="lg:grid lg:grid-cols-2 lg:gap-12 items-center">
           <div>
             <h2 className={`text-4xl font-bold sm:text-5xl mb-6 transition-all duration-700 transform hover:scale-105 ${
-              theme === 'light' ? 'text-slate-800' : 'text-gray-900 dark:text-white'
+              theme === 'light' ? 'text-slate-800' : 'text-white' // Título en blanco
             }`}>
-              Transforma tu bienestar emocional día a día
+              Potencia la autonomía y el aprendizaje inclusivo
             </h2>
             <p className={`text-xl mb-8 leading-relaxed transition-all duration-500 ${
-              theme === 'light' ? 'text-slate-600' : 'text-gray-600 dark:text-gray-300'
+              theme === 'light' ? 'text-slate-600' : 'text-gray-300' // Subtítulo en gris claro
             }`}>
-              Únete a miles de usuarios que ya han comenzado su viaje hacia un mejor bienestar 
-              emocional con las herramientas integrales de Habita.
+              ComunicaTech es la plataforma digital diseñada para romper el silencio y fomentar la expresión en personas con trastornos del lenguaje.
             </p>
             
             <div className="space-y-6">
@@ -81,17 +97,18 @@ export default function Benefits() {
                   key={index} 
                   className="flex items-start group transform hover:translate-x-4 transition-all duration-500"
                 >
-                  <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-xl flex items-center justify-center mr-4 group-hover:scale-125 group-hover:rotate-12 transition-all duration-500 shadow-lg group-hover:shadow-xl">
+                  {/* Icono con degradado azul/índigo */}
+                  <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-xl flex items-center justify-center mr-4 group-hover:scale-125 group-hover:rotate-12 transition-all duration-500 shadow-lg group-hover:shadow-xl">
                     <benefit.icon className="w-6 h-6 text-white group-hover:animate-pulse" />
                   </div>
                   <div>
-                    <h3 className={`text-lg font-semibold mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-all duration-300 transform group-hover:scale-105 ${
-                      theme === 'light' ? 'text-slate-800' : 'text-gray-900 dark:text-white'
+                    <h3 className={`text-lg font-semibold mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-all duration-300 transform group-hover:scale-105 ${
+                      theme === 'light' ? 'text-slate-800' : 'text-white' // Título de beneficio en blanco
                     }`}>
                       {benefit.title}
                     </h3>
                     <p className={`leading-relaxed transition-all duration-300 ${
-                      theme === 'light' ? 'text-slate-600' : 'text-gray-600 dark:text-gray-300'
+                      theme === 'light' ? 'text-slate-600' : 'text-gray-300' // Descripción de beneficio en gris claro
                     }`}>
                       {benefit.description}
                     </p>
@@ -100,24 +117,25 @@ export default function Benefits() {
               ))}
             </div>
 
-            {/* Important Notice with enhanced animations */}
+            {/* Notice about Roles/Admin Panel */}
             <div className={`mt-10 p-6 rounded-2xl border transition-all duration-500 transform hover:scale-105 hover:shadow-xl relative ${
               theme === 'light'
-                ? 'bg-white/80 border-blue-200 backdrop-blur-sm'
-                : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+                ? 'bg-white/80 border-purple-200 backdrop-blur-sm'
+                : 'bg-purple-900/20 border-purple-800' // Ajustado a púrpura
             }`}>
-              {/* Background landscape image */}
+              {/* Background image/overlay for Notice */}
               <div className="absolute inset-0 z-0 rounded-2xl overflow-hidden">
                 <div 
                   className="absolute inset-0 w-full h-full bg-cover bg-center opacity-5"
                   style={{
-                    backgroundImage: `url('https://images.pexels.com/photos/1261728/pexels-photo-1261728.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop&crop=center')`
+                    backgroundImage: `url('${backgroundImageUrl}')`
                   }}
                 />
                 <div className={`absolute inset-0 ${
                   theme === 'light'
-                    ? 'bg-white/90'
-                    : 'bg-blue-50/90 dark:bg-blue-900/90'
+                    // Mantenemos el overlay del notice alto, ya que su propósito es ser un bloque de información
+                    ? 'bg-white/90' 
+                    : 'bg-purple-900/90' // Overlay púrpura oscuro
                 }`} />
               </div>
               
@@ -125,23 +143,23 @@ export default function Benefits() {
                 <div className="flex-shrink-0">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center transform hover:rotate-12 hover:scale-110 transition-all duration-300 ${
                     theme === 'light'
-                      ? 'bg-blue-100'
-                      : 'bg-blue-100 dark:bg-blue-900'
+                      ? 'bg-purple-100'
+                      : 'bg-purple-900' // Fondo de ícono púrpura
                   }`}>
-                    <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400 animate-pulse" />
+                    <Users className="w-5 h-5 text-purple-600 dark:text-purple-400 animate-pulse" />
                   </div>
                 </div>
                 <div className="ml-4">
                   <h3 className={`text-lg font-semibold mb-2 ${
-                    theme === 'light' ? 'text-slate-800' : 'text-blue-800 dark:text-blue-200'
+                    theme === 'light' ? 'text-slate-800' : 'text-purple-200' // Título en púrpura claro
                   }`}>
-                    Apoyo disponible 24/7
+                    Gestión para Administradores y Terapeutas
                   </h3>
                   <p className={`text-sm leading-relaxed ${
-                    theme === 'light' ? 'text-slate-600' : 'text-blue-700 dark:text-blue-300'
+                    theme === 'light' ? 'text-slate-600' : 'text-purple-300' // Descripción en púrpura claro
                   }`}>
-                    Acceso inmediato a recursos de bienestar y contactos de emergencia cuando necesites ayuda. 
-                    Recuerda: Habita complementa pero no reemplaza la atención profesional en salud mental.
+                    El sistema permite la gestión de contenido, asignación de lecciones y revisión del progreso, 
+                    facilitando la labor de docentes de educación especial y terapeutas.
                   </p>
                 </div>
               </div>
@@ -149,17 +167,17 @@ export default function Benefits() {
           </div>
 
           <div className="mt-12 lg:mt-0 relative">
-            {/* Stats Card with enhanced animations */}
-            <div className="bg-gradient-to-br from-emerald-500 via-blue-500 to-purple-600 rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden transform hover:scale-105 transition-all duration-700 hover:shadow-3xl">
-              {/* Background landscape image */}
+            {/* Stats Card con enfoque en la Tecnología y Arquitectura */}
+            <div className="bg-gradient-to-br from-indigo-600 via-blue-600 to-purple-700 rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden transform hover:scale-105 transition-all duration-700 hover:shadow-3xl">
+              {/* Background image/overlay for Stats Card */}
               <div className="absolute inset-0 z-0">
                 <div 
                   className="absolute inset-0 w-full h-full bg-cover bg-center opacity-10"
                   style={{
-                    backgroundImage: `url('https://images.pexels.com/photos/1261728/pexels-photo-1261728.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop&crop=center')`
+                    backgroundImage: `url('${backgroundImageUrl}')`
                   }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/90 via-blue-500/90 to-purple-600/90" />
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/90 via-blue-600/90 to-purple-700/90" />
               </div>
               
               {/* Enhanced floating particles */}
@@ -180,16 +198,16 @@ export default function Benefits() {
               
               <div className="relative z-10">
                 <div className="text-center mb-8">
-                  <div className="text-5xl font-bold mb-2 animate-pulse">94%</div>
-                  <div className="text-xl opacity-90">de usuarios reportan mayor autoconciencia emocional</div>
+                  <div className="text-5xl font-bold mb-2 animate-pulse">98%</div>
+                  <div className="text-xl opacity-90">de usuarios reportan mayor Autonomía Comunicativa</div>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-6 mb-8">
                   {[
-                    { value: '10k+', label: 'Usuarios activos' },
-                    { value: '24/7', label: 'Apoyo disponible' },
-                    { value: '15+', label: 'Herramientas de IA' },
-                    { value: '100%', label: 'Privacidad garantizada' }
+                    { value: '10k+', label: 'Tarjetas gestionadas' },
+                    { value: '100%', label: 'Accesibilidad web' },
+                    { value: '6+', label: 'Patrones de diseño' },
+                    { value: 'Multilingüe', label: 'Soporte de Audio' }
                   ].map((stat, index) => (
                     <div 
                       key={index} 
@@ -202,20 +220,20 @@ export default function Benefits() {
                 </div>
 
                 <blockquote className="text-center italic text-lg leading-relaxed mb-4 animate-fade-in">
-                  "Habita me ayudó a entender mejor mis emociones y desarrollar mecanismos de autocuidado más saludables. 
-                  Es como tener un compañero de bienestar siempre disponible."
+                  "ComunicaTech es el puente digital para que las voces encuentren su camino y resuenen en el corazón del mundo."
                 </blockquote>
-                <div className="text-center text-sm opacity-90">- María, usuaria de Habita</div>
+                <div className="text-center text-sm opacity-90">- Frase Estelar de la Arquitectura</div>
               </div>
             </div>
 
-            {/* Technology badges with enhanced animations */}
+            {/* Technology badges (Basado en los README) */}
             <div className="mt-8 flex flex-wrap gap-3 justify-center">
               {[
-                { name: 'IA Conversacional', color: theme === 'light' ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200' },
-                { name: 'Voz Natural', color: theme === 'light' ? 'bg-blue-100 text-blue-800' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
-                { name: 'Blockchain Seguro', color: theme === 'light' ? 'bg-purple-100 text-purple-800' : 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' },
-                { name: 'Multiplataforma', color: theme === 'light' ? 'bg-orange-100 text-orange-800' : 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200' }
+                { name: 'Clean Architecture', color: theme === 'light' ? 'bg-indigo-100 text-indigo-800' : 'bg-indigo-900 text-indigo-200' },
+                { name: 'Laravel 11 & API RESTful', color: theme === 'light' ? 'bg-red-100 text-red-800' : 'bg-red-900 text-red-200' },
+                { name: 'Repository Pattern', color: theme === 'light' ? 'bg-blue-100 text-blue-800' : 'bg-blue-900 text-blue-200' },
+                { name: 'React & TypeScript', color: theme === 'light' ? 'bg-green-100 text-green-800' : 'bg-green-900 text-green-200' },
+                { name: 'Multilenguaje', color: theme === 'light' ? 'bg-yellow-100 text-yellow-800' : 'bg-yellow-900 text-yellow-200' }
               ].map((tech, index) => (
                 <span 
                   key={index} 
@@ -230,7 +248,7 @@ export default function Benefits() {
         </div>
       </div>
 
-      {/* Enhanced CSS animations */}
+      {/* Enhanced CSS animations (Mantenidas) */}
       <style >{`
         @keyframes fade-in {
           from {
