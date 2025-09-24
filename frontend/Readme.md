@@ -1,6 +1,4 @@
-# 🗣️🧠 Plataforma Interactiva de Comunicación y Aprendizaje (PLATICA)
-
-
+# 🗣️🧠 Plataforma Interactiva de Comunicación y Aprendizaje (ComunicaTech)
 
 
 

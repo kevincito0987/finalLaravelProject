@@ -1,4 +1,4 @@
-# 🗣️🧠 Backend: Clean Architecture con Laravel 🗣️🧠
+# 🗣️🧠 Backend: Clean Architecture con Laravel (ComunicaTech)🗣️🧠
 
 Este es el backend de la Plataforma Interactiva de Comunicación y Aprendizaje, construido sobre una arquitectura robusta para garantizar la escalabilidad, la mantenibilidad y la testabilidad del sistema. 🚀
 

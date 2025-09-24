@@ -4614,3 +4614,572 @@ Una vez creado el proyecto, Laravel proporciona una estructura limpia y organiza
    
 
 > **Con mucho Cariño**: Adrián R. 🗿
+
+# 🚀 Laravel: Un Vistazo Rápido a Mi Boilerplate
+
+¡Hola, dev! Este es un proyecto de Laravel que he configurado como base para futuros trabajos. Aquí te explico cómo está todo montado, desde la base de datos hasta la autenticación. Espero que te sirva tanto como a mí.
+
+---
+
+## 🛠️ Conexión con Bases de Datos
+
+He configurado este proyecto para que sea flexible. Puedes usar **MySQL**, **PostgreSQL** o incluso **Supabase** sin problemas, ya que las migraciones están listas para las tres.
+
+### Iniciar proyectos con Supabase:
+
+1. Inicia sesion en: https://supabase.com/
+
+2. Crea una organizacion, si no un proyecto: 
+
+   ![Organizaciones](https://i.imgur.com/NyuNlBg.png)
+
+3. Entra en tu proyecto, en este caso se uso Laravel.
+
+   ![Proyectos](https://i.imgur.com/2HMfhtH.png)
+
+4. Entra en Crud-Laravel que es el proyecto:
+
+   ![Crud-Laravel](https://i.imgur.com/a3L8N5B.png)
+
+5. En la parte de conexion en donde dice connect no vamos a centrar:
+
+   ![Connection](https://i.imgur.com/ChbUCGp.png)
+
+   ![image-20250921155640959](/home/camper/.config/Typora/typora-user-images/image-20250921155640959.png)
+
+**Para empezar, solo necesitas:**
+
+1. Copia el archivo `.env.example` y renómbralo a `.env`.
+
+   1. ```
+      # Local MySQL Connection
+      DB_HOST_MYSQL=db
+      DB_PORT_MYSQL=3306
+      DB_DATABASE_MYSQL=laravel
+      DB_USERNAME_MYSQL=root
+      DB_PASSWORD_MYSQL=admin
+      
+      # Local PostgreSQL Connection
+      DB_HOST_PGSQL=pgsql
+      DB_PORT_PGSQL=5432
+      DB_DATABASE_PGSQL=laravel
+      DB_USERNAME_PGSQL=laravel
+      DB_PASSWORD_PGSQL=admin
+      
+      # Supabase Connection
+      DB_HOST_SUPABASE=aws-1-us-east-2.pooler.supabase.com
+      DB_PORT_SUPABASE=5432
+      DB_DATABASE_SUPABASE=postgres
+      DB_USERNAME_SUPABASE=postgres.bmcnrnnhyazclvwgrieb
+      DB_PASSWORD_SUPABASE=............
+      ```
+
+      
+
+2. Abre `.env` y busca la sección de base de datos.
+3. Cambia `DB_CONNECTION` a `mysql`, `pgsql`, `supabase`  o la opción que prefieras:
+
+    Tu database config deberia de quedar con esto: 
+
+   ​	
+
+   ```php
+   <?php
+   
+   use Illuminate\Support\Str;
+   
+   return [
+   
+       /*
+       |--------------------------------------------------------------------------
+       | Default Database Connection Name
+       |--------------------------------------------------------------------------
+       |
+       | Here you may specify which of the database connections below you wish
+       | to use as your default connection for database operations. This is
+       | the connection which will be utilized unless another connection
+       | is explicitly specified when you execute a query / statement.
+       |
+       */
+   
+       'default' => env('DB_CONNECTION', 'sqlite'),
+   
+       /*
+       |--------------------------------------------------------------------------
+       | Database Connections
+       |--------------------------------------------------------------------------
+       |
+       | Below are all of the database connections defined for your application.
+       | An example configuration is provided for each database system which
+       | is supported by Laravel. You're free to add / remove connections.
+       |
+       */
+   
+       'connections' => [
+   
+           'sqlite' => [
+               'driver' => 'sqlite',
+               'url' => env('DB_URL'),
+               'database' => env('DB_DATABASE', database_path('database.sqlite')),
+               'prefix' => '',
+               'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
+               'busy_timeout' => null,
+               'journal_mode' => null,
+               'synchronous' => null,
+           ],
+   
+           'mysql' => [
+               'driver' => 'mysql',
+               'url' => env('DB_URL'),
+               'host' => env('DB_HOST_MYSQL', '127.0.0.1'),
+               'port' => env('DB_PORT_MYSQL', '3306'),
+               'database' => env('DB_DATABASE_MYSQL', 'laravel'),
+               'username' => env('DB_USERNAME_MYSQL', 'root'),
+               'password' => env('DB_PASSWORD_MYSQL', ''),
+               'unix_socket' => env('DB_SOCKET', ''),
+               'charset' => env('DB_CHARSET', 'utf8mb4'),
+               'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
+               'prefix' => '',
+               'prefix_indexes' => true,
+               'strict' => true,
+               'engine' => null,
+               'options' => extension_loaded('pdo_mysql') ? array_filter([
+                   PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+               ]) : [],
+           ],
+   
+           'supabase' => [
+               'driver' => 'pgsql',
+               'url' => env('DB_URL_SUPABASE'),
+               'host' => env('DB_HOST_SUPABASE'),
+               'port' => env('DB_PORT_SUPABASE'),
+               'database' => env('DB_DATABASE_SUPABASE'),
+               'username' => env('DB_USERNAME_SUPABASE'),
+               'password' => env('DB_PASSWORD_SUPABASE'),
+               'charset' => 'utf8',
+               'prefix' => '',
+               'prefix_indexes' => true,
+               'search_path' => 'public',
+               'sslmode' => 'prefer',
+           ],
+   
+           'mariadb' => [
+               'driver' => 'mariadb',
+               'url' => env('DB_URL'),
+               'host' => env('DB_HOST', '127.0.0.1'),
+               'port' => env('DB_PORT', '3306'),
+               'database' => env('DB_DATABASE', 'laravel'),
+               'username' => env('DB_USERNAME', 'root'),
+               'password' => env('DB_PASSWORD', ''),
+               'unix_socket' => env('DB_SOCKET', ''),
+               'charset' => env('DB_CHARSET', 'utf8mb4'),
+               'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
+               'prefix' => '',
+               'prefix_indexes' => true,
+               'strict' => true,
+               'engine' => null,
+               'options' => extension_loaded('pdo_mysql') ? array_filter([
+                   PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+               ]) : [],
+           ],
+   
+           'pgsql' => [
+               'driver' => 'pgsql',
+               'url' => env('DB_URL'),
+               'host' => env('DB_HOST_PGSQL', '127.0.0.1'),
+               'port' => env('DB_PORT_PGSQL', '5432'),
+               'database' => env('DB_DATABASE_PGSQL', 'laravel'),
+               'username' => env('DB_USERNAME_PGSQL', 'root'),
+               'password' => env('DB_PASSWORD_PGSQL', ''),
+               'charset' => env('DB_CHARSET', 'utf8'),
+               'prefix' => '',
+               'prefix_indexes' => true,
+               'search_path' => 'public',
+               'sslmode' => 'prefer',
+           ],
+   
+           'sqlsrv' => [
+               'driver' => 'sqlsrv',
+               'url' => env('DB_URL'),
+               'host' => env('DB_HOST', 'localhost'),
+               'port' => env('DB_PORT', '1433'),
+               'database' => env('DB_DATABASE', 'laravel'),
+               'username' => env('DB_USERNAME', 'root'),
+               'password' => env('DB_PASSWORD', ''),
+               'charset' => env('DB_CHARSET', 'utf8'),
+               'prefix' => '',
+               'prefix_indexes' => true,
+               // 'encrypt' => env('DB_ENCRYPT', 'yes'),
+               // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
+           ],
+   
+       ],
+   
+       /*
+       |--------------------------------------------------------------------------
+       | Migration Repository Table
+       |--------------------------------------------------------------------------
+       |
+       | This table keeps track of all the migrations that have already run for
+       | your application. Using this information, we can determine which of
+       | the migrations on disk haven't actually been run on the database.
+       |
+       */
+   
+       'migrations' => [
+           'table' => 'migrations',
+           'update_date_on_publish' => true,
+       ],
+   
+       /*
+       |--------------------------------------------------------------------------
+       | Redis Databases
+       |--------------------------------------------------------------------------
+       |
+       | Redis is an open source, fast, and advanced key-value store that also
+       | provides a richer body of commands than a typical key-value system
+       | such as Memcached. You may define your connection settings here.
+       |
+       */
+   
+       'redis' => [
+   
+           'client' => env('REDIS_CLIENT', 'phpredis'),
+   
+           'options' => [
+               'cluster' => env('REDIS_CLUSTER', 'redis'),
+               'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
+           ],
+   
+           'default' => [
+               'url' => env('REDIS_URL'),
+               'host' => env('REDIS_HOST', '127.0.0.1'),
+               'username' => env('REDIS_USERNAME'),
+               'password' => env('REDIS_PASSWORD'),
+               'port' => env('REDIS_PORT', '6379'),
+               'database' => env('REDIS_DB', '0'),
+           ],
+   
+           'cache' => [
+               'url' => env('REDIS_URL'),
+               'host' => env('REDIS_HOST', '127.0.0.1'),
+               'username' => env('REDIS_USERNAME'),
+               'password' => env('REDIS_PASSWORD'),
+               'port' => env('REDIS_PORT', '6379'),
+               'database' => env('REDIS_CACHE_DB', '1'),
+           ],
+   
+       ],
+   
+   ];
+   ```
+
+   
+4. Llena las credenciales correspondientes.
+5. Ejecuta las migraciones con `php artisan migrate`, esta pro default tu la configuras, pero si quieres una especifica por ejemplo postgress entonces ejecuta: `php artisan migrate --database pgsql`
+
+¡Y listo! La base de datos estará lista para tu proyecto.
+
+---
+
+## 📧 Notificaciones: De Prueba a Producción
+
+Para los correos electrónicos, me gusta tener dos opciones:
+
+* **Para desarrollo local**, uso **Mailpit**. Es genial para atrapar y ver los correos sin enviarlos realmente.
+* **Para el entorno real**, la configuración está lista para usar un servicio de **SMTP** real.
+
+Solo tienes que ajustar las variables de `MAIL_*` en tu archivo `.env` para cambiar entre uno y otro. ¡Sencillo y efectivo!:
+
+Configuracion con email: 
+
+ 1. Ve a donde este link: https://myaccount.google.com/apppasswords 
+
+ 2. Crea tu aplicacion:
+
+    ![Aplicacion](https://i.imgur.com/WjDfDBK.png)
+
+ 3. Crea tu Contraseña: 
+
+    ![Contraseña](https://copilot.microsoft.com/th/id/BCO.355c1b4d-4047-4808-83a4-0b64e2098018.png)
+
+## Configuracion en tu .env: 
+
+```
+MAIL_MAILER=mailpit
+MAIL_HOST=mailpit
+MAIL_PORT=1025
+MAIL_ENCRYPTION=tls
+MAIL_USERNAME=
+MAIL_PASSWORD=
+MAIL_FROM_ADDRESS=no-reply@tudominio.test
+MAIL_FROM_NAME="${APP_NAME}"
+
+MAIL_MAILER_REAL=smtp
+MAIL_HOST_REAL=smtp.gmail.com
+MAIL_PORT_REAL=587
+MAIL_USERNAME_REAL=correo-remitente
+MAIL_PASSWORD_REAL=clave que le das
+MAIL_ENCRYPVITE_DEV_SERVER_URL=http://localhost:5173
+```
+
+## Archivo Config de Mail: 
+
+```php
+<?php
+
+return [
+
+    /*
+    |--------------------------------------------------------------------------
+    | Default Mailer
+    |--------------------------------------------------------------------------
+    |
+    | This option controls the default mailer that is used to send all email
+    | messages unless another mailer is explicitly specified when sending
+    | the message. All additional mailers can be configured within the
+    | "mailers" array. Examples of each type of mailer are provided.
+    |
+    */
+
+    'default' => env('MAIL_MAILER', 'log'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mailer Configurations
+    |--------------------------------------------------------------------------
+    |
+    | Here you may configure all of the mailers used by your application plus
+    | their respective settings. Several examples have been configured for
+    | you and you are free to add your own as your application requires.
+    |
+    | Laravel supports a variety of mail "transport" drivers that can be used
+    | when delivering an email. You may specify which one you're using for
+    | your mailers below. You may also add additional mailers if needed.
+    |
+    | Supported: "smtp", "sendmail", "mailgun", "ses", "ses-v2",
+    |            "postmark", "resend", "log", "array",
+    |            "failover", "roundrobin"
+    |
+    */
+
+    'mailers' => [
+
+        'mailpit' => [
+            'transport' => 'smtp',
+            'scheme' => env('MAIL_SCHEME'),
+            'url' => env('MAIL_URL'),
+            'host' => env('MAIL_HOST', '127.0.0.1'),
+            'port' => env('MAIL_PORT', 2525),
+            'username' => env('MAIL_USERNAME'),
+            'password' => env('MAIL_PASSWORD'),
+            'timeout' => null,
+            'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url(env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
+        ],
+
+        'real' => [
+            'transport' => 'smtp',
+            'host' => env('MAIL_HOST_REAL', 'smtp.gmail.com'),
+            'port' => env('MAIL_PORT_REAL', 587),
+            'username' => env('MAIL_USERNAME_REAL'),
+            'password' => env('MAIL_PASSWORD_REAL'),
+            'encryption' => env('MAIL_ENCRYPTION_REAL', 'tls'),
+            'timeout' => null,
+            'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url(env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
+        ],
+
+
+        'ses' => [
+            'transport' => 'ses',
+        ],
+
+        'postmark' => [
+            'transport' => 'postmark',
+            // 'message_stream_id' => env('POSTMARK_MESSAGE_STREAM_ID'),
+            // 'client' => [
+            //     'timeout' => 5,
+            // ],
+        ],
+
+        'resend' => [
+            'transport' => 'resend',
+        ],
+
+        'sendmail' => [
+            'transport' => 'sendmail',
+            'path' => env('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -bs -i'),
+        ],
+
+        'log' => [
+            'transport' => 'log',
+            'channel' => env('MAIL_LOG_CHANNEL'),
+        ],
+
+        'array' => [
+            'transport' => 'array',
+        ],
+
+        'failover' => [
+            'transport' => 'failover',
+            'mailers' => [
+                'smtp',
+                'log',
+            ],
+        ],
+
+        'roundrobin' => [
+            'transport' => 'roundrobin',
+            'mailers' => [
+                'ses',
+                'postmark',
+            ],
+        ],
+
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Global "From" Address
+    |--------------------------------------------------------------------------
+    |
+    | You may wish for all emails sent by your application to be sent from
+    | the same address. Here you may specify a name and address that is
+    | used globally for all emails that are sent by your application.
+    |
+    */
+
+    'from' => [
+        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
+        'name' => env('MAIL_FROM_NAME', 'Example'),
+    ],
+
+];
+```
+
+## Aplicaciones:
+
+AuthController.php:
+
+```php
+function login(Request $request)
+    {
+        $data = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string|min:8',
+        ]);
+        //!Auth::attempt($data)
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            return $this->error('Credenciales invalidas', 401);
+        }
+
+        $user = $request->user();
+
+        $tokenResult = $user->createToken('api-token', ['posts.read', 'posts.write']);
+
+        $token = $tokenResult->accessToken;
+
+        Mail::to($user->email)->queue(new UserRegisteredMail($user)); //QueueMail::to($user->email)->queue(new UserRegisteredMail($user)); // Mailpit
+        Mail::mailer('real')->to($user->email)->queue(new UserRegisteredMail($user)); // Gmail
+        
+        return $this->success([
+            'token_type' => 'Bearer',
+            'access_token' => $token,
+            'user' => [
+                'email' => $user->email,
+                'roles' => $user->roles()->pluck('name'),
+            ]
+        ]);
+    }
+```
+
+
+
+---
+
+## 🔒 Autenticación con Oauth2 y Supabase
+
+En lugar de construir la autenticación desde cero, la manejo con **Supabase**, que simplifica todo el proceso de **Oauth2**. Puedes iniciar sesión con cuentas de **Google** y **GitHub**.
+
+**Cómo funciona:**
+
+1. Configura tus aplicaciones de Google y GitHub para obtener el `client ID` y el `client secret`.
+
+   1. Google:
+
+      1. Ir a google cloud, y seleccionar un proyecto o crear uno, en este caso use uno ya existente:
+
+         ![Proyecto Google](https://i.imgur.com/l4TBTC4.png)
+      2. Ir a apis y servicios:
+
+         ![Apis y Servicios](https://i.imgur.com/ouLchCB.png)
+      3. En donce dice pantalla de consentimiento veras esto:
+
+         ![Panel](https://i.imgur.com/P4gcHTf.png)
+      4. En donde dice Clientes crea uno o edita si ya lo tienes:
+
+         ![Cliente Google](https://i.imgur.com/qKpxoal.png)
+
+   2. Github:
+
+      1. Ve a las configuraciones de tu perfil: 
+
+         ![Config Github](https://i.imgur.com/19FEbEI.png)
+
+      2. Ve a developer settings a Oauth Apps:
+
+         ![Developer Settings](https://i.imgur.com/3E1VJER.png)
+
+      3. Y luego o creas una o la editas: 
+
+         ![App de github](https://i.imgur.com/g8cNcKC.png)
+
+2. Ve a tu proyecto de Supabase y habilita estos proveedores.
+
+   1. Google, asi tiene que quedar: 
+
+      ![Paso 1](https://i.imgur.com/qSuxYlp.png)
+
+      ![Providers](https://i.imgur.com/AcaVcyz.png)
+
+      ![Providers](https://i.imgur.com/HWgLDsk.png)
+
+      ![Github](https://i.imgur.com/GhnmuRv.png)
+
+      ![Google](https://i.imgur.com/62KgJkb.png)
+
+3. Copia tus credenciales en el archivo `.env` de tu proyecto de Laravel.
+
+   1. Api key de Supabase: 
+
+      ![Api Key Supabase](https://i.imgur.com/bOb4J8m.png)
+
+   2. Jwt de Supabase: 
+
+      ![Jwt de Supabase](https://i.imgur.com/FLmRUJ2.png)
+
+   ```
+   VITE_SUPABASE_URL=TU Url de supabase
+   VITE_SUPABASE_ANON_KEY=api key de supabase
+   # Valor de Supabase > Project Settings > API > JWT Secret
+   SUPABASE_JWT_SECRET=jwt de supabase
+   ```
+
+   
+
+De esta forma, la autenticación es segura y rápida, sin tener que reinventar la rueda.
+
+Ya solo faltaria que lo implementes en tu codigo ya sea php o React, para eso use laravel con breeze, mas info en: https://github.com/addsdev-campuslands/skill_laravel_a1_introduccion.git  ve a la rama de:
+
+​	![Repo](https://i.imgur.com/ScccTTx.png)
+
+
+
+Ahi en resources/js/Pages/Login o Register.jsx esta el como se implemento, nota ellos usaron routes/auth.php
+
+---
+
+¡Espero que esta configuración te ahorre tiempo y te sirva como una buena base para tus proyectos!
+
+**¡A codear!**
+
+**Con mucho Cariño**: Kevin A. 🗿
