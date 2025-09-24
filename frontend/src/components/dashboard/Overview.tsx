@@ -1,39 +1,86 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, TrendingUp, MessageCircle, Target, Calendar, Award, Loader, Globe } from 'lucide-react';
+import { Heart, TrendingUp, MessageCircle, Target, Calendar, Award, Loader } from 'lucide-react'; 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
 import AnimatedCard, { useTypewriter, ParticleEffect } from '../ui/AnimatedCard';
 import PowerPointTransition from '../ui/PowerPointTransition';
 import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer,
-  Area,
-  AreaChart
+  ResponsiveContainer
 } from 'recharts';
 
-interface OverviewProps {
-  currentLanguage?: string;
+// --- INTERFACES PARA RECHARTS TOOLTIP ---
+// 1. Estructura de cada entrada de datos individual en el payload.
+interface TooltipEntry {
+  color: string;
+  name: string;
+  value: number | string;
+  payload: {
+    moodLabel?: string; // Propiedad que usamos en el mock data pero no es estándar de Recharts
+  }
 }
 
-export default function Overview({ currentLanguage = 'es' }: OverviewProps) {
-  const { blogs, loading: blogsLoading } = useEmotionalBlogs();
-  const { userHabits, loading: habitsLoading } = useHabits();
-  const { emotionalTypes } = useEmotionalTypes();
+// 2. Propiedades que recibe el componente CustomTooltip de Recharts.
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: TooltipEntry[];
+  label?: string | number;
+}
+// ------------------------------------------
+
+
+// --- DATOS ESTÁTICOS DE REEMPLAZO ---
+const MOCK_EMOTIONAL_TYPES = [
+  { id: 1, description: 'Triste', emoji: '😢' },
+  { id: 2, description: 'Bajo', emoji: '😕' },
+  { id: 3, description: 'Neutral', emoji: '😐' },
+  { id: 4, description: 'Bien', emoji: '😊' },
+  { id: 5, description: 'Genial', emoji: '😄' },
+  { id: 6, description: 'Ansioso', emoji: '😰' },
+];
+
+const todaysMood = 4;
+const weekStreak = 5;
+const monthlyGoal = 75;
+const achievements = 12;
+
+const weeklyData = [
+  { day: 'Lun', mood: 3.5, activities: 2, moodLabel: 'Neutral' },
+  { day: 'Mar', mood: 4.0, activities: 3, moodLabel: 'Bien' },
+  { day: 'Mié', mood: 3.0, activities: 1, moodLabel: 'Neutral' },
+  { day: 'Jue', mood: 4.5, activities: 4, moodLabel: 'Genial' },
+  { day: 'Vie', mood: 5.0, activities: 5, moodLabel: 'Genial' },
+  { day: 'Sáb', mood: 4.0, activities: 3, moodLabel: 'Bien' },
+  { day: 'Dom', mood: 3.8, activities: 2, moodLabel: 'Neutral' },
+];
+
+const MOCK_RECENT_ACTIVITIES = [
+    { type: 'checkin', title: 'Check-in emocional completado', time: 'Hace 2 horas', icon: Heart, color: 'text-emerald-600 dark:text-emerald-400' },
+    { type: 'habit', title: 'Hábito: Meditación 10 min', time: 'Hace 4 horas', icon: TrendingUp, color: 'text-blue-600 dark:text-blue-400' },
+    { type: 'checkin', title: 'Check-in emocional completado', time: 'Ayer', icon: Heart, color: 'text-emerald-600 dark:text-emerald-400' }
+];
+
+function getMoodEmoji(moodId: number) {
+  return MOCK_EMOTIONAL_TYPES.find(t => t.id === moodId)?.emoji || '😐';
+}
+
+function getMoodDescription(moodId: number) {
+    return MOCK_EMOTIONAL_TYPES.find(t => t.id === moodId)?.description || 'Neutral';
+}
+
+// --- COMPONENTE ---
+export default function Overview() {
   const { theme } = useTheme();
   const [showCharts, setShowCharts] = useState(false);
   const [isSmartwatch, setIsSmartwatch] = useState(false);
-  const [selectedMood, setSelectedMood] = useState<number | null>(4); // Default to 'Bien' (index 3)
+  const [selectedMood, setSelectedMood] = useState<number | null>(4); 
+  const [loading, setLoading] = useState(true);
 
   // Detect if we're on a smartwatch-sized screen
   useEffect(() => {
@@ -46,69 +93,27 @@ export default function Overview({ currentLanguage = 'es' }: OverviewProps) {
     return () => window.removeEventListener('resize', checkSmartwatch);
   }, []);
 
-  // Calcular estadísticas basadas únicamente en datos de la DB
-  const todaysMood = blogs.length > 0 ? blogs[0].emotional_type_id : 3;
-  const weekStreak = Math.min(blogs.length, 7);
-  const monthlyGoal = Math.min((blogs.length / 30) * 100, 100);
-  const achievements = userHabits.length + blogs.length;
+  const welcomeText = "Tu Panel de Bienestar";
+  const typedText = useTypewriter(welcomeText, 100);
 
-  // Generar datos de la semana basados en datos reales de la DB
-  const generateWeeklyData = () => {
-    const days = currentLanguage === 'es' 
-      ? ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
-      : currentLanguage === 'fr'
-      ? ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
-      : currentLanguage === 'pt'
-      ? ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
-      : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const now = new Date();
+  // Efecto para simular la carga inicial
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+      setShowCharts(true);
+    }, 1500);
     
-    return days.map((day, index) => {
-      const date = new Date(now);
-      date.setDate(date.getDate() - (6 - index));
-      
-      const dayBlogs = blogs.filter(blog => {
-        const blogDate = new Date(blog.blog_date || '');
-        return blogDate.toDateString() === date.toDateString();
-      });
-      
-      const dayHabits = userHabits.filter(habit => {
-        const habitDate = new Date(habit.registration_date || '');
-        return habitDate.toDateString() === date.toDateString();
-      });
-      
-      const avgMood = dayBlogs.length > 0 
-        ? dayBlogs.reduce((sum, blog) => sum + blog.emotional_type_id, 0) / dayBlogs.length
-        : 3;
-      
-      return {
-        day,
-        mood: Math.round(avgMood * 10) / 10, // Redondear a 1 decimal
-        activities: dayHabits.length,
-        date: date.toISOString().split('T')[0],
-        moodLabel: emotionalTypes.find(t => t.id === Math.round(avgMood))?.description || 'Neutral'
-      };
-    });
-  };
-
-  const weeklyData = generateWeeklyData();
+    return () => clearTimeout(timer);
+  }, []);
 
   // Colores para los gráficos
   const colors = {
     primary: theme === 'light' ? '#10b981' : '#34d399',
     secondary: theme === 'light' ? '#3b82f6' : '#60a5fa',
-    accent: theme === 'light' ? '#8b5cf6' : '#a78bfa',
-    warning: theme === 'light' ? '#f59e0b' : '#fbbf24',
-    danger: theme === 'light' ? '#ef4444' : '#f87171',
-    success: theme === 'light' ? '#22c55e' : '#4ade80',
-    info: theme === 'light' ? '#06b6d4' : '#22d3ee',
-    purple: theme === 'light' ? '#a855f7' : '#c084fc',
-    pink: theme === 'light' ? '#ec4899' : '#f472b6',
-    orange: theme === 'light' ? '#f97316' : '#fb923c'
   };
 
-  // Custom tooltip para los gráficos
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  // Custom tooltip con tipado fuerte (CustomTooltipProps)
+  const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
       return (
         <div className={`p-2 sm:p-4 rounded-lg sm:rounded-xl shadow-lg border ${
@@ -121,10 +126,10 @@ export default function Overview({ currentLanguage = 'es' }: OverviewProps) {
           }`}>
             {label}
           </p>
-          {payload.map((entry: any, index: number) => (
+          {/* Usamos TooltipEntry para tipar cada 'entry' */}
+          {payload.map((entry: TooltipEntry, index: number) => (
             <p key={index} style={{ color: entry.color }} className="text-xxs sm:text-xs">
               {entry.name}: {entry.value}
-              {entry.name === 'mood' && ` (${entry.payload?.moodLabel})`}
             </p>
           ))}
         </div>
@@ -133,161 +138,9 @@ export default function Overview({ currentLanguage = 'es' }: OverviewProps) {
     return null;
   };
 
-  const recentActivities = [
-    ...blogs.slice(0, 2).map(blog => ({
-      type: 'checkin',
-      title: currentLanguage === 'es' ? 'Check-in emocional completado' : 
-             currentLanguage === 'fr' ? 'Check-in émotionnel complété' :
-             currentLanguage === 'pt' ? 'Check-in emocional concluído' :
-             'Emotional check-in completed',
-      time: formatTimeAgo(blog.blog_date || '', currentLanguage),
-      icon: Heart,
-      color: 'text-emerald-600 dark:text-emerald-400'
-    })),
-    ...userHabits.slice(0, 2).map(habit => ({
-      type: 'habit',
-      title: `${currentLanguage === 'es' ? 'Hábito' : 
-              currentLanguage === 'fr' ? 'Habitude' :
-              currentLanguage === 'pt' ? 'Hábito' :
-              'Habit'}: ${habit.habits.description}`,
-      time: formatTimeAgo(habit.registration_date || '', currentLanguage),
-      icon: TrendingUp,
-      color: 'text-blue-600 dark:text-blue-400'
-    }))
-  ].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()).slice(0, 3);
+  const recentActivities = MOCK_RECENT_ACTIVITIES;
 
-  function formatTimeAgo(dateString: string, lang: string) {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (lang === 'es') {
-      if (diffHours < 24) return `Hace ${diffHours} horas`;
-      if (diffDays === 1) return 'Ayer';
-      return `Hace ${diffDays} días`;
-    } else if (lang === 'fr') {
-      if (diffHours < 24) return `Il y a ${diffHours} heures`;
-      if (diffDays === 1) return 'Hier';
-      return `Il y a ${diffDays} jours`;
-    } else if (lang === 'pt') {
-      if (diffHours < 24) return `${diffHours} horas atrás`;
-      if (diffDays === 1) return 'Ontem';
-      return `${diffDays} dias atrás`;
-    } else {
-      if (diffHours < 24) return `${diffHours} hours ago`;
-      if (diffDays === 1) return 'Yesterday';
-      return `${diffDays} days ago`;
-    }
-  }
-
-  const getMoodEmoji = (moodId: number) => {
-    const emojiMap: { [key: number]: string } = {
-      1: '😢', 2: '😕', 3: '😐', 4: '😊', 5: '😄',
-      6: '😰', 7: '😤', 8: '😌', 9: '💪', 10: '🙏'
-    };
-    return emojiMap[moodId] || '😐';
-  };
-
-  const translations = {
-    es: {
-      welcomeText: "Tu Panel de Bienestar",
-      currentStatus: "Estado Actual",
-      currentStreak: "Racha Actual",
-      monthlyProgress: "Progreso Mensual",
-      achievements: "Logros",
-      quickCheckIn: "Check-in Rápido",
-      howFeelNow: "¿Cómo te sientes en este momento?",
-      updateCheckIn: "Actualizar Check-in",
-      recentActivity: "Actividad Reciente",
-      noRecentActivity: "No hay actividad reciente",
-      weeklyTrends: "Tendencias de Bienestar Semanal",
-      visualizationAvailable: "Visualización de progreso disponible con más datos",
-      continueTracking: "Continúa registrando tu bienestar diario",
-      days: "días",
-      neutral: "Neutral",
-      emotionalState: "Estado Emocional",
-      activities: "Actividades",
-      trackProgress: "Rastrea tu progreso, conecta con otros y construye hábitos saludables."
-    },
-    en: {
-      welcomeText: "Your Wellness Dashboard",
-      currentStatus: "Current Status",
-      currentStreak: "Current Streak",
-      monthlyProgress: "Monthly Progress",
-      achievements: "Achievements",
-      quickCheckIn: "Quick Check-in",
-      howFeelNow: "How are you feeling right now?",
-      updateCheckIn: "Update Check-in",
-      recentActivity: "Recent Activity",
-      noRecentActivity: "No recent activity",
-      weeklyTrends: "Weekly Wellness Trends",
-      visualizationAvailable: "Progress visualization available with more data",
-      continueTracking: "Continue tracking your daily wellness",
-      days: "days",
-      neutral: "Neutral",
-      emotionalState: "Emotional State",
-      activities: "Activities",
-      trackProgress: "Track your progress, connect with others, and build healthy habits."
-    },
-    fr: {
-      welcomeText: "Votre Tableau de Bord Bien-être",
-      currentStatus: "État Actuel",
-      currentStreak: "Série Actuelle",
-      monthlyProgress: "Progrès Mensuel",
-      achievements: "Réalisations",
-      quickCheckIn: "Check-in Rapide",
-      howFeelNow: "Comment vous sentez-vous en ce moment?",
-      updateCheckIn: "Mettre à jour le Check-in",
-      recentActivity: "Activité Récente",
-      noRecentActivity: "Aucune activité récente",
-      weeklyTrends: "Tendances Hebdomadaires de Bien-être",
-      visualizationAvailable: "Visualisation des progrès disponible avec plus de données",
-      continueTracking: "Continuez à suivre votre bien-être quotidien",
-      days: "jours",
-      neutral: "Neutre",
-      emotionalState: "État Émotionnel",
-      activities: "Activités",
-      trackProgress: "Suivez vos progrès, connectez-vous avec d'autres et développez des habitudes saines."
-    },
-    pt: {
-      welcomeText: "Seu Painel de Bem-estar",
-      currentStatus: "Estado Atual",
-      currentStreak: "Sequência Atual",
-      monthlyProgress: "Progresso Mensal",
-      achievements: "Conquistas",
-      quickCheckIn: "Check-in Rápido",
-      howFeelNow: "Como você está se sentindo agora?",
-      updateCheckIn: "Atualizar Check-in",
-      recentActivity: "Atividade Recente",
-      noRecentActivity: "Nenhuma atividade recente",
-      weeklyTrends: "Tendências Semanais de Bem-estar",
-      visualizationAvailable: "Visualização de progresso disponível com mais dados",
-      continueTracking: "Continue registrando seu bem-estar diário",
-      days: "dias",
-      neutral: "Neutro",
-      emotionalState: "Estado Emocional",
-      activities: "Atividades",
-      trackProgress: "Acompanhe seu progresso, conecte-se com outros e construa hábitos saudáveis."
-    }
-  };
-
-  const t = translations[currentLanguage as keyof typeof translations];
-
-  const welcomeText = t.welcomeText;
-  const typedText = useTypewriter(welcomeText, 100);
-
-  // Efecto para mostrar gráficos después de un tiempo
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowCharts(true);
-    }, 1500);
-    
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (blogsLoading || habitsLoading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
         <motion.div
@@ -311,7 +164,7 @@ export default function Overview({ currentLanguage = 'es' }: OverviewProps) {
   const statsData = [
     {
       icon: Heart,
-      label: t.currentStatus,
+      label: "Estado Actual",
       value: (
         <div className="flex items-center">
           <motion.span 
@@ -330,7 +183,7 @@ export default function Overview({ currentLanguage = 'es' }: OverviewProps) {
             {getMoodEmoji(todaysMood)}
           </motion.span>
           <span className="text-sm sm:text-lg font-semibold">
-            {emotionalTypes.find(t => t.id === todaysMood)?.description || t.neutral}
+            {getMoodDescription(todaysMood)}
           </span>
         </div>
       ),
@@ -342,8 +195,8 @@ export default function Overview({ currentLanguage = 'es' }: OverviewProps) {
     },
     {
       icon: Calendar,
-      label: t.currentStreak,
-      value: `${weekStreak} ${t.days}`,
+      label: "Racha Actual",
+      value: `${weekStreak} días`,
       gradient: 'from-blue-400 to-blue-600',
       bgLight: 'bg-gradient-to-br from-blue-50 to-blue-100',
       bgDark: 'dark:bg-gray-800',
@@ -352,7 +205,7 @@ export default function Overview({ currentLanguage = 'es' }: OverviewProps) {
     },
     {
       icon: Target,
-      label: t.monthlyProgress,
+      label: "Progreso Mensual",
       value: `${Math.round(monthlyGoal)}%`,
       gradient: 'from-purple-400 to-purple-600',
       bgLight: 'bg-gradient-to-br from-purple-50 to-purple-100',
@@ -362,7 +215,7 @@ export default function Overview({ currentLanguage = 'es' }: OverviewProps) {
     },
     {
       icon: Award,
-      label: t.achievements,
+      label: "Logros",
       value: achievements,
       gradient: 'from-orange-400 to-orange-600',
       bgLight: 'bg-gradient-to-br from-orange-50 to-orange-100',
@@ -418,7 +271,7 @@ export default function Overview({ currentLanguage = 'es' }: OverviewProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1 }}
             >
-              {t.trackProgress}
+              Rastrea tu progreso, conecta con otros y construye hábitos saludables.
             </motion.p>
           </div>
         </motion.div>
@@ -495,7 +348,7 @@ export default function Overview({ currentLanguage = 'es' }: OverviewProps) {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 1 }}
             >
-              {t.quickCheckIn}
+              Check-in Rápido
             </motion.h3>
             <motion.p 
               className={`mb-3 sm:mb-6 text-xxs sm:text-base ${
@@ -505,7 +358,7 @@ export default function Overview({ currentLanguage = 'es' }: OverviewProps) {
               animate={{ opacity: 1 }}
               transition={{ delay: 1.2 }}
             >
-              {t.howFeelNow}
+              ¿Cómo te sientes en este momento?
             </motion.p>
             
             <div className="grid grid-cols-5 gap-1 sm:gap-6 mb-3 sm:mb-6">
@@ -561,7 +414,7 @@ export default function Overview({ currentLanguage = 'es' }: OverviewProps) {
                 whileHover={{ x: '100%' }}
                 transition={{ duration: 0.6 }}
               />
-              <span className="relative z-10">{t.updateCheckIn}</span>
+              <span className="relative z-10">Actualizar Check-in</span>
             </motion.button>
           </motion.div>
         </PowerPointTransition>
@@ -583,7 +436,7 @@ export default function Overview({ currentLanguage = 'es' }: OverviewProps) {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 1.2 }}
             >
-              {t.recentActivity}
+              Actividad Reciente
             </motion.h3>
             
             <div className="space-y-2 sm:space-y-4">
@@ -645,10 +498,10 @@ export default function Overview({ currentLanguage = 'es' }: OverviewProps) {
                   >
                     <MessageCircle className="w-6 h-6 sm:w-12 sm:h-12 mx-auto mb-2 sm:mb-4 text-gray-400" />
                   </motion.div>
-                  <p className={`text-xxs sm:text-sm ${
+                  <p className={`font-semibold text-xxs sm:text-sm ${
                     theme === 'light' ? 'text-gray-600' : 'text-gray-500 dark:text-gray-400'
                   }`}>
-                    {t.noRecentActivity}
+                    No hay actividad reciente
                   </p>
                 </motion.div>
               )}
@@ -676,7 +529,7 @@ export default function Overview({ currentLanguage = 'es' }: OverviewProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.4 }}
             >
-              {t.weeklyTrends}
+              Tendencias de Bienestar Semanal
             </motion.h3>
             <motion.div
               animate={{ 
@@ -732,7 +585,7 @@ export default function Overview({ currentLanguage = 'es' }: OverviewProps) {
                     <Area
                       type="monotone"
                       dataKey="mood"
-                      name={t.emotionalState}
+                      name="Estado Emocional"
                       stroke={colors.primary}
                       strokeWidth={isSmartwatch ? 1 : 3}
                       fill="url(#moodGradient)"
@@ -742,7 +595,7 @@ export default function Overview({ currentLanguage = 'es' }: OverviewProps) {
                     <Area
                       type="monotone"
                       dataKey="activities"
-                      name={t.activities}
+                      name="Actividades"
                       stroke={colors.secondary}
                       strokeWidth={isSmartwatch ? 1 : 2}
                       fill="url(#activitiesGradient)"
@@ -787,7 +640,7 @@ export default function Overview({ currentLanguage = 'es' }: OverviewProps) {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 1.8 }}
                   >
-                    {t.visualizationAvailable}
+                    Visualización de progreso disponible con más datos
                   </motion.p>
                   <motion.p 
                     className={`text-xxs sm:text-sm mt-1 sm:mt-2 ${
@@ -797,7 +650,7 @@ export default function Overview({ currentLanguage = 'es' }: OverviewProps) {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 2 }}
                   >
-                    {t.continueTracking}
+                    Continúa registrando tu bienestar diario
                   </motion.p>
                 </div>
               </motion.div>

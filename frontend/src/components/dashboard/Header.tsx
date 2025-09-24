@@ -7,10 +7,10 @@ import NotificationsDropdown from '../ui/NotificationsDropdown';
 
 interface HeaderProps {
   setSidebarOpen: (open: boolean) => void;
-  currentLanguage?: string;
+  // Se eliminó currentLanguage
 }
 
-export default function Header({ setSidebarOpen, currentLanguage = 'es' }: HeaderProps) {
+export default function Header({ setSidebarOpen }: HeaderProps) {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -28,37 +28,10 @@ export default function Header({ setSidebarOpen, currentLanguage = 'es' }: Heade
     return () => window.removeEventListener('resize', checkSmartwatch);
   }, []);
 
-  // Simular conteo de notificaciones no leídas
-  const unreadNotifications = 3;
+  // Notificaciones no leídas se inicializa en 0 (cero)
+  const unreadNotifications = 0; 
 
-  const translations = {
-    es: {
-      welcome: "Bienvenido de vuelta",
-      howFeel: "¿Cómo te sientes hoy?",
-      online: "En línea",
-      logout: "Cerrar sesión"
-    },
-    en: {
-      welcome: "Welcome back",
-      howFeel: "How are you feeling today?",
-      online: "Online",
-      logout: "Log out"
-    },
-    fr: {
-      welcome: "Bon retour",
-      howFeel: "Comment vous sentez-vous aujourd'hui?",
-      online: "En ligne",
-      logout: "Déconnexion"
-    },
-    pt: {
-      welcome: "Bem-vindo de volta",
-      howFeel: "Como você está se sentindo hoje?",
-      online: "Online",
-      logout: "Sair"
-    }
-  };
-
-  const t = translations[currentLanguage as keyof typeof translations];
+  // Se eliminó el objeto translations y la variable t
 
   return (
     <header className={`backdrop-blur-xl border-b transition-all duration-500 animate-slide-down ${
@@ -85,12 +58,14 @@ export default function Header({ setSidebarOpen, currentLanguage = 'es' }: Heade
               <h1 className={`text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl font-semibold transition-colors duration-300 ${
                 theme === 'light' ? 'text-slate-800' : 'text-white'
               }`}>
-                {t.welcome}, {user?.profile?.name || user?.username}
+                {/* Texto hardcodeado */}
+                Bienvenido de vuelta, {user?.profile?.name || user?.username}
               </h1>
               <p className={`text-xxs sm:text-xs md:text-sm mt-0.5 ${
                 theme === 'light' ? 'text-slate-600' : 'text-gray-400'
               }`}>
-                {t.howFeel}
+                {/* Texto hardcodeado */}
+                ¿Cómo te sientes hoy?
               </p>
             </div>
           </div>
@@ -185,7 +160,8 @@ export default function Header({ setSidebarOpen, currentLanguage = 'es' }: Heade
                 {/* Tooltip - Hide on smartwatch */}
                 {!isSmartwatch && (
                   <div className="absolute bottom-full right-0 mb-2 px-2 py-1 bg-gray-800 text-white text-xxs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                    {t.online}
+                    {/* Texto hardcodeado */}
+                    En línea
                   </div>
                 )}
               </div>
@@ -196,7 +172,7 @@ export default function Header({ setSidebarOpen, currentLanguage = 'es' }: Heade
                     ? 'text-slate-600 hover:text-slate-800 hover:bg-white/60'
                     : 'text-gray-400 hover:text-gray-300 hover:bg-gray-700/80'
                 }`}
-                title={t.logout}
+                title="Cerrar sesión" // Texto hardcodeado
                 whileHover={{ scale: 1.1, rotate: -3 }}
                 whileTap={{ scale: 0.9 }}
               >
@@ -207,8 +183,8 @@ export default function Header({ setSidebarOpen, currentLanguage = 'es' }: Heade
         </div>
       </div>
 
-      {/* Custom CSS for animations */}
-      <style jsx>{`
+      {/* Custom CSS for animations (se mantiene sin cambios) */}
+      <style>{`
         @keyframes slide-down {
           from {
             opacity: 0;

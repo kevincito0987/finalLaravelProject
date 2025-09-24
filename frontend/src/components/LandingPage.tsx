@@ -109,14 +109,14 @@ export default function LandingPage() {
         </div>
       )}
       
-      <Navigation currentLanguage={currentLanguage} setCurrentLanguage={setCurrentLanguage} />
-      <Hero currentLanguage={currentLanguage} />
-      <Features currentLanguage={currentLanguage} />
-      <HowItWorks currentLanguage={currentLanguage} />
-      <Benefits currentLanguage={currentLanguage} />
-      <Team currentLanguage={currentLanguage} />
-      <CallToAction currentLanguage={currentLanguage} />
-      <Footer currentLanguage={currentLanguage} />
+      <Navigation/>
+      <Hero />
+      <Features />
+      <HowItWorks />
+      <Benefits />
+      <Team/>
+      <CallToAction />
+      <Footer />
       
       {/* Demo Mode Banner */}
       <div className="fixed bottom-4 right-4 z-50">

@@ -2,6 +2,7 @@ import React from 'react';
 import { Heart, MessageCircle, TrendingUp, Shield, Users, Mic, Brain, Calendar, Zap } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
+
 const features = [
   {
     icon: Mic,

@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
 import HabitaLogo from '../ui/HabitaLogo';
 
-export default function Hero() {
+export default function Hero()  {
   const { theme } = useTheme();
 
   return (
@@ -333,7 +333,7 @@ export default function Hero() {
       </div>
 
       {/* Custom CSS for animations */}
-      <style jsx>{`
+      <style>{`
         @keyframes fade-in-up {
           from {
             opacity: 0;

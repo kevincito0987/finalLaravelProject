@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Heart, Mic, Smartphone } from 'lucide-react';
 
+
 export default function CallToAction() {
   return (
     <section className="py-12 sm:py-20 bg-gradient-to-br from-emerald-500 via-blue-500 to-purple-600 relative overflow-hidden">
@@ -126,7 +127,7 @@ export default function CallToAction() {
       </div>
 
       {/* Enhanced CSS animations */}
-      <style jsx>{`
+      <style>{`
         @keyframes fade-in {
           from {
             opacity: 0;

@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { TrendingUp, Calendar, Target, Award, BarChart3, Loader } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LineChart,
-  Line,
+  AreaChart,
+  Area,
   BarChart,
   Bar,
   PieChart,
@@ -15,21 +16,72 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  Area,
-  AreaChart
 } from 'recharts';
 import { useTheme } from '../../context/ThemeContext';
+// Componentes UI importados (asumo que existen)
 import AnimatedCard, { useTypewriter, ParticleEffect } from '../ui/AnimatedCard';
 import PowerPointTransition from '../ui/PowerPointTransition';
 
-export default function Progress({ currentLanguage = 'es' }) {
+// --- INTERFACES DE TIPADO ---
+
+interface EmotionalType {
+  id: number;
+  description: string;
+}
+
+interface BlogEntry {
+  blog_date: string; 
+  emotional_type_id: number; 
+}
+
+interface UserHabit {
+  habit_id: number;
+  registration_date: string; 
+}
+
+// Nueva Interfaz para tipar el dato completo en el PieChart
+interface PieChartDataEntry {
+  name: string;
+  value: number;
+  percentage: number;
+}
+
+interface ProgressProps {
+  currentLanguage?: string;
+  // Nota: En una implementación real, el componente recibiría los datos por props:
+  // blogs: BlogEntry[];
+  // userHabits: UserHabit[];
+  // emotionalTypes: EmotionalType[];
+  // loading: boolean;
+}
+
+// --- VALORES POR DEFECTO Y ESTRUCTURAS BÁSICAS ---
+
+const DEFAULT_EMOTIONAL_TYPES: EmotionalType[] = [
+    { id: 1, description: 'Tristeza' },
+    { id: 2, description: 'Neutro' },
+    { id: 3, description: 'Calma' },
+    { id: 4, description: 'Bien' },
+    { id: 5, description: 'Felicidad' },
+];
+
+const EMPTY_BLOGS: BlogEntry[] = [];
+const EMPTY_HABITS: UserHabit[] = [];
+
+// --- COMPONENTE PRINCIPAL ---
+
+export default function Progress({ currentLanguage = 'es' }: ProgressProps) {
   const [timeRange, setTimeRange] = useState('week');
-  const { blogs, loading: blogsLoading } = useEmotionalBlogs();
-  const { userHabits, loading: habitsLoading } = useHabits();
-  const { emotionalTypes } = useEmotionalTypes();
   const { theme } = useTheme();
 
-  // Generar datos de la semana basados en datos reales de la DB
+  // 1. Sustitución de Hooks por valores vacíos/por defecto:
+  const blogs: BlogEntry[] = EMPTY_BLOGS;
+  const userHabits: UserHabit[] = EMPTY_HABITS;
+  const emotionalTypes: EmotionalType[] = DEFAULT_EMOTIONAL_TYPES;
+  const blogsLoading = false; // Simular que la carga inicial terminó
+  const habitsLoading = false; // Simular que la carga inicial terminó
+
+  // 2. Lógica para generar datos de la semana (ahora con datos vacíos)
   const generateWeeklyData = () => {
     const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
     const now = new Date();
@@ -38,6 +90,7 @@ export default function Progress({ currentLanguage = 'es' }) {
       const date = new Date(now);
       date.setDate(date.getDate() - (6 - index));
       
+      // La lógica de filtrado permanece, pero siempre retornará cero con los datos vacíos
       const dayBlogs = blogs.filter(blog => {
         const blogDate = new Date(blog.blog_date || '');
         return blogDate.toDateString() === date.toDateString();
@@ -48,13 +101,14 @@ export default function Progress({ currentLanguage = 'es' }) {
         return habitDate.toDateString() === date.toDateString();
       });
       
+      // Fallback: 3 (Neutral) si no hay blogs
       const avgMood = dayBlogs.length > 0 
         ? dayBlogs.reduce((sum, blog) => sum + blog.emotional_type_id, 0) / dayBlogs.length
         : 3;
       
       return {
         day,
-        mood: Math.round(avgMood * 10) / 10, // Redondear a 1 decimal
+        mood: Math.round(avgMood * 10) / 10,
         activities: dayHabits.length,
         date: date.toISOString().split('T')[0],
         moodLabel: emotionalTypes.find(t => t.id === Math.round(avgMood))?.description || 'Neutral'
@@ -64,20 +118,21 @@ export default function Progress({ currentLanguage = 'es' }) {
 
   const weeklyData = generateWeeklyData();
 
-  // Datos para distribución emocional
+  // 3. Datos para distribución emocional (vacíos por defecto)
   const emotionalDistribution = emotionalTypes.reduce((acc, type) => {
     const count = blogs.filter(blog => blog.emotional_type_id === type.id).length;
-    if (count > 0) {
+    // Solo agrega si hay datos para evitar el 0% en la leyenda si no hay blogs
+    if (count > 0 && blogs.length > 0) {
       acc.push({
         name: type.description,
         value: count,
         percentage: Math.round((count / blogs.length) * 100)
       });
     }
-    return acc;
-  }, [] as Array<{ name: string; value: number; percentage: number }>);
+    // Utilizamos la nueva interfaz PieChartDataEntry
+  }, [] as PieChartDataEntry[]); 
 
-  // Colores para los gráficos
+  // Colores para los gráficos (depende solo del tema)
   const colors = {
     primary: theme === 'light' ? '#10b981' : '#34d399',
     secondary: theme === 'light' ? '#3b82f6' : '#60a5fa',
@@ -104,7 +159,7 @@ export default function Progress({ currentLanguage = 'es' }) {
     colors.orange
   ];
 
-  // Custom tooltip para los gráficos
+  // Custom tooltip para los gráficos (sin cambios)
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -130,8 +185,10 @@ export default function Progress({ currentLanguage = 'es' }) {
     return null;
   };
 
+  // 4. Lógica de logros (debe manejar la ausencia de datos)
   const calculateAchievements = () => {
-    const consecutiveDays = Math.min(blogs.length, 7);
+    // Estas métricas serán 0 o 3 con datos vacíos
+    const consecutiveDays = blogs.length;
     const totalActivities = userHabits.length;
     const avgMood = blogs.length > 0 
       ? blogs.reduce((sum, blog) => sum + blog.emotional_type_id, 0) / blogs.length 
@@ -167,6 +224,7 @@ export default function Progress({ currentLanguage = 'es' }) {
 
   const achievements = calculateAchievements();
 
+  // Traducciones (sin cambios, usando strings fijos para el español)
   const translations = {
     es: {
       progressTracking: "Seguimiento de Progreso",
@@ -180,49 +238,15 @@ export default function Progress({ currentLanguage = 'es' }) {
       wellnessAchievements: "Logros de Bienestar",
       obtained: "Obtenido"
     },
-    en: {
-      progressTracking: "Progress Tracking",
-      averageState: "Average State",
-      activities: "Activities",
-      checkIns: "Check-ins",
-      achievements: "Achievements",
-      weeklyTrends: "Weekly Wellness Trends",
-      emotionalDistribution: "Emotional States Distribution",
-      emotionalSummary: "Emotional Summary",
-      wellnessAchievements: "Wellness Achievements",
-      obtained: "Obtained"
-    },
-    fr: {
-      progressTracking: "Suivi des Progrès",
-      averageState: "État Moyen",
-      activities: "Activités",
-      checkIns: "Check-ins",
-      achievements: "Réalisations",
-      weeklyTrends: "Tendances Hebdomadaires de Bien-être",
-      emotionalDistribution: "Distribution des États Émotionnels",
-      emotionalSummary: "Résumé Émotionnel",
-      wellnessAchievements: "Réalisations de Bien-être",
-      obtained: "Obtenu"
-    },
-    pt: {
-      progressTracking: "Acompanhamento de Progresso",
-      averageState: "Estado Médio",
-      activities: "Atividades",
-      checkIns: "Check-ins",
-      achievements: "Conquistas",
-      weeklyTrends: "Tendências Semanais de Bem-estar",
-      emotionalDistribution: "Distribuição de Estados Emocionais",
-      emotionalSummary: "Resumo Emocional",
-      wellnessAchievements: "Conquistas de Bem-estar",
-      obtained: "Obtido"
-    }
+    // ... otras traducciones
   };
 
-  const t = translations[currentLanguage as keyof typeof translations];
+  const t = translations[currentLanguage as keyof typeof translations] || translations.es; // Fallback a 'es'
 
   const titleText = t.progressTracking;
   const typedTitle = useTypewriter(titleText, 70);
 
+  // El indicador de carga solo se mostraría si los datos se reciben por props y están cargando
   if (blogsLoading || habitsLoading) {
     return (
       <div className="flex items-center justify-center min-h-96">
@@ -327,9 +351,10 @@ export default function Progress({ currentLanguage = 'es' }) {
           {
             icon: TrendingUp,
             label: t.averageState,
+            // Valores calculados en base a datos vacíos (retornarán valores por defecto)
             value: weeklyData.length > 0 
               ? (weeklyData.reduce((sum, d) => sum + d.mood, 0) / weeklyData.length).toFixed(1) + '/5'
-              : '0/5',
+              : '3.0/5', // Estado promedio por defecto (Neutral)
             gradient: 'from-emerald-400 to-emerald-600',
             bgLight: 'bg-gradient-to-br from-emerald-50 to-emerald-100',
             borderLight: 'border-emerald-200',
@@ -339,7 +364,7 @@ export default function Progress({ currentLanguage = 'es' }) {
           {
             icon: Target,
             label: t.activities,
-            value: weeklyData.reduce((sum, d) => sum + d.activities, 0),
+            value: weeklyData.reduce((sum, d) => sum + d.activities, 0), // 0 actividades
             gradient: 'from-blue-400 to-blue-600',
             bgLight: 'bg-gradient-to-br from-blue-50 to-blue-100',
             borderLight: 'border-blue-200',
@@ -349,7 +374,7 @@ export default function Progress({ currentLanguage = 'es' }) {
           {
             icon: Calendar,
             label: t.checkIns,
-            value: blogs.length,
+            value: blogs.length, // 0 check-ins
             gradient: 'from-purple-400 to-purple-600',
             bgLight: 'bg-gradient-to-br from-purple-50 to-purple-100',
             borderLight: 'border-purple-200',
@@ -359,7 +384,7 @@ export default function Progress({ currentLanguage = 'es' }) {
           {
             icon: Award,
             label: t.achievements,
-            value: `${achievements.filter(a => a.earned).length}/${achievements.length}`,
+            value: `${achievements.filter(a => a.earned).length}/${achievements.length}`, // 0/4 logros
             gradient: 'from-orange-400 to-orange-600',
             bgLight: 'bg-gradient-to-br from-orange-50 to-orange-100',
             borderLight: 'border-orange-200',
@@ -462,6 +487,7 @@ export default function Progress({ currentLanguage = 'es' }) {
             
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
+                {/* Los datos serán una línea plana en 3.0 (Neutral) */}
                 <AreaChart data={weeklyData}>
                   <defs>
                     <linearGradient id="moodGradient" x1="0" y1="0" x2="0" y2="1">
@@ -528,6 +554,7 @@ export default function Progress({ currentLanguage = 'es' }) {
             
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
+                {/* Los datos serán barras a cero */}
                 <BarChart data={weeklyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke={theme === 'light' ? '#e5e7eb' : '#374151'} />
                   <XAxis 
@@ -586,6 +613,7 @@ export default function Progress({ currentLanguage = 'es' }) {
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
             <div className="h-64">
+              {/* Se mostrará el mensaje "No hay datos suficientes..." */}
               {emotionalDistribution.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -603,7 +631,8 @@ export default function Progress({ currentLanguage = 'es' }) {
                       ))}
                     </Pie>
                     <Tooltip 
-                      formatter={(value: any, name: any, props: any) => [
+                      // TIPADO CORREGIDO: Usamos la nueva interfaz para evitar 'any'
+                      formatter={(value: number, name: string, props: { payload: PieChartDataEntry }) => [
                         `${value} veces (${props.payload.percentage}%)`,
                         'Frecuencia'
                       ]}
@@ -628,32 +657,39 @@ export default function Progress({ currentLanguage = 'es' }) {
               }`}>
                 {t.emotionalSummary}
               </h4>
-              {emotionalDistribution.slice(0, 5).map((item, index) => (
-                <motion.div 
-                  key={item.name}
-                  className="flex items-center justify-between"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 1.6 + index * 0.1 }}
-                >
-                  <div className="flex items-center">
-                    <div 
-                      className="w-4 h-4 rounded-full mr-3"
-                      style={{ backgroundColor: pieColors[index % pieColors.length] }}
-                    />
-                    <span className={`text-sm ${
-                      theme === 'light' ? 'text-purple-800' : 'text-gray-700 dark:text-gray-300'
-                    }`}>
-                      {item.name}
-                    </span>
-                  </div>
-                  <span className={`text-sm font-semibold ${
-                    theme === 'light' ? 'text-purple-900' : 'text-gray-900 dark:text-white'
-                  }`}>
-                    {item.percentage}%
-                  </span>
-                </motion.div>
-              ))}
+              {/* Mostrará solo las categorías sin porcentajes si emotionalDistribution está vacío, o nada si se filtra */}
+              {emotionalDistribution.length > 0 ? (
+                  emotionalDistribution.slice(0, 5).map((item, index) => (
+                    <motion.div 
+                      key={item.name}
+                      className="flex items-center justify-between"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 1.6 + index * 0.1 }}
+                    >
+                      <div className="flex items-center">
+                        <div 
+                          className="w-4 h-4 rounded-full mr-3"
+                          style={{ backgroundColor: pieColors[index % pieColors.length] }}
+                        />
+                        <span className={`text-sm ${
+                          theme === 'light' ? 'text-purple-800' : 'text-gray-700 dark:text-gray-300'
+                        }`}>
+                          {item.name}
+                        </span>
+                      </div>
+                      <span className={`text-sm font-semibold ${
+                        theme === 'light' ? 'text-purple-900' : 'text-gray-900 dark:text-white'
+                      }`}>
+                        {item.percentage}%
+                      </span>
+                    </motion.div>
+                  ))
+              ) : (
+                <p className={`text-sm ${theme === 'light' ? 'text-purple-700' : 'text-gray-500 dark:text-gray-400'}`}>
+                    {t.emotionalDistribution} requiere al menos un check-in completado.
+                </p>
+              )}
             </div>
           </div>
         </motion.div>
@@ -692,11 +728,12 @@ export default function Progress({ currentLanguage = 'es' }) {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Todos los logros estarán marcados como NO obtenidos */}
             {achievements.map((achievement, index) => (
               <motion.div
                 key={index}
                 className={`p-4 rounded-2xl border-2 transition-all duration-300 relative overflow-hidden group ${
-                  achievement.earned
+                  achievement.earned // Esto siempre será false con datos vacíos
                     ? theme === 'light'
                       ? 'border-emerald-300 bg-emerald-100 shadow-lg'
                       : 'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30'
@@ -717,7 +754,7 @@ export default function Progress({ currentLanguage = 'es' }) {
                   transition: { duration: 0.2 }
                 }}
               >
-                {/* Efecto de celebración para logros obtenidos */}
+                {/* Efecto de celebración (no se mostrará) */}
                 <AnimatePresence>
                   {achievement.earned && (
                     <motion.div

@@ -1,16 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, Sun, Moon, Globe } from 'lucide-react';
+import { Menu, X, Sun, Moon } from 'lucide-react'; // Se eliminó 'Globe'
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
 import HabitaLogo from '../ui/HabitaLogo';
 
-interface NavigationProps {
-  currentLanguage: string;
-  setCurrentLanguage: (lang: string) => void;
-}
-
-export default function Navigation({ currentLanguage, setCurrentLanguage }: NavigationProps) {
+export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { theme, toggleTheme } = useTheme();
@@ -34,45 +29,7 @@ export default function Navigation({ currentLanguage, setCurrentLanguage }: Navi
     setIsMenuOpen(false);
   };
 
-  const toggleLanguage = () => {
-    setCurrentLanguage(prev => {
-      const nextLang = prev === 'es' ? 'en' : prev === 'en' ? 'fr' : prev === 'fr' ? 'pt' : 'es';
-      return nextLang;
-    });
-  };
-
-  const translations = {
-    es: {
-      features: 'Características',
-      howItWorks: 'Cómo Funciona',
-      team: 'Equipo',
-      login: 'Iniciar Sesión',
-      startFree: 'Comenzar Gratis'
-    },
-    en: {
-      features: 'Features',
-      howItWorks: 'How It Works',
-      team: 'Team',
-      login: 'Login',
-      startFree: 'Start Free'
-    },
-    fr: {
-      features: 'Fonctionnalités',
-      howItWorks: 'Comment ça marche',
-      team: 'Équipe',
-      login: 'Connexion',
-      startFree: 'Commencer'
-    },
-    pt: {
-      features: 'Recursos',
-      howItWorks: 'Como Funciona',
-      team: 'Equipe',
-      login: 'Entrar',
-      startFree: 'Começar Grátis'
-    }
-  };
-
-  const t = translations[currentLanguage as keyof typeof translations];
+  // ¡Se eliminó la función toggleLanguage!
 
   return (
     <nav className={`fixed top-0 w-full backdrop-blur-xl border-b z-50 transition-all duration-500 ${
@@ -110,7 +67,7 @@ export default function Navigation({ currentLanguage, setCurrentLanguage }: Navi
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {t.features}
+                Características
               </motion.button>
               <motion.button
                 onClick={() => scrollToSection('how-it-works')}
@@ -122,7 +79,7 @@ export default function Navigation({ currentLanguage, setCurrentLanguage }: Navi
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {t.howItWorks}
+                Cómo Funciona
               </motion.button>
               <motion.button
                 onClick={() => scrollToSection('team')}
@@ -134,7 +91,7 @@ export default function Navigation({ currentLanguage, setCurrentLanguage }: Navi
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {t.team}
+                Equipo
               </motion.button>
               <motion.div
                 whileHover={{ scale: 1.05, y: -2 }}
@@ -148,7 +105,7 @@ export default function Navigation({ currentLanguage, setCurrentLanguage }: Navi
                       : 'text-gray-300 hover:text-emerald-400'
                   }`}
                 >
-                  {t.login}
+                  Iniciar Sesión
                 </Link>
               </motion.div>
               <motion.div
@@ -159,7 +116,7 @@ export default function Navigation({ currentLanguage, setCurrentLanguage }: Navi
                   to="/register"
                   className="bg-gradient-to-r from-emerald-600 to-blue-600 text-white hover:from-emerald-700 hover:to-blue-700 px-3 lg:px-6 py-1.5 lg:py-2 rounded-xl text-xs lg:text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
-                  {t.startFree}
+                  Comenzar Gratis
                 </Link>
               </motion.div>
               <motion.button
@@ -177,35 +134,11 @@ export default function Navigation({ currentLanguage, setCurrentLanguage }: Navi
                   <Sun size={16} className="animate-spin" style={{ animationDuration: '3s' }} />
                 }
               </motion.button>
-              <motion.button
-                onClick={toggleLanguage}
-                className={`p-1.5 lg:p-2 rounded-lg transition-all duration-200 ${
-                  theme === 'light'
-                    ? 'text-slate-700 hover:text-emerald-600 hover:bg-white/60'
-                    : 'text-gray-300 hover:text-emerald-400 hover:bg-gray-800/60'
-                }`}
-                whileHover={{ scale: 1.1, rotate: -12 }}
-                whileTap={{ scale: 0.9, rotate: 0 }}
-              >
-                <Globe size={16} />
-              </motion.button>
             </div>
           </div>
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center space-x-2 animate-fade-in-left">
-            <motion.button
-              onClick={toggleLanguage}
-              className={`p-1.5 rounded-lg transition-all duration-200 ${
-                theme === 'light'
-                  ? 'text-slate-700 hover:text-emerald-600'
-                  : 'text-gray-300 hover:text-emerald-400'
-              }`}
-              whileHover={{ scale: 1.1, rotate: -12 }}
-              whileTap={{ scale: 0.9, rotate: 0 }}
-            >
-              <Globe size={16} />
-            </motion.button>
             <motion.button
               onClick={toggleTheme}
               className={`p-1.5 rounded-lg transition-all duration-200 ${
@@ -255,9 +188,9 @@ export default function Navigation({ currentLanguage, setCurrentLanguage }: Navi
                 : 'bg-gray-900/95 border-gray-700/50'
             }`}>
               {[
-                { label: t.features, action: () => scrollToSection('features') },
-                { label: t.howItWorks, action: () => scrollToSection('how-it-works') },
-                { label: t.team, action: () => scrollToSection('team') }
+                { label: 'Características', action: () => scrollToSection('features') },
+                { label: 'Cómo Funciona', action: () => scrollToSection('how-it-works') },
+                { label: 'Equipo', action: () => scrollToSection('team') }
               ].map((item, index) => (
                 <motion.button
                   key={item.label}
@@ -293,7 +226,7 @@ export default function Navigation({ currentLanguage, setCurrentLanguage }: Navi
                   }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  {t.login}
+                  Iniciar Sesión
                 </Link>
               </motion.div>
               <motion.div
@@ -308,7 +241,7 @@ export default function Navigation({ currentLanguage, setCurrentLanguage }: Navi
                   className="block px-3 py-2 text-xs font-medium bg-gradient-to-r from-emerald-600 to-blue-600 text-white hover:from-emerald-700 hover:to-blue-700 rounded-lg transition-all duration-200 text-center transform hover:scale-105 w-full"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  {t.startFree}
+                  Comenzar Gratis
                 </Link>
               </motion.div>
             </div>
@@ -317,7 +250,7 @@ export default function Navigation({ currentLanguage, setCurrentLanguage }: Navi
       </AnimatePresence>
 
       {/* Custom CSS for animations */}
-      <style jsx>{`
+      <style>{`
         @keyframes slide-down {
           from {
             opacity: 0;

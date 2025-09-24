@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   User, 
-  Camera, 
   Edit3, 
   Save, 
   X, 
@@ -17,23 +16,30 @@ import {
   Lock,
   Eye,
   EyeOff,
-  Smartphone,
-  Globe,
   Heart,
   Activity,
   TrendingUp,
   Award,
-  Clock,
-  Target,
   Loader,
   Image as ImageIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../../context/AuthContext';
-import { useTheme } from '../../context/ThemeContext';
+// Se mantiene useTheme ya que define la apariencia del componente
+import { useTheme } from '../../context/ThemeContext'; 
 import AnimatedCard, { useTypewriter, ParticleEffect } from '../ui/AnimatedCard';
 import PowerPointTransition from '../ui/PowerPointTransition';
-import { useTranslation } from 'react-i18next';
+
+// --- INTERFACES DE TIPADO ---
+
+// 1. INTERFAZ PARA LAS PROPS
+interface ProfileProps {
+  currentLanguage?: string;
+  // **Nota:** En un caso de uso real, este componente recibiría los datos aquí:
+  // initialProfileData: ProfileData;
+  // initialUserStats: UserStats;
+}
+
+// 2. INTERFAZ PARA LOS DATOS DEL PERFIL
 interface ProfileData {
   name: string;
   lastname: string;
@@ -53,45 +59,59 @@ interface ProfileData {
   };
 }
 
-export default function Profile({ currentLanguage = 'es' }) {
-  const { user, updateUserAvatar } = useAuth();
+// 3. INTERFAZ PARA LAS ESTADÍSTICAS
+interface UserStats {
+    totalCheckIns: number;
+    activeHabits: number;
+    currentStreak: number;
+    avgMood: string;
+    joinDate: string;
+    lastActivity: string;
+}
+
+// --- VALORES POR DEFECTO PARA INICIALIZACIÓN ---
+
+// Definimos el perfil vacío
+const DEFAULT_PROFILE: ProfileData = {
+    name: '',
+    lastname: '',
+    email: '',
+    phone: '',
+    city: '',
+    bio: '',
+    avatar: 'https://via.placeholder.com/150?text=Avatar', // Placeholder de imagen
+    birthDate: '',
+    emergencyContact: '',
+    emergencyPhone: '',
+    preferences: {
+        notifications: false,
+        emailUpdates: false,
+        dataSharing: false,
+        darkMode: false,
+    },
+};
+
+// Definimos las estadísticas a cero/vacío
+const DEFAULT_USER_STATS: UserStats = {
+    totalCheckIns: 0,
+    activeHabits: 0,
+    currentStreak: 0,
+    avgMood: '0.0',
+    joinDate: 'N/A',
+    lastActivity: 'N/A',
+};
+
+// --- COMPONENTE PRINCIPAL ---
+
+export default function Profile({ currentLanguage = 'es' }: ProfileProps) {
   const { theme } = useTheme();
-  const { blogs } = useEmotionalBlogs();
-  const { userHabits } = useHabits();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showPasswordChange, setShowPasswordChange] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const { t, i18n } = useTranslation();
 
-  // Estado del perfil con persistencia en localStorage
-  const [profileData, setProfileData] = useState<ProfileData>(() => {
-    const savedProfile = localStorage.getItem('habitaProfile');
-    if (savedProfile) {
-      return JSON.parse(savedProfile);
-    }
-    
-    return {
-      name: user?.profile?.name || '',
-      lastname: user?.profile?.lastname || '',
-      email: user?.email || '',
-      phone: '+57 300 123 4567',
-      city: 'Medellín, Colombia',
-      bio: 'Enfocado en mi bienestar emocional y crecimiento personal. Me encanta la meditación y el ejercicio.',
-      avatar: user?.avatar || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
-      birthDate: '1990-05-15',
-      emergencyContact: 'María González',
-      emergencyPhone: '+57 300 987 6543',
-      preferences: {
-        notifications: true,
-        emailUpdates: true,
-        dataSharing: false,
-        darkMode: theme === 'dark'
-      }
-    };
-  });
-
+  // Inicialización de estados con valores por defecto (sin mock data)
+  const [profileData, setProfileData] = useState<ProfileData>(DEFAULT_PROFILE);
   const [tempProfileData, setTempProfileData] = useState(profileData);
   const [passwordData, setPasswordData] = useState({
     current: '',
@@ -104,189 +124,37 @@ export default function Profile({ currentLanguage = 'es' }) {
     confirm: false
   });
 
-  // Guardar en localStorage cuando cambie profileData
-  useEffect(() => {
-    localStorage.setItem('habitaProfile', JSON.stringify(profileData));
-  }, [profileData]);
+  // Usamos las estadísticas por defecto
+  const userStats: UserStats = DEFAULT_USER_STATS;
 
-  // Estadísticas del usuario
-  const userStats = {
-    totalCheckIns: blogs.length,
-    activeHabits: userHabits.length,
-    currentStreak: Math.min(blogs.length, 7),
-    avgMood: blogs.length > 0 
-      ? (blogs.reduce((sum, blog) => sum + blog.emotional_type_id, 0) / blogs.length).toFixed(1)
-      : '0',
-    joinDate: user?.created_at ? new Date(user.created_at).toLocaleDateString('es-ES') : 'Enero 2024',
-    lastActivity: blogs.length > 0 ? new Date(blogs[0].blog_date || '').toLocaleDateString('es-ES') : 'Hoy'
-  };
-
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Lógica de carga de imagen simplificada
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     setIsUploading(true);
     
-    try {
-      // Track image upload with Sentry
-      Sentry.addBreadcrumb({
-        category: 'profile',
-        message: 'Starting profile image upload',
-        level: 'info',
-      });
-
-      // Create a promise to handle the image processing
-      const processImage = new Promise<string>((resolve, reject) => {
-        const img = new Image();
-        const canvas = document.createElement('canvas');
-        canvas.width = 300;
-        canvas.height = 300;
-        
-        img.onload = async () => {
-          try {
-            // Create a new instance of Pica for image resizing
-            const pica = new Pica();
-            
-            // Resize the image using Pica
-            const resizedCanvas = await pica.resize(img, canvas, {
-              quality: 3,
-              alpha: true
-            });
-
-            // Convert canvas to blob
-            const blob = await pica.toBlob(resizedCanvas, 'image/jpeg', 0.9);
-            
-            // Try to upload to Supabase Storage, but fallback to object URL if it fails
-            try {
-              // First, check if the avatars bucket exists
-              const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-              
-              if (bucketsError) {
-                console.warn('Could not list buckets:', bucketsError);
-                throw new Error('Storage not available');
-              }
-              
-              const avatarsBucket = buckets?.find(bucket => bucket.name === 'avatars');
-              
-              if (!avatarsBucket) {
-                console.warn('Avatars bucket not found, using local storage');
-                throw new Error('Avatars bucket not found');
-              }
-              
-              // Upload to Supabase Storage
-              const fileName = `profile-${user?.id || 'user'}-${Date.now()}.jpg`;
-              const { data, error } = await supabase.storage
-                .from('avatars')
-                .upload(fileName, blob, {
-                  cacheControl: '3600',
-                  upsert: true
-                });
-                
-              if (error) {
-                console.warn('Supabase storage upload failed:', error);
-                throw error;
-              }
-              
-              // Get public URL
-              const { data: urlData } = supabase.storage
-                .from('avatars')
-                .getPublicUrl(fileName);
-                
-              resolve(urlData.publicUrl);
-              
-            } catch (uploadError) {
-              console.warn('Supabase upload failed, using local storage:', uploadError);
-              
-              // Fallback to object URL for local storage
-              const imageUrl = URL.createObjectURL(blob);
-              
-              // Store the blob data in localStorage for persistence
-              const reader = new FileReader();
-              reader.onload = () => {
-                const base64 = reader.result as string;
-                localStorage.setItem('habitaProfileImage', base64);
-                resolve(imageUrl);
-              };
-              reader.readAsDataURL(blob);
-            }
-          } catch (resizeError) {
-            console.error('Error resizing image:', resizeError);
-            Sentry.captureException(resizeError);
-            reject(resizeError);
-          }
-        };
-        
-        img.onerror = (err) => {
-          console.error('Error loading image:', err);
-          Sentry.captureException(err);
-          reject('Error loading image');
-        };
-        
-        img.src = URL.createObjectURL(file);
-      });
-      
-      // Wait for image processing to complete
-      const imageUrl = await processImage;
-      
-      // Update profile with new image URL
-      const updatedProfile = { ...profileData, avatar: imageUrl };
-      setProfileData(updatedProfile);
-      setTempProfileData(updatedProfile);
-      
-      // Update in auth context
-      if (updateUserAvatar) {
-        updateUserAvatar(imageUrl);
-      }
-      
-      // Track successful upload
-      Sentry.captureMessage('Profile image uploaded successfully', 'info');
-
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      Sentry.captureException(error);
-      alert('Error al subir la imagen. Por favor intenta de nuevo.');
-    } finally {
-      setIsUploading(false);
-    }
+    // Solo crea una URL de objeto para la previsualización local
+    const imageUrl = URL.createObjectURL(file);
+    const updatedProfile = { ...profileData, avatar: imageUrl };
+    setProfileData(updatedProfile);
+    setTempProfileData(updatedProfile);
+    setIsUploading(false);
   };
 
   const handleGooglePhotosUpload = () => {
-    // Open Google Photos in a new tab
-    window.open('https://photos.google.com', '_blank');
-    
-    // Track Google Photos click with Sentry
-    Sentry.addBreadcrumb({
-      category: 'profile',
-      message: 'Opened Google Photos for image selection',
-      level: 'info',
-    });
+    alert('Funcionalidad de Google Fotos deshabilitada.');
   };
 
   const handleSave = () => {
-    // Track profile save with Sentry
-    Sentry.addBreadcrumb({
-      category: 'profile',
-      message: 'Saving profile changes',
-      level: 'info',
-    });
-    
     setProfileData(tempProfileData);
     setIsEditing(false);
-    
-    // Track successful save with Sentry
-    Sentry.captureMessage('Profile updated successfully', 'info');
+    alert('Perfil guardado (simulado).');
   };
 
   const handleCancel = () => {
     setTempProfileData(profileData);
     setIsEditing(false);
-    
-    // Track cancel with Sentry
-    Sentry.addBreadcrumb({
-      category: 'profile',
-      message: 'Cancelled profile editing',
-      level: 'info',
-    });
   };
 
   const handlePasswordChange = () => {
@@ -299,101 +167,24 @@ export default function Profile({ currentLanguage = 'es' }) {
       return;
     }
     
-    // Track password change with Sentry
-    Sentry.addBreadcrumb({
-      category: 'profile',
-      message: 'Changing password',
-      level: 'info',
-    });
-    
     // Simular cambio de contraseña
-    alert('Contraseña actualizada exitosamente');
+    alert('Contraseña actualizada exitosamente (simulado)');
     setPasswordData({ current: '', new: '', confirm: '' });
     setShowPasswordChange(false);
-    
-    // Track successful password change with Sentry
-    Sentry.captureMessage('Password changed successfully', 'info');
   };
+  
+  // Lógica de exportación de PDF (solo alert, función eliminada)
+  const handleExportPDF = () => {
+      alert('Funcionalidad de Exportar PDF deshabilitada.');
+  }
 
-  const exportToPDF = async () => {
-    setIsExporting(true);
-    
-    try {
-      // Track PDF export with Sentry
-      Sentry.addBreadcrumb({
-        category: 'profile',
-        message: 'Exporting profile to PDF',
-        level: 'info',
-      });
-      
-      const pdf = new jsPDF();
-      
-      // Configuración del PDF
-      pdf.setFontSize(20);
-      pdf.text('Reporte de Bienestar - Habita', 20, 30);
-      
-      pdf.setFontSize(12);
-      pdf.text(`Generado el: ${new Date().toLocaleDateString('es-ES')}`, 20, 45);
-      
-      // Información personal
-      pdf.setFontSize(16);
-      pdf.text('Información Personal', 20, 65);
-      pdf.setFontSize(12);
-      pdf.text(`Nombre: ${profileData.name} ${profileData.lastname}`, 20, 80);
-      pdf.text(`Email: ${profileData.email}`, 20, 90);
-      pdf.text(`Ciudad: ${profileData.city}`, 20, 100);
-      pdf.text(`Miembro desde: ${userStats.joinDate}`, 20, 110);
-      
-      // Estadísticas de bienestar
-      pdf.setFontSize(16);
-      pdf.text('Estadísticas de Bienestar', 20, 130);
-      pdf.setFontSize(12);
-      pdf.text(`Total de Check-ins: ${userStats.totalCheckIns}`, 20, 145);
-      pdf.text(`Hábitos activos: ${userStats.activeHabits}`, 20, 155);
-      pdf.text(`Racha actual: ${userStats.currentStreak} días`, 20, 165);
-      pdf.text(`Estado emocional promedio: ${userStats.avgMood}/5`, 20, 175);
-      pdf.text(`Última actividad: ${userStats.lastActivity}`, 20, 185);
-      
-      // Hábitos registrados
-      if (userHabits.length > 0) {
-        pdf.setFontSize(16);
-        pdf.text('Hábitos de Bienestar', 20, 205);
-        pdf.setFontSize(12);
-        userHabits.slice(0, 10).forEach((habit, index) => {
-          pdf.text(`• ${habit.habits.description}`, 25, 220 + (index * 10));
-        });
-      }
-      
-      // Información de contacto de emergencia
-      pdf.setFontSize(16);
-      pdf.text('Contacto de Emergencia', 20, 220 + (userHabits.length * 10) + 20);
-      pdf.setFontSize(12);
-      pdf.text(`Nombre: ${profileData.emergencyContact}`, 20, 235 + (userHabits.length * 10) + 20);
-      pdf.text(`Teléfono: ${profileData.emergencyPhone}`, 20, 245 + (userHabits.length * 10) + 20);
-      
-      // Guardar el PDF
-      pdf.save(`habita-reporte-${new Date().toISOString().split('T')[0]}.pdf`);
-      
-      // Track successful PDF export with Sentry
-      Sentry.captureMessage('Profile exported to PDF successfully', 'info');
-      
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      alert('Error al generar el PDF');
-      
-      // Track error with Sentry
-      Sentry.captureException(error);
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
-  const titleText = t('Mi Perfil');
+  const titleText = "Mi Perfil";
   const typedTitle = useTypewriter(titleText, 100);
+
+  // NOTA: Se ha quitado toda la traducción (t('...')) y se usan strings fijos en español.
 
   return (
     <div className="space-y-6 relative">
-      {/* Efecto de partículas de perfil */}
       <ParticleEffect count={25} color="purple" />
 
       {/* Header con animación de máquina de escribir */}
@@ -441,9 +232,9 @@ export default function Profile({ currentLanguage = 'es' }) {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 1 }}
           >
+            {/* Botón de Exportar PDF */}
             <motion.button
-              onClick={exportToPDF}
-              disabled={isExporting}
+              onClick={handleExportPDF}
               className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors flex items-center relative overflow-hidden"
               whileHover={{ scale: 1.05, rotate: 2 }}
               whileTap={{ scale: 0.95 }}
@@ -456,25 +247,9 @@ export default function Profile({ currentLanguage = 'es' }) {
               />
               <motion.div
                 className="relative z-10 flex items-center"
-                animate={isExporting ? { scale: [1, 1.1, 1] } : {}}
-                transition={{ duration: 0.5, repeat: Infinity }}
               >
-                {isExporting ? (
-                  <>
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    >
-                      <Loader className="w-4 h-4 mr-2" />
-                    </motion.div>
-                    {t('Exportando...')}
-                  </>
-                ) : (
-                  <>
-                    <Download className="w-4 h-4 mr-2" />
-                    {t('Exportar PDF')}
-                  </>
-                )}
+                <Download className="w-4 h-4 mr-2" />
+                <span>Exportar PDF</span>
               </motion.div>
             </motion.button>
             
@@ -495,12 +270,12 @@ export default function Profile({ currentLanguage = 'es' }) {
               {isEditing ? (
                 <>
                   <X className="w-4 h-4 mr-2" />
-                  {t('Cancelar')}
+                  <span>Cancelar</span>
                 </>
               ) : (
                 <>
                   <Edit3 className="w-4 h-4 mr-2" />
-                  {t('Editar')}
+                  <span>Editar</span>
                 </>
               )}
             </motion.button>
@@ -520,43 +295,9 @@ export default function Profile({ currentLanguage = 'es' }) {
               }`}
               whileHover={{ scale: 1.02, y: -5 }}
             >
-              {/* Animated background effects for dark mode */}
+              {/* Animated background effects for dark mode (reducido para no ser redundante) */}
               {theme === 'dark' && (
-                <>
-                  <div className="absolute inset-0 overflow-hidden">
-                    {[...Array(20)].map((_, i) => (
-                      <motion.div
-                        key={i}
-                        className="absolute w-1 h-1 bg-purple-500/30 rounded-full"
-                        animate={{
-                          x: [Math.random() * 100, Math.random() * 100 + 50],
-                          y: [Math.random() * 100, Math.random() * 100 - 50],
-                          opacity: [0, 0.5, 0],
-                          scale: [0, 1, 0]
-                        }}
-                        transition={{
-                          duration: Math.random() * 5 + 3,
-                          repeat: Infinity,
-                          delay: Math.random() * 2
-                        }}
-                        style={{
-                          left: `${Math.random() * 100}%`,
-                          top: `${Math.random() * 100}%`
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-br from-purple-900/10 to-blue-900/10"
-                    animate={{
-                      background: [
-                        'radial-gradient(circle at 20% 20%, rgba(139, 92, 246, 0.15), transparent 70%)',
-                        'radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.15), transparent 70%)'
-                      ]
-                    }}
-                    transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                  />
-                </>
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-900/10 to-blue-900/10" />
               )}
 
               {/* Avatar Section */}
@@ -646,7 +387,7 @@ export default function Profile({ currentLanguage = 'es' }) {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.7 }}
                 >
-                  {isEditing ? `${tempProfileData.name} ${tempProfileData.lastname}` : `${profileData.name} ${profileData.lastname}`}
+                  {isEditing ? `${tempProfileData.name} ${tempProfileData.lastname}` : (profileData.name || 'Sin Nombre') + ' ' + (profileData.lastname || ' ')}
                 </motion.h3>
                 
                 <motion.p 
@@ -657,24 +398,24 @@ export default function Profile({ currentLanguage = 'es' }) {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.9 }}
                 >
-                  {isEditing ? tempProfileData.email : profileData.email}
+                  {isEditing ? tempProfileData.email : (profileData.email || 'Sin Email')}
                 </motion.p>
               </div>
 
               {/* Quick Stats */}
               <div className="grid grid-cols-2 gap-4 mb-6">
                 {[
-                  { icon: Heart, label: t('Check-ins'), value: userStats.totalCheckIns, color: theme === 'light' ? 'text-red-500' : 'text-red-400' },
-                  { icon: Activity, label: t('Hábitos'), value: userStats.activeHabits, color: theme === 'light' ? 'text-emerald-500' : 'text-emerald-400' },
-                  { icon: TrendingUp, label: t('Racha'), value: `${userStats.currentStreak}d`, color: theme === 'light' ? 'text-blue-500' : 'text-blue-400' },
-                  { icon: Award, label: t('Estado'), value: userStats.avgMood, color: theme === 'light' ? 'text-purple-500' : 'text-purple-400' }
+                  { icon: Heart, label: 'Check-ins', value: userStats.totalCheckIns, color: theme === 'light' ? 'text-red-500' : 'text-red-400' },
+                  { icon: Activity, label: 'Hábitos', value: userStats.activeHabits, color: theme === 'light' ? 'text-emerald-500' : 'text-emerald-400' },
+                  { icon: TrendingUp, label: 'Racha', value: `${userStats.currentStreak}d`, color: theme === 'light' ? 'text-blue-500' : 'text-blue-400' },
+                  { icon: Award, label: 'Estado', value: userStats.avgMood, color: theme === 'light' ? 'text-purple-500' : 'text-purple-400' }
                 ].map((stat, index) => (
                   <motion.div
                     key={index}
-                    className={`text-center p-3 rounded-xl ${
+                    className={`text-center p-3 rounded-xl border ${
                       theme === 'light'
-                        ? 'bg-white/80 border border-purple-200'
-                        : 'bg-gray-800/80 border border-purple-800/30 backdrop-blur-sm'
+                        ? 'bg-white/80 border-purple-200'
+                        : 'bg-gray-800/80 border-purple-800/30 backdrop-blur-sm'
                     }`}
                     initial={{ opacity: 0, scale: 0.5 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -705,7 +446,7 @@ export default function Profile({ currentLanguage = 'es' }) {
                 <h4 className={`font-semibold mb-2 ${
                   theme === 'light' ? 'text-purple-900' : 'text-purple-200'
                 }`}>
-                  {t('Acerca de mí')}
+                  Acerca de mí
                 </h4>
                 {isEditing ? (
                   <textarea
@@ -722,7 +463,7 @@ export default function Profile({ currentLanguage = 'es' }) {
                   <p className={`text-sm leading-relaxed ${
                     theme === 'light' ? 'text-purple-800' : 'text-purple-300'
                   }`}>
-                    {profileData.bio}
+                    {profileData.bio || 'Escribe una biografía en modo edición.'}
                   </p>
                 )}
               </motion.div>
@@ -742,50 +483,16 @@ export default function Profile({ currentLanguage = 'es' }) {
               }`}
               whileHover={{ scale: 1.01, y: -3 }}
             >
-              {/* Animated background effects for dark mode */}
+              {/* Animated background effects for dark mode (reducido para no ser redundante) */}
               {theme === 'dark' && (
-                <>
-                  <div className="absolute inset-0 overflow-hidden">
-                    {[...Array(15)].map((_, i) => (
-                      <motion.div
-                        key={i}
-                        className="absolute w-1 h-1 bg-emerald-500/20 rounded-full"
-                        animate={{
-                          x: [Math.random() * 100, Math.random() * 100 + 50],
-                          y: [Math.random() * 100, Math.random() * 100 - 50],
-                          opacity: [0, 0.5, 0],
-                          scale: [0, 1, 0]
-                        }}
-                        transition={{
-                          duration: Math.random() * 5 + 3,
-                          repeat: Infinity,
-                          delay: Math.random() * 2
-                        }}
-                        style={{
-                          left: `${Math.random() * 100}%`,
-                          top: `${Math.random() * 100}%`
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-br from-emerald-900/10 to-blue-900/10"
-                    animate={{
-                      background: [
-                        'radial-gradient(circle at 30% 30%, rgba(16, 185, 129, 0.1), transparent 70%)',
-                        'radial-gradient(circle at 70% 70%, rgba(16, 185, 129, 0.1), transparent 70%)'
-                      ]
-                    }}
-                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                  />
-                </>
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/10 to-blue-900/10" />
               )}
 
               <div className="flex items-center justify-between mb-6">
                 <h3 className={`text-lg font-semibold ${
                   theme === 'light' ? 'text-emerald-900' : 'text-emerald-200'
                 }`}>
-                  {t('Información Personal')}
+                  Información Personal
                 </h3>
                 
                 <AnimatePresence>
@@ -803,11 +510,11 @@ export default function Profile({ currentLanguage = 'es' }) {
                         whileTap={{ scale: 0.95 }}
                       >
                         <Save className="w-4 h-4 mr-2" />
-                        {t('Guardar')}
+                        <span>Guardar</span>
                       </motion.button>
                       <motion.button
                         onClick={handleCancel}
-                        className={`px-4 py-2 rounded-lg transition-colors ${
+                        className={`px-4 py-2 rounded-lg transition-colors flex items-center ${
                           theme === 'light'
                             ? 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                             : 'bg-gray-700 text-gray-200 hover:bg-gray-600'
@@ -816,7 +523,7 @@ export default function Profile({ currentLanguage = 'es' }) {
                         whileTap={{ scale: 0.95 }}
                       >
                         <X className="w-4 h-4 mr-2" />
-                        {t('Cancelar')}
+                        <span>Cancelar</span>
                       </motion.button>
                     </motion.div>
                   )}
@@ -825,12 +532,12 @@ export default function Profile({ currentLanguage = 'es' }) {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {[
-                  { icon: User, label: t('Nombre'), key: 'name', value: isEditing ? tempProfileData.name : profileData.name },
-                  { icon: User, label: t('Apellido'), key: 'lastname', value: isEditing ? tempProfileData.lastname : profileData.lastname },
-                  { icon: Mail, label: t('Email'), key: 'email', value: isEditing ? tempProfileData.email : profileData.email },
-                  { icon: Phone, label: t('Teléfono'), key: 'phone', value: isEditing ? tempProfileData.phone : profileData.phone },
-                  { icon: MapPin, label: t('Ciudad'), key: 'city', value: isEditing ? tempProfileData.city : profileData.city },
-                  { icon: Calendar, label: t('Fecha de Nacimiento'), key: 'birthDate', value: isEditing ? tempProfileData.birthDate : profileData.birthDate, type: 'date' }
+                  { icon: User, label: 'Nombre', key: 'name', value: isEditing ? tempProfileData.name : profileData.name },
+                  { icon: User, label: 'Apellido', key: 'lastname', value: isEditing ? tempProfileData.lastname : profileData.lastname },
+                  { icon: Mail, label: 'Email', key: 'email', value: isEditing ? tempProfileData.email : profileData.email },
+                  { icon: Phone, label: 'Teléfono', key: 'phone', value: isEditing ? tempProfileData.phone : profileData.phone },
+                  { icon: MapPin, label: 'Ciudad', key: 'city', value: isEditing ? tempProfileData.city : profileData.city },
+                  { icon: Calendar, label: 'Fecha de Nacimiento', key: 'birthDate', value: isEditing ? tempProfileData.birthDate : profileData.birthDate, type: 'date' }
                 ].map((field, index) => (
                   <motion.div
                     key={field.key}
@@ -857,7 +564,7 @@ export default function Profile({ currentLanguage = 'es' }) {
                     {isEditing ? (
                       <input
                         type={field.type || 'text'}
-                        value={field.value}
+                        value={tempProfileData[field.key as keyof ProfileData]}
                         onChange={(e) => setTempProfileData(prev => ({ 
                           ...prev, 
                           [field.key]: e.target.value 
@@ -872,7 +579,7 @@ export default function Profile({ currentLanguage = 'es' }) {
                       <p className={`font-medium ${
                         theme === 'light' ? 'text-emerald-900' : 'text-emerald-100'
                       }`}>
-                        {field.value}
+                        {field.value || 'N/A'}
                       </p>
                     )}
                   </motion.div>
@@ -891,43 +598,9 @@ export default function Profile({ currentLanguage = 'es' }) {
               }`}
               whileHover={{ scale: 1.01, y: -3 }}
             >
-              {/* Animated background effects for dark mode */}
+              {/* Animated background effects for dark mode (reducido para no ser redundante) */}
               {theme === 'dark' && (
-                <>
-                  <div className="absolute inset-0 overflow-hidden">
-                    {[...Array(10)].map((_, i) => (
-                      <motion.div
-                        key={i}
-                        className="absolute w-1 h-1 bg-red-500/20 rounded-full"
-                        animate={{
-                          x: [Math.random() * 100, Math.random() * 100 + 50],
-                          y: [Math.random() * 100, Math.random() * 100 - 50],
-                          opacity: [0, 0.5, 0],
-                          scale: [0, 1, 0]
-                        }}
-                        transition={{
-                          duration: Math.random() * 5 + 3,
-                          repeat: Infinity,
-                          delay: Math.random() * 2
-                        }}
-                        style={{
-                          left: `${Math.random() * 100}%`,
-                          top: `${Math.random() * 100}%`
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-br from-red-900/10 to-orange-900/10"
-                    animate={{
-                      background: [
-                        'radial-gradient(circle at 30% 30%, rgba(239, 68, 68, 0.1), transparent 70%)',
-                        'radial-gradient(circle at 70% 70%, rgba(239, 68, 68, 0.1), transparent 70%)'
-                      ]
-                    }}
-                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                  />
-                </>
+                <div className="absolute inset-0 bg-gradient-to-br from-red-900/10 to-orange-900/10" />
               )}
 
               <div className="flex items-center mb-4">
@@ -937,7 +610,7 @@ export default function Profile({ currentLanguage = 'es' }) {
                 <h3 className={`text-lg font-semibold ${
                   theme === 'light' ? 'text-red-900' : 'text-red-200'
                 }`}>
-                  {t('Contacto de Emergencia')}
+                  Contacto de Emergencia
                 </h3>
               </div>
 
@@ -955,7 +628,7 @@ export default function Profile({ currentLanguage = 'es' }) {
                   <label className={`text-sm font-medium ${
                     theme === 'light' ? 'text-red-800' : 'text-red-200'
                   }`}>
-                    {t('Nombre del Contacto')}
+                    Nombre del Contacto
                   </label>
                   {isEditing ? (
                     <input
@@ -975,7 +648,7 @@ export default function Profile({ currentLanguage = 'es' }) {
                     <p className={`mt-1 font-medium ${
                       theme === 'light' ? 'text-red-900' : 'text-red-100'
                     }`}>
-                      {profileData.emergencyContact}
+                      {profileData.emergencyContact || 'N/A'}
                     </p>
                   )}
                 </motion.div>
@@ -993,7 +666,7 @@ export default function Profile({ currentLanguage = 'es' }) {
                   <label className={`text-sm font-medium ${
                     theme === 'light' ? 'text-red-800' : 'text-red-200'
                   }`}>
-                    {t('Teléfono de Emergencia')}
+                    Teléfono de Emergencia
                   </label>
                   {isEditing ? (
                     <input
@@ -1013,7 +686,7 @@ export default function Profile({ currentLanguage = 'es' }) {
                     <p className={`mt-1 font-medium ${
                       theme === 'light' ? 'text-red-900' : 'text-red-100'
                     }`}>
-                      {profileData.emergencyPhone}
+                      {profileData.emergencyPhone || 'N/A'}
                     </p>
                   )}
                 </motion.div>
@@ -1031,43 +704,9 @@ export default function Profile({ currentLanguage = 'es' }) {
               }`}
               whileHover={{ scale: 1.01, y: -3 }}
             >
-              {/* Animated background effects for dark mode */}
+              {/* Animated background effects for dark mode (reducido para no ser redundante) */}
               {theme === 'dark' && (
-                <>
-                  <div className="absolute inset-0 overflow-hidden">
-                    {[...Array(15)].map((_, i) => (
-                      <motion.div
-                        key={i}
-                        className="absolute w-1 h-1 bg-blue-500/20 rounded-full"
-                        animate={{
-                          x: [Math.random() * 100, Math.random() * 100 + 50],
-                          y: [Math.random() * 100, Math.random() * 100 - 50],
-                          opacity: [0, 0.5, 0],
-                          scale: [0, 1, 0]
-                        }}
-                        transition={{
-                          duration: Math.random() * 5 + 3,
-                          repeat: Infinity,
-                          delay: Math.random() * 2
-                        }}
-                        style={{
-                          left: `${Math.random() * 100}%`,
-                          top: `${Math.random() * 100}%`
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-br from-blue-900/10 to-cyan-900/10"
-                    animate={{
-                      background: [
-                        'radial-gradient(circle at 30% 30%, rgba(59, 130, 246, 0.1), transparent 70%)',
-                        'radial-gradient(circle at 70% 70%, rgba(59, 130, 246, 0.1), transparent 70%)'
-                      ]
-                    }}
-                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                  />
-                </>
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-900/10 to-cyan-900/10" />
               )}
 
               <div className="flex items-center justify-between mb-6">
@@ -1078,7 +717,7 @@ export default function Profile({ currentLanguage = 'es' }) {
                   <h3 className={`text-lg font-semibold ${
                     theme === 'light' ? 'text-blue-900' : 'text-blue-200'
                   }`}>
-                    {t('Configuración y Seguridad')}
+                    Configuración y Seguridad
                   </h3>
                 </div>
                 
@@ -1093,16 +732,16 @@ export default function Profile({ currentLanguage = 'es' }) {
                   whileTap={{ scale: 0.95 }}
                 >
                   <Lock className="w-4 h-4 mr-2" />
-                  {t('Cambiar Contraseña')}
+                  <span>Cambiar Contraseña</span>
                 </motion.button>
               </div>
 
               {/* Preferencias */}
               <div className="space-y-4">
                 {[
-                  { key: 'notifications', label: t('Notificaciones push'), icon: Bell },
-                  { key: 'emailUpdates', label: t('Actualizaciones por email'), icon: Mail },
-                  { key: 'dataSharing', label: t('Compartir datos para investigación'), icon: Shield }
+                  { key: 'notifications', label: 'Notificaciones push', icon: Bell },
+                  { key: 'emailUpdates', label: 'Actualizaciones por email', icon: Mail },
+                  { key: 'dataSharing', label: 'Compartir datos para investigación', icon: Shield }
                 ].map((pref, index) => (
                   <motion.div
                     key={pref.key}
@@ -1123,23 +762,15 @@ export default function Profile({ currentLanguage = 'es' }) {
                     </div>
                     <motion.button
                       onClick={() => {
-                        if (isEditing) {
-                          setTempProfileData(prev => ({
+                        // Cambiamos el estado temporal si estamos editando, si no, cambiamos el estado principal.
+                        const setter = isEditing ? setTempProfileData : setProfileData;
+                        setter(prev => ({
                             ...prev,
                             preferences: {
                               ...prev.preferences,
                               [pref.key]: !prev.preferences[pref.key as keyof typeof prev.preferences]
                             }
-                          }));
-                        } else {
-                          setProfileData(prev => ({
-                            ...prev,
-                            preferences: {
-                              ...prev.preferences,
-                              [pref.key]: !prev.preferences[pref.key as keyof typeof prev.preferences]
-                            }
-                          }));
-                        }
+                        }));
                       }}
                       className={`w-12 h-6 rounded-full transition-all duration-300 relative ${
                         (isEditing ? tempProfileData : profileData).preferences[pref.key as keyof typeof profileData.preferences]
@@ -1179,14 +810,14 @@ export default function Profile({ currentLanguage = 'es' }) {
                     <h4 className={`font-semibold mb-4 ${
                       theme === 'light' ? 'text-blue-900' : 'text-blue-200'
                     }`}>
-                      {t('Cambiar Contraseña')}
+                      Cambiar Contraseña
                     </h4>
                     
                     <div className="space-y-4">
                       {[
-                        { key: 'current', label: t('Contraseña actual'), placeholder: t('Contraseña actual') },
-                        { key: 'new', label: t('Nueva contraseña'), placeholder: t('Nueva contraseña') },
-                        { key: 'confirm', label: t('Confirmar contraseña'), placeholder: t('Confirmar contraseña') }
+                        { key: 'current', label: 'Contraseña actual', placeholder: 'Contraseña actual' },
+                        { key: 'new', label: 'Nueva contraseña', placeholder: 'Nueva contraseña' },
+                        { key: 'confirm', label: 'Confirmar contraseña', placeholder: 'Confirmar contraseña' }
                       ].map((field) => (
                         <div key={field.key}>
                           <label className={`block text-sm font-medium mb-1 ${
@@ -1236,7 +867,7 @@ export default function Profile({ currentLanguage = 'es' }) {
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                         >
-                          {t('Actualizar Contraseña')}
+                          Actualizar Contraseña
                         </motion.button>
                         <motion.button
                           onClick={() => {
@@ -1251,7 +882,7 @@ export default function Profile({ currentLanguage = 'es' }) {
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                         >
-                          {t('Cancelar')}
+                          Cancelar
                         </motion.button>
                       </div>
                     </div>

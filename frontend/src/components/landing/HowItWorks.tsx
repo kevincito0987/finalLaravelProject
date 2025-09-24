@@ -177,7 +177,7 @@ export default function HowItWorks() {
       </div>
 
       {/* Enhanced CSS animations */}
-      <style jsx>{`
+      <style>{`
         .perspective-1000 {
           perspective: 1000px;
         }

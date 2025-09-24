@@ -35,6 +35,7 @@ const benefits = [
   },
 ];
 
+
 export default function Benefits() {
   const { theme } = useTheme();
 
@@ -230,7 +231,7 @@ export default function Benefits() {
       </div>
 
       {/* Enhanced CSS animations */}
-      <style jsx>{`
+      <style >{`
         @keyframes fade-in {
           from {
             opacity: 0;

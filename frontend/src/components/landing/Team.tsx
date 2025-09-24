@@ -61,7 +61,6 @@ const teamMembers = [
     specialty: '🚀 QA & Testing'
   },
 ];
-
 export default function Team() {
   const { theme } = useTheme();
 
@@ -239,7 +238,7 @@ export default function Team() {
       </div>
 
       {/* Enhanced CSS animations */}
-      <style jsx>{`
+      <style>{`
         @keyframes fade-in {
           from {
             opacity: 0;

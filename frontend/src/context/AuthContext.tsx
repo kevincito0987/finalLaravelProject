@@ -5,9 +5,14 @@ interface User {
   email: string;
   name: string;
   avatar?: string;
-  // Si Laravel incluye más campos, agrégalos aquí
+  profile?: UserProfile; 
+  username?: string
 }
 
+interface UserProfile {
+  name: string | undefined; // Si el nombre puede ser nulo o indefinido
+  // ... otras propiedades de perfil
+}
 interface AuthContextType {
   user: User | null;
   loading: boolean;
