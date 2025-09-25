@@ -33,5 +33,6 @@ Route::prefix('auth')->group(function () {
         Route::post('logout', [AuthController::class, 'logout']);
     });
     Route::post('create-admin', [AuthController::class, 'createAdmin']);
+    Route::post('create-therapist', [AuthController::class, 'createTherapist']);
 
 });

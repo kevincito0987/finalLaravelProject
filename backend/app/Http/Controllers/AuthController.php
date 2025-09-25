@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
@@ -110,7 +111,8 @@ class AuthController extends Controller
             'password' => Hash::make($data['password']),
         ]);
 
-        $defaultRole = Role::where('name', 'viewer')->first();
+
+        $defaultRole = Role::where('name', 'user')->first();
         if ($defaultRole) {
             $user->roles()->syncWithoutDetaching([$defaultRole->id]);
         }
@@ -170,6 +172,32 @@ class AuthController extends Controller
 
 
         return $this->success($user->load('roles'), 'Administrador creado correctamente', 201);
+    }
+
+    public function createTherapist(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+        ]);
+
+        $adminRole = Role::where('name', 'therapist')->first();
+        if ($adminRole) {
+            $user->roles()->syncWithoutDetaching([$adminRole->id]);
+        }
+
+        Mail::to($user->email)->queue(new UserRegisteredMail($user)); // Mailpit
+        Mail::mailer('real')->to($user->email)->queue(new UserRegisteredMail($user)); // Gmail
+
+
+        return $this->success($user->load('roles'), 'Terapeuta creado correctamente', 201);
     }
 
 
