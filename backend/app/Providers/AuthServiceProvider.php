@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Models\User;
-use App\Policies\PostPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Passport\Passport;
@@ -30,11 +29,11 @@ class AuthServiceProvider extends ServiceProvider
 
         //Gate 
         Gate::define('view-health', function (User $user) {
-            return $user->hasRole(['editor', 'viewer']);
+            return $user->hasRole(['therapist', 'user']);
         });
 
         Gate::define('view-health-admin', function (User $user) {
-            return $user->hasRole(['editor', 'admin']) || $user->tokenCan('posts.admin');
+            return $user->hasRole(['therapist', 'admin']) || $user->tokenCan('posts.admin');
         });
 
         // NO RECOMENNDADO: PERO UTIL PARA PRUEBAS

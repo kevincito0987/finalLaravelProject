@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -24,11 +26,10 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
+            'name' => $this->faker->name(),
+            'email' => $this->faker->unique()->safeEmail(),
             'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'profile_image_path' => $this->faker->imageUrl(640, 480, 'people', true, 'profile'),
         ];
     }
 
@@ -40,5 +41,24 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
+    }
+
+    public function withrole(string $roleName = 'viewer'): static
+    {
+        return $this->afterCreating(function (User $user) use ($roleName) {
+            $role = Role::firstOrCreate(['name' => $roleName]);
+            $user->role_id = $role->id;
+            $user->save();
+        });
+    }
+
+    public function withroles(array $roleNames = ['viewer']): static
+    {
+        return $this->afterCreating(function (User $user) use ($roleNames) {
+            foreach ($roleNames as $name) {
+                $role = Role::firstOrCreate(['name' => $name]);
+                $user->roles()->attach($role->id);
+            }
+        });
     }
 }

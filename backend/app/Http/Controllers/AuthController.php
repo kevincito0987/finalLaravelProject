@@ -60,7 +60,7 @@ class AuthController extends Controller
 
         $user = $request->user();
 
-        $tokenResult = $user->createToken('api-token', ['posts.read', 'posts.write']);
+        $tokenResult = $user->createToken('api-token');
 
         $token = $tokenResult->accessToken;
 
