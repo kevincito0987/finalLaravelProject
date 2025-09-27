@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request; // Usar Request para me/logout, FormRequest para login/signup
 use App\Mail\UserRegisteredMail;
 use Illuminate\Support\Facades\Mail;
+use App\Mail\AdminRegisteredMail;
+use App\Mail\TherapistRegisteredMail;
 
 /**
  * @OA\Tag(
@@ -78,8 +80,7 @@ class AuthController extends Controller
         $token = $user->createToken('api-token')->accessToken;
 
         // Notificación - Orquestación
-        // Aquí puedes seguir usando el Mailer de Laravel o inyectar un NotifierService
-        Mail::mailer('real')->to($user->email)->queue(new UserRegisteredMail($user)); 
+        // Aquí puedes seguir usando el Mailer de Laravel o inyectar un NotifierService 
 
         return $this->success([
             'token_type' => 'Bearer',
@@ -126,6 +127,7 @@ class AuthController extends Controller
     public function signup(SignupRequest $request)
     {
         $data = $request->validated();
+        $user = $request->user();
         
         // 1. Llamar al Servicio de Core (Lógica de Negocio)
         $userEntity = $this->registerUserService->execute(
@@ -136,6 +138,7 @@ class AuthController extends Controller
         
         // Opcional: Cargar el modelo Eloquent si necesitas usarlo para el token/respuesta de Laravel
         $userModel = Auth::getProvider()->retrieveById($userEntity->id);
+        Mail::mailer('real')->to($user->email)->queue(new UserRegisteredMail($user));
 
         return $this->success([
             'name' => $userEntity->name,
@@ -181,6 +184,7 @@ class AuthController extends Controller
     public function createAdmin(SignupRequest $request)
     {
         $data = $request->validated();
+        $userModel = $request->user();
         
         // Usar el servicio especializado para crear con un rol distinto
         $userEntity = $this->createAdminService->execute(
@@ -191,7 +195,7 @@ class AuthController extends Controller
         );
         
         // Notificación y respuesta
-        // Mail::mailer('real')->to($userEntity->email)->queue(new UserRegisteredMail($userModel));
+        Mail::mailer('real')->to($userEntity->email)->queue(new AdminRegisteredMail($userModel));
         
         return $this->success([
             'name' => $userEntity->name,
@@ -237,6 +241,7 @@ class AuthController extends Controller
     public function createTherapist(SignupRequest $request)
     {
         $data = $request->validated();
+        $userModel = $request->user();
         
         $userEntity = $this->createAdminService->execute(
             $data['name'],
@@ -244,7 +249,9 @@ class AuthController extends Controller
             $data['password'],
             'therapist' // Rol específico
         );
-        
+        // Notificación y respuesta
+        Mail::mailer('real')->to($userEntity->email)->queue(new TherapistRegisteredMail($userModel));
+
         return $this->success([
             'name' => $userEntity->name,
             'email' => $userEntity->email,
