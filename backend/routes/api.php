@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SupabaseAuthController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MediaController;
 
 Route::get('/health', fn() => ['ok' => true]);
 Route::get('/health-any-auth', fn() => ['ok' => true])->middleware(['auth:api', 'can:view-health']);
@@ -36,3 +37,7 @@ Route::prefix('auth')->group(function () {
     Route::post('create-therapist', [AuthController::class, 'createTherapist']);
 
 });
+
+Route::post('/media/upload', [MediaController::class, 'upload']);
+Route::get('/media', [MediaController::class, 'index']);
+Route::delete('/media/{id}', [MediaController::class, 'destroy']);

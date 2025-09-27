@@ -6,6 +6,8 @@ services:
     container_name: project-laravel-app
     volumes:
       - .:/workspaces/finalLaravelProject:cached
+      # AGREGADO: Monta el socket de Docker para que el contenedor pueda ejecutar comandos Docker
+      - /var/run/docker.sock:/var/run/docker.sock
     working_dir: /workspace
     command: bash -lc "tail -f /dev/null"
     environment:
@@ -13,7 +15,6 @@ services:
     ports:
       - "8001:8000"
     depends_on:
-      # Ahora depende de ambos servicios de base de datos
       - db
       - pgsql
       - redis
@@ -35,7 +36,7 @@ services:
     ports:
       - "3307:3306"
 
-  # Servicio de PostgreSQL (Nuevo)
+  # Servicio de PostgreSQL
   pgsql:
     image: postgres:16-alpine
     container_name: project-laravel-pgsql
@@ -48,6 +49,7 @@ services:
       - pgdata-laravel11:/var/lib/postgresql/data
     ports:
       - "5433:5432"
+  
   # Servicio de Redis
   redis:
     image: redis:7
@@ -63,17 +65,19 @@ services:
       - "8025:8025" # UI
       - "1025:1025" # SMTP
 
-  # Servicio de LibreTranslate
+  # Servicio de LibreTranslate (CORREGIDO para evitar reinicios)
   libretranslate:
-    image: libretranslate/libretranslate
+    image: libretranslate/libretranslate:latest
     container_name: project-laravel-libretranslate
     ports:
       - "5000:5000"
-    environment:
-      LT_API_KEY: ""  # puedes dejarlo vacío si no quieres usar autenticación
+    # La sección environment se omite intencionalmente porque no necesitamos variables aquí.
+    command: ["libretranslate", "--api-keys"] # Activa el modo de gestión de claves
+    volumes:
+      - ./libretranslate_data:/root/.local/share/libretranslate
     restart: unless-stopped
 
 volumes:
   dbdata-laravel11:
-  # Nuevo volumen para PostgreSQL
   pgdata-laravel11:
+  libretranslate_data:

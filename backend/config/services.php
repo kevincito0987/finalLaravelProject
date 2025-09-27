@@ -34,5 +34,9 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'libretranslate' => [
+        'url' => env('LIBRETRANSLATE_BASE_URL'),
+        'key' => env('LIBRETRANSLATE_API_KEY'),
+    ],
 
 ];
