@@ -5,11 +5,11 @@ namespace App\Http\Controllers;
 
 use App\Core\Services\Auth\RegisterUserService;
 use App\Core\Services\User\CreateAdminService;
-use App\Http\Requests\Auth\SignupRequest; // Usar FormRequest para validaciones
-use App\Http\Requests\Auth\LoginRequest; // Crear este FormRequest
+use App\Http\Requests\Auth\SignupRequest;
+use App\Http\Requests\Auth\LoginRequest;
 use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request; // Usar Request para me/logout, FormRequest para login/signup
+use Illuminate\Http\Request;
 use App\Mail\UserRegisteredMail;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\AdminRegisteredMail;
@@ -26,7 +26,6 @@ class AuthController extends Controller
 {
     use ApiResponse;
 
-    // Inyectar el servicio para el registro
     public function __construct(
         private readonly RegisterUserService $registerUserService,
         private readonly CreateAdminService $createAdminService
@@ -68,10 +67,8 @@ class AuthController extends Controller
      */
     public function login(LoginRequest $request)
     {
-        // La validación se hace en LoginRequest
         $data = $request->validated(); 
         
-        // La autenticación de Laravel se mantiene en el Controller (es un detalle de infraestructura)
         if (!Auth::attempt($request->only('email', 'password'))) {
             return $this->error('Credenciales invalidas', 401);
         }
@@ -79,15 +76,11 @@ class AuthController extends Controller
         $user = $request->user();
         $token = $user->createToken('api-token')->accessToken;
 
-        // Notificación - Orquestación
-        // Aquí puedes seguir usando el Mailer de Laravel o inyectar un NotifierService 
-
         return $this->success([
             'token_type' => 'Bearer',
             'access_token' => $token,
             'user' => [
                 'email' => $user->email,
-                // Si la Entidad no incluye esta info, puedes usar el Model para esta capa de presentación
                 'roles' => $user->roles()->pluck('name'), 
             ]
         ]);
@@ -127,7 +120,6 @@ class AuthController extends Controller
     public function signup(SignupRequest $request)
     {
         $data = $request->validated();
-        $user = $request->user();
         
         // 1. Llamar al Servicio de Core (Lógica de Negocio)
         $userEntity = $this->registerUserService->execute(
@@ -136,9 +128,12 @@ class AuthController extends Controller
             $data['password']
         );
         
-        // Opcional: Cargar el modelo Eloquent si necesitas usarlo para el token/respuesta de Laravel
+        // 2. Cargar el modelo Eloquent del usuario recién creado
         $userModel = Auth::getProvider()->retrieveById($userEntity->id);
-        Mail::mailer('real')->to($user->email)->queue(new UserRegisteredMail($user));
+        
+        // CORRECCIÓN: Se usa el modelo recién creado ($userModel) para el correo, 
+        // ya que la ruta de registro suele ser pública y $request->user() sería NULL.
+        Mail::mailer('real')->to($userEntity->email)->queue(new UserRegisteredMail($userModel));
 
         return $this->success([
             'name' => $userEntity->name,
@@ -151,42 +146,57 @@ class AuthController extends Controller
     // CREATE ADMIN
     // ----------------------------------------------------------------------
     /**
-     * @OA\Post(
-     * path="/api/auth/admin",
-     * tags={"Auth"},
-     * summary="Crear un Administrador (Rol: admin)",
-     * description="Endpoint utilizado por un administrador existente para crear otro administrador. Requiere protección de ruta por rol.",
-     * security={{"bearerAuth":{}}},
-     * @OA\RequestBody(
+     * Crea un nuevo usuario con rol 'admin'.
+     * Esta ruta debe estar protegida por auth:api y role:admin.
+     * * @OA\Post(
+     * path="/api/auth/create-admin",
+     * operationId="createAdmin",
+     * tags={"Administración de Usuarios"},
+     * summary="Crea un nuevo usuario con rol de Administrador",
+     * description="Solo accesible por un usuario autenticado con rol 'admin'. Requiere un token JWT válido.",
+     * security={{"bearerAuth": {}}},
+     * * @OA\RequestBody(
      * required=true,
      * @OA\JsonContent(
-     * required={"name", "email", "password", "password_confirmation"},
-     * @OA\Property(property="name", type="string", example="Admin Supremo"),
-     * @OA\Property(property="email", type="string", format="email", example="admin@example.com"),
-     * @OA\Property(property="password", type="string", minLength=8, example="Pa55Word123$.", description="Contraseña de al menos 8 caracteres"),
-     * @OA\Property(property="password_confirmation", type="string", example="Pa55Word123$.", description="Confirmación de la contraseña")
+     * required={"name","email","password","password_confirmation"},
+     * @OA\Property(property="name", type="string", example="Nuevo Administrador"),
+     * @OA\Property(property="email", type="string", format="email", example="nuevo.admin@ejemplo.com"),
+     * @OA\Property(property="password", type="string", format="password", example="Password123#"),
+     * @OA\Property(property="password_confirmation", type="string", format="password", example="Password123#")
      * )
      * ),
-     * @OA\Response(response=201, description="Administrador creado", 
+     * * @OA\Response(
+     * response=201,
+     * description="Administrador creado exitosamente",
      * @OA\JsonContent(
      * @OA\Property(property="status", type="string", example="success"),
+     * @OA\Property(property="message", type="string", example="Administrador creado correctamente"),
      * @OA\Property(property="data", type="object",
-     * @OA\Property(property="name", type="string", example="Admin Supremo"),
-     * @OA\Property(property="email", type="string", example="admin@example.com"),
-     * @OA\Property(property="roles", type="array", @OA\Items(type="string"), example={"admin"})
+     * @OA\Property(property="name", type="string", example="Nuevo Administrador"),
+     * @OA\Property(property="email", type="string", format="email", example="nuevo.admin@ejemplo.com"),
+     * @OA\Property(property="roles", type="array", @OA\Items(type="string", example="admin"))
      * )
      * )
      * ),
-     * @OA\Response(response=403, description="Prohibido (solo Admin)"),
-     * @OA\Response(response=422, description="Error de Validación")
+     * @OA\Response(
+     * response=401,
+     * description="No autenticado (si falta el token JWT)"
+     * ),
+     * @OA\Response(
+     * response=403,
+     * description="Acceso Prohibido (si el usuario autenticado no tiene el rol 'admin')"
+     * ),
+     * @OA\Response(
+     * response=422,
+     * description="Error de validación (ej. email duplicado, formato de password)"
+     * )
      * )
      */
-    public function createAdmin(SignupRequest $request)
+    public function createAdmin(SignupRequest $request): \Illuminate\Http\JsonResponse
     {
         $data = $request->validated();
-        $userModel = $request->user();
         
-        // Usar el servicio especializado para crear con un rol distinto
+        // 1. Crear la entidad/modelo de usuario con el rol 'admin'
         $userEntity = $this->createAdminService->execute(
             $data['name'],
             $data['email'],
@@ -194,9 +204,14 @@ class AuthController extends Controller
             'admin' // Rol específico
         );
         
-        // Notificación y respuesta
-        Mail::mailer('real')->to($userEntity->email)->queue(new AdminRegisteredMail($userModel));
+        // CORRECCIÓN: Adaptación del patrón de retrieveById() para obtener el modelo completo
+        // del administrador recién creado para pasarlo al Mailable.
+        $adminModel = Auth::getProvider()->retrieveById($userEntity->id);
+
+        // 2. Enviar correo. Se pasa el modelo del administrador recién creado.
+        Mail::mailer('real')->to($userEntity->email)->queue(new AdminRegisteredMail($adminModel));
         
+        // 3. Respuesta exitosa
         return $this->success([
             'name' => $userEntity->name,
             'email' => $userEntity->email,
@@ -241,7 +256,9 @@ class AuthController extends Controller
     public function createTherapist(SignupRequest $request)
     {
         $data = $request->validated();
-        $userModel = $request->user();
+        
+        // El creador es el usuario autenticado (aunque no lo usaremos en el mailer)
+        // $creatorUserModel = $request->user(); 
         
         $userEntity = $this->createAdminService->execute(
             $data['name'],
@@ -249,8 +266,13 @@ class AuthController extends Controller
             $data['password'],
             'therapist' // Rol específico
         );
-        // Notificación y respuesta
-        Mail::mailer('real')->to($userEntity->email)->queue(new TherapistRegisteredMail($userModel));
+
+        // CORRECCIÓN: Para evitar el TypeError (NULL dado a un constructor que espera App\Models\User),
+        // y por lógica de negocio, pasamos el modelo del terapeuta recién creado al Mailable.
+        $therapistModel = Auth::getProvider()->retrieveById($userEntity->id);
+        
+        // Notificación: Se pasa el modelo del terapeuta recién creado
+        Mail::mailer('real')->to($userEntity->email)->queue(new TherapistRegisteredMail($therapistModel));
 
         return $this->success([
             'name' => $userEntity->name,

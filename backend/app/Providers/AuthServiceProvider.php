@@ -6,13 +6,14 @@ use App\Models\User;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Passport\Passport;
+use App\Policies\CommunicationMethodPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
     //Policia de las politicas
-    // protected $policies = [
-    //     PostPolicy::class,
-    // ];
+    protected $policies = [
+        CommunicationMethodPolicy::class,
+     ];
 
     /**
      * Bootstrap services.

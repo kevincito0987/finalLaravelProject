@@ -193,14 +193,14 @@
                 }
             }
         },
-        "/api/auth/admin": {
+        "/api/auth/create-admin": {
             "post": {
                 "tags": [
-                    "Auth"
+                    "Administración de Usuarios"
                 ],
-                "summary": "Crear un Administrador (Rol: admin)",
-                "description": "Endpoint utilizado por un administrador existente para crear otro administrador. Requiere protección de ruta por rol.",
-                "operationId": "d459fe56fae5ce97ca2fbe27f54f8346",
+                "summary": "Crea un nuevo usuario con rol de Administrador",
+                "description": "Solo accesible por un usuario autenticado con rol 'admin'. Requiere un token JWT válido.",
+                "operationId": "createAdmin",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -215,23 +215,22 @@
                                 "properties": {
                                     "name": {
                                         "type": "string",
-                                        "example": "Admin Supremo"
+                                        "example": "Nuevo Administrador"
                                     },
                                     "email": {
                                         "type": "string",
                                         "format": "email",
-                                        "example": "admin@example.com"
+                                        "example": "nuevo.admin@ejemplo.com"
                                     },
                                     "password": {
-                                        "description": "Contraseña de al menos 8 caracteres",
                                         "type": "string",
-                                        "minLength": 8,
-                                        "example": "Pa55Word123$."
+                                        "format": "password",
+                                        "example": "Password123#"
                                     },
                                     "password_confirmation": {
-                                        "description": "Confirmación de la contraseña",
                                         "type": "string",
-                                        "example": "Pa55Word123$."
+                                        "format": "password",
+                                        "example": "Password123#"
                                     }
                                 },
                                 "type": "object"
@@ -241,7 +240,7 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Administrador creado",
+                        "description": "Administrador creado exitosamente",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -250,24 +249,27 @@
                                             "type": "string",
                                             "example": "success"
                                         },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Administrador creado correctamente"
+                                        },
                                         "data": {
                                             "properties": {
                                                 "name": {
                                                     "type": "string",
-                                                    "example": "Admin Supremo"
+                                                    "example": "Nuevo Administrador"
                                                 },
                                                 "email": {
                                                     "type": "string",
-                                                    "example": "admin@example.com"
+                                                    "format": "email",
+                                                    "example": "nuevo.admin@ejemplo.com"
                                                 },
                                                 "roles": {
                                                     "type": "array",
                                                     "items": {
-                                                        "type": "string"
-                                                    },
-                                                    "example": [
-                                                        "admin"
-                                                    ]
+                                                        "type": "string",
+                                                        "example": "admin"
+                                                    }
                                                 }
                                             },
                                             "type": "object"
@@ -278,11 +280,14 @@
                             }
                         }
                     },
+                    "401": {
+                        "description": "No autenticado (si falta el token JWT)"
+                    },
                     "403": {
-                        "description": "Prohibido (solo Admin)"
+                        "description": "Acceso Prohibido (si el usuario autenticado no tiene el rol 'admin')"
                     },
                     "422": {
-                        "description": "Error de Validación"
+                        "description": "Error de validación (ej. email duplicado, formato de password)"
                     }
                 },
                 "security": [
@@ -483,6 +488,223 @@
                     }
                 ]
             }
+        },
+        "/api/communication-methods": {
+            "get": {
+                "tags": [
+                    "Communication Methods"
+                ],
+                "summary": "Obtiene la lista de todos los métodos de comunicación",
+                "operationId": "592183ee0894be293eddcd754fa385dd",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "name": {
+                                                "type": "string",
+                                                "example": "visual"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Communication Methods"
+                ],
+                "summary": "Crea un nuevo método de comunicación",
+                "operationId": "791856e92a19701fb5d4eacc59167865",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "method_name"
+                                ],
+                                "properties": {
+                                    "method_name": {
+                                        "type": "string",
+                                        "example": "auditivo"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Creado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 2
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "auditivo"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de Validación (ej. nombre duplicado)"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/communication-methods/{id}": {
+            "put": {
+                "tags": [
+                    "Communication Methods"
+                ],
+                "summary": "Actualiza un método de comunicación existente",
+                "operationId": "2e68ed47667697ce9c687ef5afd16097",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del método",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "method_name"
+                                ],
+                                "properties": {
+                                    "method_name": {
+                                        "type": "string",
+                                        "example": "tactil"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "tactil"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Método no encontrado"
+                    },
+                    "422": {
+                        "description": "Error de Validación"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Communication Methods"
+                ],
+                "summary": "Elimina un método de comunicación",
+                "operationId": "958310d248c43eaffde2adea693342a4",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID del método",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eliminado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Método eliminado correctamente"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Método no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -498,6 +720,14 @@
         {
             "name": "Auth",
             "description": "Autenticación y perfil"
+        },
+        {
+            "name": "Communication Methods",
+            "description": "Gestión de los tipos de interacción (visual, auditivo, táctil)"
+        },
+        {
+            "name": "Administración de Usuarios",
+            "description": "Administración de Usuarios"
         }
     ]
 }
