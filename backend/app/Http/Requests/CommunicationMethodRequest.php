@@ -10,9 +10,6 @@ class CommunicationMethodRequest extends FormRequest
     /**
      * Determine if the user is authorized to make this request.
      * En este caso, solo los administradores pueden crear/actualizar métodos.
-     * (Aunque las rutas ya lo fuerzan, es una buena práctica de seguridad).
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -23,14 +20,11 @@ class CommunicationMethodRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\Rule|array|string>
      */
     public function rules(): array
     {
-        // Obtiene el ID si estamos en una petición PUT/PATCH (Actualización)
-        // El ID viene del segmento de la URL, por ejemplo: /api/communication-methods/5
-        $methodId = $this->route('id');
+        // El ID del método se obtiene del parámetro de la URL, que en tu ruta se llama 'methodId'
+        $methodId = $this->route('methodId'); // <-- CORRECCIÓN AQUÍ
 
         return [
             'method_name' => [
@@ -40,15 +34,14 @@ class CommunicationMethodRequest extends FormRequest
                 'max:50',
                 // Validación de Unicidad:
                 // Ignora el ID del método que se está actualizando (si existe)
-                Rule::unique('communication_methods', 'name')->ignore($methodId),
+                // Se asume que la columna es 'method_name' (el campo) y 'method_id' (la PK)
+                Rule::unique('communication_methods', 'method_name')->ignore($methodId, 'method_id'),
             ],
         ];
     }
 
     /**
      * Personaliza los mensajes de error.
-     *
-     * @return array
      */
     public function messages(): array
     {
@@ -62,11 +55,7 @@ class CommunicationMethodRequest extends FormRequest
     }
     
     /**
-     * Prepara los datos para la validación.
-     * Laravel no diferencia entre mayúsculas y minúsculas en UNIQUE por defecto.
-     * Para asegurar que 'visual' no colisione con 'VISUAL', se recomienda guardarlos en minúsculas.
-     *
-     * @return void
+     * Prepara los datos para la validación (estandarización a minúsculas).
      */
     protected function prepareForValidation(): void
     {
@@ -78,3 +67,4 @@ class CommunicationMethodRequest extends FormRequest
         }
     }
 }
+    

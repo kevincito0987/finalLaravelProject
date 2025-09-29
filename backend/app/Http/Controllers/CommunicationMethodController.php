@@ -3,16 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Core\Services\CommunicationMethodService;
+// Se elimina la inyección de FormRequest
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Validator; // <-- Necesario para validación manual
+use Illuminate\Validation\Rule; // <-- Necesario para la regla unique en update
 
 /**
  * @OA\Tag(
  * name="Communication Methods",
  * description="Endpoints para la gestión de métodos de comunicación (PECS, Lenguaje de Señas, etc.)"
  * )
+ *
+ * Controlador que maneja las peticiones HTTP para los Métodos de Comunicación.
+ * Solo interactúa con el Service de Negocio.
  */
 class CommunicationMethodController extends Controller
 {
@@ -38,7 +42,6 @@ class CommunicationMethodController extends Controller
      * @OA\Items(
      * @OA\Property(property="method_id", type="integer", example=1),
      * @OA\Property(property="method_name", type="string", example="Tarjetas PECS")
-     * )
      * )
      * )
      * )
@@ -121,9 +124,9 @@ class CommunicationMethodController extends Controller
      * @OA\Response(response=422, description="Error de validación (nombre de método duplicado o faltante).")
      * )
      */
-    public function store(Request $request): JsonResponse
+    public function store(Request $request): JsonResponse // <-- REVERTIDO A VALIDACIÓN MANUAL
     {
-        // Validación manual, idealmente con FormRequest
+        // Validación manual, basada en el ejemplo que funciona para POST
         $validator = Validator::make($request->all(), [
             'method_name' => 'required|string|max:100|unique:communication_methods,method_name',
         ]);
@@ -131,7 +134,7 @@ class CommunicationMethodController extends Controller
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
-
+        
         try {
             $method = $this->service->create($request->input('method_name'));
             
@@ -180,24 +183,31 @@ class CommunicationMethodController extends Controller
      * @OA\Response(response=422, description="Error de validación (nombre de método duplicado o faltante).")
      * )
      */
-    public function update(Request $request, int $methodId): JsonResponse
+    public function update(Request $request, int $methodId): JsonResponse // <-- REVERTIDO A VALIDACIÓN MANUAL
     {
-        // Validación de unicidad de 'method_name', ignorando el ID actual
+        // La clave es que la validación debe ser una regla, y no una cadena simple,
+        // para poder usar el Rule::unique con ignore.
         $validator = Validator::make($request->all(), [
             'method_name' => [
                 'required',
                 'string',
                 'max:100',
+                // Validación de unicidad de 'method_name', ignorando el ID actual
                 Rule::unique('communication_methods', 'method_name')->ignore($methodId, 'method_id'),
             ],
         ]);
-
+        
+        // Si la validación falla (ej. campo faltante o nombre duplicado)
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
         try {
-            $method = $this->service->update($methodId, $request->input('method_name'));
+            // Obtenemos el nuevo nombre
+            $newMethodName = $request->input('method_name');
+            
+            // Pasamos el nuevo nombre (que ya sabemos que existe y es válido)
+            $method = $this->service->update($methodId, $newMethodName);
             
             return response()->json([
                 'message' => 'Método actualizado exitosamente.',
