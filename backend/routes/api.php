@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CardController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommunicationMethodController;
 use App\Http\Controllers\SupabaseAuthController;
@@ -73,6 +74,10 @@ Route::middleware(['auth:api', 'role:user,therapist,admin'])->group(function () 
         Route::get('/', [CommunicationMethodController::class, 'index']); // Listar todos
         Route::get('/{methodId}', [CommunicationMethodController::class, 'show']); // Mostrar uno por ID
     });
+    // CARDS: Acceso de lectura (index, show) <-- ¡AÑADIDO!
+    Route::apiResource('cards', CardController::class)->only(['index', 'show']);
+    // Ruta para simulación de RFID/UUID
+    Route::get('cards/uuid/{uuid}', [CardController::class, 'showByUuid']);
 });
 
 
@@ -88,4 +93,7 @@ Route::middleware(['auth:api', 'role:therapist,admin'])->group(function () {
         Route::put('/{methodId}', [CommunicationMethodController::class, 'update']); // Actualizar uno existente
         Route::delete('/{methodId}', [CommunicationMethodController::class, 'destroy']); // Eliminar uno
     });
+    
+    // CARDS: Acceso de escritura (store, update, destroy) <-- ¡AÑADIDO!
+    Route::apiResource('cards', CardController::class)->except(['index', 'show']);
 });

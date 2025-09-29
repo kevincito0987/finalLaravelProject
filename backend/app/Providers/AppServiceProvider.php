@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 use App\Core\Interfaces\CommunicationMethodRepositoryInterface;
+use App\Core\Interfaces\EloquentCardRepository;
 use App\Core\Interfaces\EloquentCategoryRepository;
 use App\Core\Interfaces\UserRepositoryInterface; // Asumo que esta es la ruta correcta para la interfaz del usuario
+use App\Core\Repositories\CardRepositoryInterface;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use App\Core\Repositories\CategoryRepositoryInterface;
@@ -39,6 +41,12 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             CategoryRepositoryInterface::class,
             EloquentCategoryRepository::class
+        );
+
+        // Binding para la Tarjeta de Comunicación
+        $this->app->bind(
+            CardRepositoryInterface::class,
+            EloquentCardRepository::class
         );
         
         // ----------------------------------------------------

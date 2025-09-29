@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Category;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB; // Añadido para inserción masiva si es necesario
+use Illuminate\Support\Facades\DB;
 
 class CategorySeeder extends Seeder
 {
@@ -13,7 +12,6 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        // Define las categorías centrales para la comunicación alternativa
         $categories = [
             ['category_name' => 'Necesidades'],
             ['category_name' => 'Sentimientos'],
@@ -28,17 +26,17 @@ class CategorySeeder extends Seeder
             ['category_name' => 'Emergencias'],
         ];
         
-        // Limpia la tabla y la vuelve a poblar para evitar duplicados en la ejecución de seed
+        // 1. DESHABILITAR temporalmente las comprobaciones de Clave Foránea
+        // Esto permite hacer truncate a una tabla referenciada sin error.
+        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+
+        // 2. Limpia la tabla (Ahora permitido)
         DB::table('categories')->truncate();
 
-        // Inserta todos los datos de una vez para mayor eficiencia
+        // 3. Inserta todos los datos de una vez
         DB::table('categories')->insert($categories);
-        
-        // Opcional: Usando el Modelo para tener acceso a eventos si los hubiera
-        /*
-        foreach ($categories as $category) {
-            Category::create($category);
-        }
-        */
+
+        // 4. RESTABLECER las comprobaciones de Clave Foránea
+        DB::statement('SET FOREIGN_KEY_CHECKS=1');
     }
 }

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Database\Seeders\RoleSeeder;
+use Database\Seeders\CardSeeder;
 use App\Models\User;
 use App\Models\Role;
 
@@ -29,7 +30,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             // Asegúrate de agregar tu nuevo seeder aquí
             CommunicationMethodSeeder::class,
-            CategorySeeder::class
+            CategorySeeder::class,
+            CardSeeder::class
         ]);
     }
 }

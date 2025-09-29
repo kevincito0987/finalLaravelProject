@@ -7,12 +7,14 @@ use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvid
 use Illuminate\Support\Facades\Gate;
 use Laravel\Passport\Passport;
 use App\Policies\CommunicationMethodPolicy;
+use App\Policies\CardPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
     //Policia de las politicas
     protected $policies = [
         CommunicationMethodPolicy::class,
+        CardPolicy::class,
      ];
 
     /**
