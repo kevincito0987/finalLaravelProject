@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommunicationMethodController;
 use App\Http\Controllers\SupabaseAuthController;
 use Illuminate\Support\Facades\Route;
@@ -26,40 +27,65 @@ Route::post('/supabase-auth', [SupabaseAuthController::class, 'handle']);
 // GRUPO DE RUTAS DE AUTENTICACIÓN (Prefijo: /api/auth)
 Route::prefix('auth')->group(function () {
     // ----------------------------------------------------------------------
-    // 1. Rutas Públicas de Auth (Login, Signup) - Funcionan correctamente
+    // 1. Rutas PÚBLICAS de Auth (Login, Signup, Create Roles)
+    // ESTAS RUTAS SON ACCESIBLES SIN TOKEN DE AUTENTICACIÓN
     // ----------------------------------------------------------------------
     Route::post('login', [AuthController::class, 'login'])->name('login');
     Route::post('signup', [AuthController::class, 'signup']);
+    
+    // Rutas de Creación de Roles (AHORA PÚBLICAS)
+    Route::post('create-admin', [AuthController::class, 'createAdmin']); // NO REQUIERE TOKEN NI ROL
+    Route::post('create-therapist', [AuthController::class, 'createTherapist']); // NO REQUIERE TOKEN NI ROL
+    
+    // RUTA DE INICIALIZACIÓN (Si la sigues usando)
+    if (app()->environment('local')) {
+        Route::post('initial-admin', [AuthController::class, 'createInitialAdmin']);
+    }
+
     Route::middleware('auth.supabase')->post('supabase/login', [SupabaseAuthController::class, 'login']);
 
     // ----------------------------------------------------------------------
-    // 2. Rutas Protegidas (Me, Logout)
-    // Se aplican directamente el middleware auth:api
+    // 2. Rutas Protegidas (Me, Logout) - Requieren SOLO autenticación
     // ----------------------------------------------------------------------
     Route::middleware(['auth:api'])->group(function () {
         Route::get('me', [AuthController::class, 'me']);
         Route::post('logout', [AuthController::class, 'logout']);
-        Route::middleware(['role:admin'])->group(function () {
-            Route::post('create-admin', [AuthController::class, 'createAdmin']); 
-            Route::post('create-therapist', [AuthController::class, 'createTherapist']);
-        });
+        
+        // El grupo 'role:admin' ya no contiene las rutas de creación.
+        // Si necesitas otras rutas de admin, puedes dejarlas aquí.
+        // Route::middleware(['role:admin'])->group(function () { ... });
     });
-
 });
 
-Route::prefix('communication-methods')->group(function () {
-    // [GET] /api/communication-methods -> Listar todos
-    Route::get('/', [CommunicationMethodController::class, 'index']);
+
+// -------------------------------------------------------------------------
+// 3. RUTAS PROTEGIDAS DE DATOS Y GESTIÓN (CATEGORIES y COMMUNICATION METHODS)
+// -------------------------------------------------------------------------
+
+// GRUPO DE ACCESO DE LECTURA (GET) - Roles: user, therapist, admin (Todos los autenticados)
+Route::middleware(['auth:api', 'role:user,therapist,admin'])->group(function () {
     
-    // [GET] /api/communication-methods/{id} -> Mostrar uno por ID
-    Route::get('/{methodId}', [CommunicationMethodController::class, 'show']);
+    // CATEGORIES: Acceso de lectura (index, show)
+    Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
+
+    // COMMUNICATION METHODS: Acceso de lectura (index, show)
+    Route::prefix('communication-methods')->group(function () {
+        Route::get('/', [CommunicationMethodController::class, 'index']); // Listar todos
+        Route::get('/{methodId}', [CommunicationMethodController::class, 'show']); // Mostrar uno por ID
+    });
+});
+
+
+// GRUPO DE ACCESO DE ESCRITURA (POST, PUT, DELETE) - Roles: therapist, admin
+Route::middleware(['auth:api', 'role:therapist,admin'])->group(function () {
+
+    // CATEGORIES: Acceso de escritura (store, update, destroy)
+    Route::apiResource('categories', CategoryController::class)->except(['index', 'show']);
     
-    // [POST] /api/communication-methods -> Crear uno nuevo
-    Route::post('/', [CommunicationMethodController::class, 'store']);
-    
-    // [PUT] /api/communication-methods/{id} -> Actualizar uno existente
-    Route::put('/{methodId}', [CommunicationMethodController::class, 'update']);
-    
-    // [DELETE] /api/communication-methods/{id} -> Eliminar uno
-    Route::delete('/{methodId}', [CommunicationMethodController::class, 'destroy']);
+    // COMMUNICATION METHODS: Acceso de escritura (store, update, destroy)
+    Route::prefix('communication-methods')->group(function () {
+        Route::post('/', [CommunicationMethodController::class, 'store']); // Crear uno nuevo
+        Route::put('/{methodId}', [CommunicationMethodController::class, 'update']); // Actualizar uno existente
+        Route::delete('/{methodId}', [CommunicationMethodController::class, 'destroy']); // Eliminar uno
+    });
 });

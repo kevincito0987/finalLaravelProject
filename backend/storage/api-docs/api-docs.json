@@ -489,13 +489,264 @@
                 ]
             }
         },
+        "/categories": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Listar todas las categorías",
+                "description": "Devuelve una lista de todas las categorías disponibles. Acceso: user, admin, therapist.",
+                "operationId": "ead5fb1cf2a7453acb2e37928a1b1eaf",
+                "responses": {
+                    "200": {
+                        "description": "Lista de categorías obtenida con éxito.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "name": {
+                                                "type": "string",
+                                                "example": "Educación"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Crear una nueva categoría",
+                "description": "Crea una nueva categoría. Acceso: admin, therapist.",
+                "operationId": "bb02f0320882db37f99574196577e446",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Salud"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Categoría creada exitosamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 2
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "Salud"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/categories/{id}": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Obtener una categoría por ID",
+                "description": "Devuelve la información de una categoría específica. Acceso: user, admin, therapist.",
+                "operationId": "4cdf41756315109f1efc72787db5830a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Categoría obtenida con éxito.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "Educación"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Categoría no encontrada."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Actualizar una categoría",
+                "description": "Actualiza el nombre de una categoría existente. Acceso: admin, therapist.",
+                "operationId": "19954b1f8aa4916b5f032dc28ea36a24",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Cultura"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Categoría actualizada exitosamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "Cultura"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Categoría no encontrada."
+                    },
+                    "422": {
+                        "description": "Error de validación."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Eliminar una categoría",
+                "description": "Elimina una categoría por su ID. Acceso: admin, therapist.",
+                "operationId": "f1b8af6e84bd52b9594d98bde748ebd6",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Categoría eliminada con éxito."
+                    },
+                    "404": {
+                        "description": "Categoría no encontrada."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/communication-methods": {
             "get": {
                 "tags": [
                     "Communication Methods"
                 ],
                 "summary": "Listar todos los métodos de comunicación",
-                "description": "Devuelve una lista de todos los métodos de comunicación disponibles.",
+                "description": "Devuelve una lista de todos los métodos de comunicación disponibles. Acceso: user, admin, therapist.",
                 "operationId": "42e5b09b4fd53dc6232cb245950fbdaf",
                 "responses": {
                     "200": {
@@ -526,14 +777,19 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
                     "Communication Methods"
                 ],
                 "summary": "Crear un nuevo método",
-                "description": "Crea un nuevo método de comunicación con un nombre único.",
+                "description": "Crea un nuevo método de comunicación con un nombre único. Acceso: admin, therapist.",
                 "operationId": "5b1dba51fe7a81071d072cb38474deae",
                 "requestBody": {
                     "required": true,
@@ -585,9 +841,14 @@
                         }
                     },
                     "422": {
-                        "description": "Error de validación (nombre de método duplicado o faltante)."
+                        "description": "Error de validación."
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/communication-methods/{methodId}": {
@@ -596,13 +857,12 @@
                     "Communication Methods"
                 ],
                 "summary": "Obtener un método por ID",
-                "description": "Devuelve la información de un método de comunicación específico.",
+                "description": "Devuelve la información de un método de comunicación específico. Acceso: user, admin, therapist.",
                 "operationId": "624b7fab77026c4e41f8fa2c30e3f51f",
                 "parameters": [
                     {
                         "name": "methodId",
                         "in": "path",
-                        "description": "ID del método de comunicación a obtener.",
                         "required": true,
                         "schema": {
                             "type": "integer",
@@ -639,20 +899,24 @@
                     "404": {
                         "description": "Método no encontrado."
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
                     "Communication Methods"
                 ],
                 "summary": "Actualizar un método",
-                "description": "Actualiza el nombre de un método de comunicación existente.",
+                "description": "Actualiza el nombre de un método de comunicación existente. Acceso: admin, therapist.",
                 "operationId": "fd3c7338ddfe89e54d3e92dae06c097c",
                 "parameters": [
                     {
                         "name": "methodId",
                         "in": "path",
-                        "description": "ID del método de comunicación a actualizar.",
                         "required": true,
                         "schema": {
                             "type": "integer",
@@ -713,22 +977,26 @@
                         "description": "Método no encontrado."
                     },
                     "422": {
-                        "description": "Error de validación (nombre de método duplicado o faltante)."
+                        "description": "Error de validación."
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
                     "Communication Methods"
                 ],
                 "summary": "Eliminar un método",
-                "description": "Elimina permanentemente un método de comunicación por su ID.",
+                "description": "Elimina permanentemente un método de comunicación por su ID. Acceso: admin, therapist.",
                 "operationId": "2c2d9102271f4b64ec1df96ba1e4e342",
                 "parameters": [
                     {
                         "name": "methodId",
                         "in": "path",
-                        "description": "ID del método de comunicación a eliminar.",
                         "required": true,
                         "schema": {
                             "type": "integer",
@@ -738,12 +1006,17 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "Método eliminado con éxito (No Content)."
+                        "description": "Método eliminado con éxito."
                     },
                     "404": {
                         "description": "Método no encontrado."
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         }
     },
@@ -760,6 +1033,10 @@
         {
             "name": "Auth",
             "description": "Autenticación y perfil"
+        },
+        {
+            "name": "Categories",
+            "description": "Endpoints para la gestión de categorías"
         },
         {
             "name": "Communication Methods",

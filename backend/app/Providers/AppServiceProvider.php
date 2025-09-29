@@ -3,9 +3,11 @@
 namespace App\Providers;
 
 use App\Core\Interfaces\CommunicationMethodRepositoryInterface;
+use App\Core\Interfaces\EloquentCategoryRepository;
+use App\Core\Interfaces\UserRepositoryInterface; // Asumo que esta es la ruta correcta para la interfaz del usuario
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
-use App\Core\Interfaces\UserRepositoryInterface;
+use App\Core\Repositories\CategoryRepositoryInterface;
 use App\Core\Repositories\EloquentCommunicationMethodRepository;
 use App\Core\Repositories\EloquentUserRepository;
 use App\Core\Services\CommunicationMethodService;
@@ -17,13 +19,31 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // ----------------------------------------------------
+        // CÓDIGO CORREGIDO: Un 'bind' por cada par Interfaz/Clase
+        // ----------------------------------------------------
+        
+        // Binding para Usuario
         $this->app->bind(
             UserRepositoryInterface::class,
-            EloquentUserRepository::class,
-            CommunicationMethodRepositoryInterface::class,
-            EloquentCommunicationMethodRepository::class
+            EloquentUserRepository::class // Asume la implementación correcta
         );
+
+        // Binding para Métodos de Comunicación
+        $this->app->bind(
+            CommunicationMethodRepositoryInterface::class,
+            EloquentCommunicationMethodRepository::class // Asume la implementación correcta
+        );
+        
+        // Binding para Categoría (el que estaba fallando)
+        $this->app->bind(
+            CategoryRepositoryInterface::class,
+            EloquentCategoryRepository::class
+        );
+        
+        // ----------------------------------------------------
+        // El resto de tu código queda igual
+        // ----------------------------------------------------
 
         $this->app->singleton(CommunicationMethodService::class, function ($app) {
             return new CommunicationMethodService(
