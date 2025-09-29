@@ -2,37 +2,44 @@
 
 namespace App\Core\Interfaces;
 
-use App\Core\Entities\CommunicationMethodEntity;
+use App\Core\Entities\CommunicationMethod;
 use Illuminate\Support\Collection;
 
 /**
- * Interfaz que define las operaciones CRUD para los métodos de comunicación.
- * Es parte de la capa Core, por lo que no debe depender de Eloquent.
+ * Define el contrato para la persistencia de datos de los Métodos de Comunicación.
+ * Esta interfaz vive en el Core (Capa de Dominio).
  */
 interface CommunicationMethodRepositoryInterface
 {
     /**
      * Obtiene todos los métodos de comunicación.
-     * @return Collection<CommunicationMethodEntity>
+     * @return Collection<CommunicationMethod>
      */
     public function getAll(): Collection;
 
     /**
-     * Encuentra un método por su ID.
+     * Obtiene un método de comunicación por su ID.
      * @param int $id
-     * @return CommunicationMethodEntity|null
+     * @return CommunicationMethod|null
      */
-    public function findById(int $id): ?CommunicationMethodEntity;
+    public function getById(int $id): ?CommunicationMethod;
 
     /**
-     * Guarda o actualiza un método de comunicación.
-     * @param CommunicationMethodEntity $method
-     * @return CommunicationMethodEntity
+     * Crea un nuevo método de comunicación.
+     * @param CommunicationMethod $method
+     * @return CommunicationMethod
      */
-    public function save(CommunicationMethodEntity $method): CommunicationMethodEntity;
+    public function create(CommunicationMethod $method): CommunicationMethod;
 
     /**
-     * Elimina un método por su ID.
+     * Actualiza un método de comunicación existente.
+     * @param CommunicationMethod $method
+     * @return CommunicationMethod
+     */
+    public function update(CommunicationMethod $method): CommunicationMethod;
+
+    /**
+     * Elimina un método de comunicación por su ID.
      * @param int $id
      * @return bool
      */

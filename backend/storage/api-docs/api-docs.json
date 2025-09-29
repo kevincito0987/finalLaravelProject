@@ -489,50 +489,52 @@
                 ]
             }
         },
-        "/api/communication-methods": {
+        "/communication-methods": {
             "get": {
                 "tags": [
                     "Communication Methods"
                 ],
-                "summary": "Obtiene la lista de todos los métodos de comunicación",
-                "operationId": "592183ee0894be293eddcd754fa385dd",
+                "summary": "Listar todos los métodos de comunicación",
+                "description": "Devuelve una lista de todos los métodos de comunicación disponibles.",
+                "operationId": "42e5b09b4fd53dc6232cb245950fbdaf",
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Lista de métodos obtenida con éxito.",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "properties": {
-                                            "id": {
-                                                "type": "integer",
-                                                "example": 1
-                                            },
-                                            "name": {
-                                                "type": "string",
-                                                "example": "visual"
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "method_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "method_name": {
+                                                        "type": "string",
+                                                        "example": "Tarjetas PECS"
+                                                    }
+                                                },
+                                                "type": "object"
                                             }
-                                        },
-                                        "type": "object"
-                                    }
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
                     }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
+                }
             },
             "post": {
                 "tags": [
                     "Communication Methods"
                 ],
-                "summary": "Crea un nuevo método de comunicación",
-                "operationId": "791856e92a19701fb5d4eacc59167865",
+                "summary": "Crear un nuevo método",
+                "description": "Crea un nuevo método de comunicación con un nombre único.",
+                "operationId": "5b1dba51fe7a81071d072cb38474deae",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -544,7 +546,7 @@
                                 "properties": {
                                     "method_name": {
                                         "type": "string",
-                                        "example": "auditivo"
+                                        "example": "Comunicación Aumentativa"
                                     }
                                 },
                                 "type": "object"
@@ -554,18 +556,27 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Creado",
+                        "description": "Método creado exitosamente.",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "id": {
-                                            "type": "integer",
-                                            "example": 2
-                                        },
-                                        "name": {
+                                        "message": {
                                             "type": "string",
-                                            "example": "auditivo"
+                                            "example": "Método creado exitosamente."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "method_id": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "method_name": {
+                                                    "type": "string",
+                                                    "example": "Comunicación Aumentativa"
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -574,28 +585,74 @@
                         }
                     },
                     "422": {
-                        "description": "Error de Validación (ej. nombre duplicado)"
+                        "description": "Error de validación (nombre de método duplicado o faltante)."
                     }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
+                }
             }
         },
-        "/api/communication-methods/{id}": {
+        "/communication-methods/{methodId}": {
+            "get": {
+                "tags": [
+                    "Communication Methods"
+                ],
+                "summary": "Obtener un método por ID",
+                "description": "Devuelve la información de un método de comunicación específico.",
+                "operationId": "624b7fab77026c4e41f8fa2c30e3f51f",
+                "parameters": [
+                    {
+                        "name": "methodId",
+                        "in": "path",
+                        "description": "ID del método de comunicación a obtener.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Método obtenido con éxito.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "method_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "method_name": {
+                                                    "type": "string",
+                                                    "example": "Tarjetas PECS"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Método no encontrado."
+                    }
+                }
+            },
             "put": {
                 "tags": [
                     "Communication Methods"
                 ],
-                "summary": "Actualiza un método de comunicación existente",
-                "operationId": "2e68ed47667697ce9c687ef5afd16097",
+                "summary": "Actualizar un método",
+                "description": "Actualiza el nombre de un método de comunicación existente.",
+                "operationId": "fd3c7338ddfe89e54d3e92dae06c097c",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "methodId",
                         "in": "path",
-                        "description": "ID del método",
+                        "description": "ID del método de comunicación a actualizar.",
                         "required": true,
                         "schema": {
                             "type": "integer",
@@ -614,7 +671,7 @@
                                 "properties": {
                                     "method_name": {
                                         "type": "string",
-                                        "example": "tactil"
+                                        "example": "Señas Colombianas"
                                     }
                                 },
                                 "type": "object"
@@ -624,18 +681,27 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Actualizado",
+                        "description": "Método actualizado exitosamente.",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "id": {
-                                            "type": "integer",
-                                            "example": 1
-                                        },
-                                        "name": {
+                                        "message": {
                                             "type": "string",
-                                            "example": "tactil"
+                                            "example": "Método actualizado exitosamente."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "method_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "method_name": {
+                                                    "type": "string",
+                                                    "example": "Señas Colombianas"
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -644,29 +710,25 @@
                         }
                     },
                     "404": {
-                        "description": "Método no encontrado"
+                        "description": "Método no encontrado."
                     },
                     "422": {
-                        "description": "Error de Validación"
+                        "description": "Error de validación (nombre de método duplicado o faltante)."
                     }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
+                }
             },
             "delete": {
                 "tags": [
                     "Communication Methods"
                 ],
-                "summary": "Elimina un método de comunicación",
-                "operationId": "958310d248c43eaffde2adea693342a4",
+                "summary": "Eliminar un método",
+                "description": "Elimina permanentemente un método de comunicación por su ID.",
+                "operationId": "2c2d9102271f4b64ec1df96ba1e4e342",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "methodId",
                         "in": "path",
-                        "description": "ID del método",
+                        "description": "ID del método de comunicación a eliminar.",
                         "required": true,
                         "schema": {
                             "type": "integer",
@@ -675,35 +737,13 @@
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "Eliminado",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "example": "success"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Método eliminado correctamente"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                    "204": {
+                        "description": "Método eliminado con éxito (No Content)."
                     },
                     "404": {
-                        "description": "Método no encontrado"
+                        "description": "Método no encontrado."
                     }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
+                }
             }
         }
     },
@@ -723,7 +763,7 @@
         },
         {
             "name": "Communication Methods",
-            "description": "Gestión de los tipos de interacción (visual, auditivo, táctil)"
+            "description": "Endpoints para la gestión de métodos de comunicación (PECS, Lenguaje de Señas, etc.)"
         },
         {
             "name": "Administración de Usuarios",

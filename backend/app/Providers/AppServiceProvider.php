@@ -2,10 +2,13 @@
 
 namespace App\Providers;
 
+use App\Core\Interfaces\CommunicationMethodRepositoryInterface;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
-use App\Core\Interfaces\UserRepositoryInterface; 
+use App\Core\Interfaces\UserRepositoryInterface;
+use App\Core\Repositories\EloquentCommunicationMethodRepository;
 use App\Core\Repositories\EloquentUserRepository;
+use App\Core\Services\CommunicationMethodService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -17,8 +20,16 @@ class AppServiceProvider extends ServiceProvider
         //
         $this->app->bind(
             UserRepositoryInterface::class,
-            EloquentUserRepository::class
+            EloquentUserRepository::class,
+            CommunicationMethodRepositoryInterface::class,
+            EloquentCommunicationMethodRepository::class
         );
+
+        $this->app->singleton(CommunicationMethodService::class, function ($app) {
+            return new CommunicationMethodService(
+                $app->make(CommunicationMethodRepositoryInterface::class)
+            );
+        });
     }
 
     /**

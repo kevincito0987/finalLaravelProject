@@ -2,85 +2,72 @@
 
 namespace App\Core\Repositories;
 
+use App\Core\Entities\CommunicationMethod;
 use App\Core\Interfaces\CommunicationMethodRepositoryInterface;
-use App\Core\Entities\CommunicationMethodEntity;
+use App\Models\CommunicationMethod as EloquentCommunicationMethodModel;
 use Illuminate\Support\Collection;
-use App\Models\CommunicationMethod;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+
 /**
- * Implementación del Repositorio de Métodos de Comunicación usando Eloquent ORM.
- * Esta clase mapea entre Modelos Eloquent y Entidades de Core.
+ * Implementación concreta del repositorio usando Eloquent (Laravel).
+ * Convierte modelos de Eloquent a Entidades de Dominio y viceversa.
  */
 class EloquentCommunicationMethodRepository implements CommunicationMethodRepositoryInterface
 {
     /**
-     * Convierte un Modelo Eloquent a una Entidad de Core.
-     * @param CommunicationMethod $model
-     * @return CommunicationMethodEntity
+     * Mapea un modelo de Eloquent a una Entidad de Dominio.
      */
-    private function toEntity(CommunicationMethod $model): CommunicationMethodEntity
+    private function mapToEntity(EloquentCommunicationMethodModel $model): CommunicationMethod
     {
-        return new CommunicationMethodEntity(
-            id: $model->method_id,
-            name: $model->method_name
+        // Solución al TypeError: Nos aseguramos de que method_name se convierta a string
+        return new CommunicationMethod(
+            $model->method_id,
+            (string) $model->method_name // Forzamos la conversión a string
         );
     }
 
-    /**
-     * Obtiene todos los métodos.
-     * @return Collection<CommunicationMethodEntity>
-     */
     public function getAll(): Collection
     {
-        return CommunicationMethod::all()->map(fn ($model) => $this->toEntity($model));
+        return EloquentCommunicationMethodModel::all()->map(function ($model) {
+            return $this->mapToEntity($model);
+        });
     }
 
-    /**
-     * Encuentra un método por su ID.
-     * @param int $id
-     * @return CommunicationMethodEntity|null
-     */
-    public function findById(int $id): ?CommunicationMethodEntity
+    public function getById(int $id): ?CommunicationMethod
     {
-        $model = CommunicationMethod::find($id);
+        $model = EloquentCommunicationMethodModel::find($id);
         
-        return $model ? $this->toEntity($model) : null;
+        return $model ? $this->mapToEntity($model) : null;
     }
 
-    /**
-     * Guarda o actualiza un método de comunicación.
-     * @param CommunicationMethodEntity $entity
-     * @return CommunicationMethodEntity
-     */
-    public function save(CommunicationMethodEntity $entity): CommunicationMethodEntity
+    public function create(CommunicationMethod $method): CommunicationMethod
     {
-        if ($entity->id) {
-            // Actualizar
-            $model = CommunicationMethod::find($entity->id);
-            if (!$model) {
-                // Lanza una excepción si el ID no existe (opcional, el servicio podría manejar esto)
-                throw new \Exception("Communication Method with ID {$entity->id} not found.");
-            }
-        } else {
-            // Crear
-            $model = new CommunicationMethod();
-        }
+        $model = EloquentCommunicationMethodModel::create([
+            'method_name' => $method->methodName,
+        ]);
 
-        $model->method_name = $entity->name;
-        $model->save();
-
-        // Asegurar que la entidad devuelta contenga el ID (si fue una creación)
-        $entity->id = $model->method_id; 
-
-        return $entity;
+        return $this->mapToEntity($model);
     }
 
-    /**
-     * Elimina un método por su ID.
-     * @param int $id
-     * @return bool
-     */
+    public function update(CommunicationMethod $method): CommunicationMethod
+    {
+        try {
+            $model = EloquentCommunicationMethodModel::findOrFail($method->methodId); 
+            
+            $model->update([
+                'method_name' => $method->methodName,
+            ]);
+
+            return $this->mapToEntity($model);
+
+        } catch (ModelNotFoundException $e) {
+            // Lanza una excepción más genérica para que el Service pueda manejarla
+            throw new \Exception('Communication method not found for update.', 404); 
+        }
+    }
+
     public function delete(int $id): bool
     {
-        return CommunicationMethod::destroy($id) > 0;
+        return EloquentCommunicationMethodModel::destroy($id) > 0;
     }
 }

@@ -27,7 +27,10 @@ class DatabaseSeeder extends Seeder
             $user->roles()->syncWithoutDetaching([$viewerRole->id]);
         }
 
-        // Finalmente los posts
-        // $this->call(PostSeeder::class);
+        $this->call([
+            // Asegúrate de agregar tu nuevo seeder aquí
+            CommunicationMethodSeeder::class,
+            // Aquí puedes añadir otros seeders como UserSeeder, CardSeeder, etc.
+        ]);
     }
 }

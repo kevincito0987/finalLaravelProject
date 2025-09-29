@@ -47,14 +47,19 @@ Route::prefix('auth')->group(function () {
 
 });
 
-Route::get('/communication-methods', [CommunicationMethodController::class, 'index'])->middleware('auth:api');
-
-Route::post('/communication-methods', [CommunicationMethodController::class, 'store'])->middleware('auth:api');
-
-Route::put('/communication-methods/{id}', [CommunicationMethodController::class, 'update'])->middleware('auth:api');
-
-Route::delete('/communication-methods/{id}', [CommunicationMethodController::class, 'destroy'])->middleware('auth:api');
-
-Route::post('/media/upload', [MediaController::class, 'upload']);
-Route::get('/media', [MediaController::class, 'index']);
-Route::delete('/media/{id}', [MediaController::class, 'destroy']);
+Route::prefix('communication-methods')->group(function () {
+    // [GET] /api/communication-methods -> Listar todos
+    Route::get('/', [CommunicationMethodController::class, 'index']);
+    
+    // [GET] /api/communication-methods/{id} -> Mostrar uno por ID
+    Route::get('/{methodId}', [CommunicationMethodController::class, 'show']);
+    
+    // [POST] /api/communication-methods -> Crear uno nuevo
+    Route::post('/', [CommunicationMethodController::class, 'store']);
+    
+    // [PUT] /api/communication-methods/{id} -> Actualizar uno existente
+    Route::put('/{methodId}', [CommunicationMethodController::class, 'update']);
+    
+    // [DELETE] /api/communication-methods/{id} -> Eliminar uno
+    Route::delete('/{methodId}', [CommunicationMethodController::class, 'destroy']);
+});
