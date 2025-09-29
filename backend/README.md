@@ -27,10 +27,12 @@ La organización refleja las capas de la Arquitectura Limpia, manteniendo el ord
 ```
 .Backend
 ├── app/ 📂                     # 🧠 El núcleo de la aplicación con la Arquitectura Limpia
+│   ├── Console/ 🧠                # El núcleo de la aplicación que gestiona conexion con buckets de almacenamiento.
 │   ├── Core/ 🧠                # El núcleo de la aplicación, independiente de Laravel
 │   │   ├── Entities/ 🛡️        # Las reglas de negocio (tarjetas, usuarios, etc.)
 │   │   ├── Repositories/ 🗄️    # Interfaces para la capa de persistencia
 │   │   ├── Services/ ⚙️         # Lógica de negocio reusable
+│   │   └── Interfaces/ ♟️        # Implementaciones del Repository con interfaces
 │   │   └── Strategies/ ♟️        # Implementaciones del Strategy Pattern
 │   ├── Http/ 🌐                # La capa de comunicación (Controllers, Requests)
 │   │   ├── Controllers/ 🌐      # Controladores que manejan las peticiones
