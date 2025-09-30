@@ -30,4 +30,14 @@ class Card extends Model
     {
         return $this->belongsTo(CommunicationMethod::class, 'method_id', 'method_id');
     }
+
+    public function lessons()
+    {
+        return $this->belongsToMany(Lesson::class, 
+            'lesson_cards',           // Nombre de la tabla pivote
+            'card_id',                // Clave foránea en la tabla pivote que pertenece a Card
+            'lesson_id'               // Clave foránea en la tabla pivote que pertenece a Lesson
+        )
+        ->withPivot('order_in_lesson');
+    }
 }

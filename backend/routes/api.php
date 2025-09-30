@@ -6,7 +6,8 @@ use App\Http\Controllers\CardTranslationController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommunicationMethodController;
 use App\Http\Controllers\SupabaseAuthController;
-use App\Http\Controllers\LessonController; // <-- AÑADIDO
+use App\Http\Controllers\LessonController;
+use App\Http\Controllers\LessonCardController; // <-- CORRECTO: Importa el controlador
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MediaController;
 
@@ -31,16 +32,13 @@ Route::post('/supabase-auth', [SupabaseAuthController::class, 'handle']);
 Route::prefix('auth')->group(function () {
     // ----------------------------------------------------------------------
     // 1. Rutas PÚBLICAS de Auth (Login, Signup, Create Roles)
-    // ESTAS RUTAS SON ACCESIBLES SIN TOKEN DE AUTENTICACIÓN
     // ----------------------------------------------------------------------
     Route::post('login', [AuthController::class, 'login'])->name('login');
     Route::post('signup', [AuthController::class, 'signup']);
     
-    // Rutas de Creación de Roles (AHORA PÚBLICAS)
-    Route::post('create-admin', [AuthController::class, 'createAdmin']); // NO REQUIERE TOKEN NI ROL
-    Route::post('create-therapist', [AuthController::class, 'createTherapist']); // NO REQUIERE TOKEN NI ROL
+    Route::post('create-admin', [AuthController::class, 'createAdmin']);
+    Route::post('create-therapist', [AuthController::class, 'createTherapist']);
     
-    // RUTA DE INICIALIZACIÓN (Si la sigues usando)
     if (app()->environment('local')) {
         Route::post('initial-admin', [AuthController::class, 'createInitialAdmin']);
     }
@@ -53,19 +51,15 @@ Route::prefix('auth')->group(function () {
     Route::middleware(['auth:api'])->group(function () {
         Route::get('me', [AuthController::class, 'me']);
         Route::post('logout', [AuthController::class, 'logout']);
-        
-        // El grupo 'role:admin' ya no contiene las rutas de creación.
-        // Si necesitas otras rutas de admin, puedes dejarlas aquí.
-        // Route::middleware(['role:admin'])->group(function () { ... });
     });
 });
 
 
 // -------------------------------------------------------------------------
-// 3. RUTAS PROTEGIDAS DE DATOS Y GESTIÓN (CATEGORIES y COMMUNICATION METHODS)
+// 3. RUTAS PROTEGIDAS DE DATOS Y GESTIÓN
 // -------------------------------------------------------------------------
 
-// GRUPO DE ACCESO DE LECTURA (GET) - Roles: user, therapist, admin (Todos los autenticados)
+// GRUPO DE ACCESO DE LECTURA (GET) - Roles: user, therapist, admin
 Route::middleware(['auth:api', 'role:user,therapist,admin'])->group(function () {
     
     // CATEGORIES: Acceso de lectura (index, show)
@@ -73,43 +67,63 @@ Route::middleware(['auth:api', 'role:user,therapist,admin'])->group(function () 
 
     // COMMUNICATION METHODS: Acceso de lectura (index, show)
     Route::prefix('communication-methods')->group(function () {
-        Route::get('/', [CommunicationMethodController::class, 'index']); // Listar todos
-        Route::get('/{methodId}', [CommunicationMethodController::class, 'show']); // Mostrar uno por ID
+        Route::get('/', [CommunicationMethodController::class, 'index']);
+        Route::get('/{methodId}', [CommunicationMethodController::class, 'show']);
     });
     
     // CARDS: Acceso de lectura (index, show)
     Route::apiResource('cards', CardController::class)->only(['index', 'show']);
-    // Ruta para simulación de RFID/UUID
     Route::get('cards/uuid/{uuid}', [CardController::class, 'showByUuid']);
 
     // CARD TRANSLATIONS: Acceso de lectura (index, show)
     Route::apiResource('card-translations', CardTranslationController::class)->only(['index', 'show']);
 
-    // LESSONS: Acceso de lectura (index, show) <-- AÑADIDO
+    // LESSONS: Acceso de lectura (index, show)
     Route::apiResource('lessons', LessonController::class)->only(['index', 'show']);
+    
+    // LESSON CARDS: Acceso de lectura (index, show) <-- ATENCIÓN: RUTA MODIFICADA
+    // Reemplazamos apiResource para show, ya que requiere 2 IDs.
+    Route::get('lesson-cards', [LessonCardController::class, 'index']); 
+    // Show con claves compuestas: /api/lesson-cards/{lesson_id}/{card_id}
+    Route::get('lesson-cards/{lesson_id}/{card_id}', [LessonCardController::class, 'show']);
 });
 
 
 // GRUPO DE ACCESO DE ESCRITURA (POST, PUT, DELETE) - Roles: therapist, admin
-// Requiere autenticación y el rol especificado.
 Route::middleware(['auth:api', 'role:therapist,admin'])->group(function () {
 
-    // CATEGORIES: Acceso de escritura (store, update, destroy)
+    // CATEGORIES: Acceso de escritura
     Route::apiResource('categories', CategoryController::class)->except(['index', 'show']);
     
-    // COMMUNICATION METHODS: Acceso de escritura (store, update, destroy)
+    // COMMUNICATION METHODS: Acceso de escritura
     Route::prefix('communication-methods')->group(function () {
-        Route::post('/', [CommunicationMethodController::class, 'store']); // Crear uno nuevo
-        Route::put('/{methodId}', [CommunicationMethodController::class, 'update']); // Actualizar uno existente
-        Route::delete('/{methodId}', [CommunicationMethodController::class, 'destroy']); // Eliminar uno
+        Route::post('/', [CommunicationMethodController::class, 'store']);
+        Route::put('/{methodId}', [CommunicationMethodController::class, 'update']);
+        Route::delete('/{methodId}', [CommunicationMethodController::class, 'destroy']);
     });
     
-    // CARDS: Acceso de escritura (store, update, destroy)
+    // CARDS: Acceso de escritura
     Route::apiResource('cards', CardController::class)->except(['index', 'show']);
 
-    // CARD TRANSLATIONS: Acceso de escritura (store, update, destroy)
+    // CARD TRANSLATIONS: Acceso de escritura
     Route::apiResource('card-translations', CardTranslationController::class)->except(['index', 'show']);
 
-    // LESSONS: Acceso de escritura (store, update, destroy) <-- AÑADIDO
+    // LESSONS: Acceso de escritura
     Route::apiResource('lessons', LessonController::class)->except(['index', 'show']);
+    
+    // LESSON CARDS: Acceso de escritura <-- ATENCIÓN: RUTAS MODIFICADAS
+    
+    // Store solo requiere el endpoint base.
+    Route::post('lesson-cards', [LessonCardController::class, 'store']);
+    
+    // Update con claves compuestas: /api/lesson-cards/{lesson_id}/{card_id}
+    Route::put('lesson-cards/{lesson_id}/{card_id}', [LessonCardController::class, 'update']); 
+    Route::patch('lesson-cards/{lesson_id}/{card_id}', [LessonCardController::class, 'update']);
+    
+    // Delete con claves compuestas: /api/lesson-cards/{lesson_id}/{card_id}
+    Route::delete('lesson-cards/{lesson_id}/{card_id}', [LessonCardController::class, 'destroy']);
+    
+    // Nota: El apiResource anterior que borraste era:
+    // Route::apiResource('lesson-cards', LessonCardController::class)->except(['index', 'show']);
+    // Al haberlo reemplazado por las rutas manuales, se soluciona el problema de los argumentos.
 });

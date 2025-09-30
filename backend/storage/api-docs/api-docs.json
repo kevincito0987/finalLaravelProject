@@ -1547,6 +1547,256 @@
                 ]
             }
         },
+        "/api/lesson-cards": {
+            "get": {
+                "tags": [
+                    "LessonCard"
+                ],
+                "summary": "Obtiene la lista de todas las asociaciones LessonCard",
+                "description": "Muestra una lista de todas las asociaciones, opcionalmente filtrada por ID de lección.",
+                "operationId": "getLessonCardsList",
+                "parameters": [
+                    {
+                        "name": "lesson_id_sesion",
+                        "in": "query",
+                        "description": "Filtra las asociaciones por el ID de la lección.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 101
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de LessonCard obtenida exitosamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Lista de asociaciones LessonCard obtenida exitosamente."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/LessonCard"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Error interno del servidor"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "LessonCard"
+                ],
+                "summary": "Crea una nueva asociación LessonCard",
+                "description": "Asocia una Card existente a una Lesson existente y establece su orden.",
+                "operationId": "storeLessonCard",
+                "requestBody": {
+                    "description": "Datos de la asociación a crear (ID de lección, ID de tarjeta y orden)",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreLessonCardRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Asociación LessonCard creada exitosamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Asociación LessonCard creada exitosamente."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/LessonCard"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    },
+                    "500": {
+                        "description": "Error al crear la asociación"
+                    }
+                }
+            }
+        },
+        "/api/lesson-cards/{lessonId}": {
+            "get": {
+                "tags": [
+                    "LessonCard"
+                ],
+                "summary": "Obtiene todas las tarjetas para una lección específica",
+                "description": "Recupera todas las asociaciones LessonCard ordenadas por 'order_in_lesson' para el lessonId dado.",
+                "operationId": "getLessonCardsByLesson",
+                "parameters": [
+                    {
+                        "name": "lessonId",
+                        "in": "path",
+                        "description": "ID de la Lección (Lesson) cuyas tarjetas se quieren recuperar.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 101
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Asociaciones recuperadas exitosamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Asociaciones LessonCard recuperadas exitosamente."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/LessonCard"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No se encontraron asociaciones para la lección."
+                    },
+                    "500": {
+                        "description": "Error interno del servidor"
+                    }
+                }
+            }
+        },
+        "/api/lesson-cards/{lesson_id}/{card_id}": {
+            "patch": {
+                "tags": [
+                    "LessonCard"
+                ],
+                "summary": "Actualiza el orden de una asociación LessonCard",
+                "description": "Actualiza el campo 'order_in_lesson' para una LessonCard específica, identificada por sus IDs compuestos.",
+                "operationId": "updateLessonCardOrder",
+                "parameters": [
+                    {
+                        "name": "lesson_id",
+                        "in": "path",
+                        "description": "ID de la Lección.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 101
+                        }
+                    },
+                    {
+                        "name": "card_id",
+                        "in": "path",
+                        "description": "ID de la Tarjeta.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 205
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Nuevo orden para la tarjeta.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateLessonCardRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Orden de LessonCard actualizado exitosamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "LessonCard actualizada exitosamente."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/LessonCard"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Asociación LessonCard no encontrada."
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    }
+                }
+            }
+        },
+        "/api/lesson-cards/{id}": {
+            "delete": {
+                "tags": [
+                    "LessonCard"
+                ],
+                "summary": "Elimina una asociación LessonCard",
+                "description": "Elimina una LessonCard específica por su clave primaria (ID).",
+                "operationId": "deleteLessonCard",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID primario del registro LessonCard (no los IDs compuestos).",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 45
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Asociación LessonCard eliminada exitosamente (No Content)."
+                    },
+                    "404": {
+                        "description": "Asociación LessonCard no encontrada."
+                    },
+                    "500": {
+                        "description": "Error al eliminar la asociación"
+                    }
+                }
+            }
+        },
         "/lessons": {
             "get": {
                 "tags": [
@@ -2009,6 +2259,35 @@
                 },
                 "type": "object"
             },
+            "StoreLessonCardRequest": {
+                "title": "Store Lesson Card Request",
+                "description": "Datos necesarios para crear una nueva asociación LessonCard (agregar una tarjeta a una lección).",
+                "required": [
+                    "lesson_id_sesion",
+                    "card_id_sesion",
+                    "order_in_lesson"
+                ],
+                "properties": {
+                    "lesson_id_sesion": {
+                        "description": "ID de la lección (Lesson) a la que se vinculará la tarjeta. Debe existir en la tabla 'lessons' bajo la columna 'lesson_id'.",
+                        "type": "integer",
+                        "example": 101
+                    },
+                    "card_id_sesion": {
+                        "description": "ID de la tarjeta (Card) que se vinculará a la lección. Debe existir en la tabla 'cards' bajo la columna 'card_id'.",
+                        "type": "integer",
+                        "example": 205
+                    },
+                    "order_in_lesson": {
+                        "description": "Posición u orden que tendrá la tarjeta dentro de la lección.",
+                        "type": "integer",
+                        "format": "int32",
+                        "minimum": 0,
+                        "example": 3
+                    }
+                },
+                "type": "object"
+            },
             "StoreLessonRequest": {
                 "title": "Store Lesson Request",
                 "description": "Datos requeridos para crear una nueva lección.",
@@ -2104,6 +2383,23 @@
                         "description": "Nuevo nombre único de la categoría. Se mapea a la columna 'category_name' en la base de datos.",
                         "type": "string",
                         "example": "Emociones"
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateLessonCardRequest": {
+                "title": "Update Lesson Card Request",
+                "description": "Datos necesarios para actualizar el orden de una tarjeta dentro de una lección.",
+                "required": [
+                    "order_in_lesson"
+                ],
+                "properties": {
+                    "order_in_lesson": {
+                        "description": "Nueva posición u orden que tendrá la tarjeta dentro de la lección.",
+                        "type": "integer",
+                        "format": "int32",
+                        "minimum": 0,
+                        "example": 5
                     }
                 },
                 "type": "object"
@@ -2249,6 +2545,29 @@
                     "name": "CardTranslationResource"
                 }
             },
+            "LessonCardResource": {
+                "title": "LessonCard Resource",
+                "description": "Define la estructura de la asociación LessonCard, incluyendo la tarjeta completa.",
+                "properties": {
+                    "orderInLesson": {
+                        "description": "Posición ordinal de la tarjeta dentro de la lección.",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "lessonId": {
+                        "description": "ID de la lección a la que pertenece esta asociación.",
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "cardData": {
+                        "$ref": "#/components/schemas/CardResource"
+                    }
+                },
+                "type": "object",
+                "xml": {
+                    "name": "LessonCardResource"
+                }
+            },
             "LessonResource": {
                 "title": "Lesson Resource",
                 "description": "Estructura de la respuesta para una lección.",
@@ -2272,6 +2591,43 @@
                         "description": "Tipo de contenido de la lección (e.g., 'video', 'lectura').",
                         "type": "string",
                         "example": "video"
+                    }
+                },
+                "type": "object"
+            },
+            "LessonCard": {
+                "title": "Lesson Card Association",
+                "description": "Representa la asociación entre una Lección y una Tarjeta, incluyendo su orden.",
+                "properties": {
+                    "id": {
+                        "description": "ID primario del registro de asociación.",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "lesson_id": {
+                        "description": "ID de la Lección asociada.",
+                        "type": "integer",
+                        "example": 101
+                    },
+                    "card_id": {
+                        "description": "ID de la Tarjeta asociada.",
+                        "type": "integer",
+                        "example": 205
+                    },
+                    "order_in_lesson": {
+                        "description": "Orden de la tarjeta dentro de la lección.",
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "created_at": {
+                        "description": "Fecha de creación.",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "description": "Fecha de última actualización.",
+                        "type": "string",
+                        "format": "date-time"
                     }
                 },
                 "type": "object"
@@ -2305,6 +2661,10 @@
         {
             "name": "Communication Methods",
             "description": "Endpoints para la gestión de métodos de comunicación (PECS, Lenguaje de Señas, etc.)"
+        },
+        {
+            "name": "LessonCard",
+            "description": "Gestión de la asociación de tarjetas a lecciones (LessonCard - Tabla pivote)."
         },
         {
             "name": "Lessons",

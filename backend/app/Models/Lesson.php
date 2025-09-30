@@ -41,4 +41,17 @@ class Lesson extends Model
         'description', 
         'lessonType',
     ];
+
+    public function cards()
+    {
+        // En este ejemplo, el tercer y cuarto parámetro son opcionales si sigues las convenciones
+        // pero especificarlos es más seguro dada tu estructura de PK personalizadas.
+        // Si no usas el modelo Card, esto no causará error, pero es buena práctica.
+        return $this->belongsToMany(Card::class, 
+            'lesson_cards',           // Nombre de la tabla pivote
+            'lesson_id',              // Clave foránea en la tabla pivote que pertenece a Lesson
+            'card_id'                 // Clave foránea en la tabla pivote que pertenece a Card
+        )
+        ->withPivot('order_in_lesson');
+    }
 }

@@ -9,6 +9,8 @@ use Laravel\Passport\Passport;
 use App\Policies\CommunicationMethodPolicy;
 use App\Policies\CardPolicy;
 use App\Policies\CardTranslationPolicy;
+use App\Policies\LessonCardPolicy;
+use App\Policies\LessonPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -16,7 +18,9 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         CommunicationMethodPolicy::class,
         CardPolicy::class,
-        CardTranslationPolicy::class
+        CardTranslationPolicy::class,
+        LessonPolicy::class,
+        LessonCardPolicy::class
      ];
 
     /**
