@@ -6,6 +6,7 @@ use App\Http\Controllers\CardTranslationController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommunicationMethodController;
 use App\Http\Controllers\SupabaseAuthController;
+use App\Http\Controllers\LessonController; // <-- AÑADIDO
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MediaController;
 
@@ -76,13 +77,16 @@ Route::middleware(['auth:api', 'role:user,therapist,admin'])->group(function () 
         Route::get('/{methodId}', [CommunicationMethodController::class, 'show']); // Mostrar uno por ID
     });
     
-    // CARDS: Acceso de lectura (index, show) <-- ¡AÑADIDO!
+    // CARDS: Acceso de lectura (index, show)
     Route::apiResource('cards', CardController::class)->only(['index', 'show']);
     // Ruta para simulación de RFID/UUID
     Route::get('cards/uuid/{uuid}', [CardController::class, 'showByUuid']);
 
-    // CARD TRANSLATIONS: Acceso de lectura (index, show) <-- ¡RUTA FALTANTE AÑADIDA!
+    // CARD TRANSLATIONS: Acceso de lectura (index, show)
     Route::apiResource('card-translations', CardTranslationController::class)->only(['index', 'show']);
+
+    // LESSONS: Acceso de lectura (index, show) <-- AÑADIDO
+    Route::apiResource('lessons', LessonController::class)->only(['index', 'show']);
 });
 
 
@@ -103,6 +107,9 @@ Route::middleware(['auth:api', 'role:therapist,admin'])->group(function () {
     // CARDS: Acceso de escritura (store, update, destroy)
     Route::apiResource('cards', CardController::class)->except(['index', 'show']);
 
-    // CARD TRANSLATIONS: Acceso de escritura (store, update, destroy) <-- ¡USANDO apiResource!
+    // CARD TRANSLATIONS: Acceso de escritura (store, update, destroy)
     Route::apiResource('card-translations', CardTranslationController::class)->except(['index', 'show']);
+
+    // LESSONS: Acceso de escritura (store, update, destroy) <-- AÑADIDO
+    Route::apiResource('lessons', LessonController::class)->except(['index', 'show']);
 });

@@ -20,6 +20,10 @@ use App\Core\Services\MediaUploader;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
+// Nuevos Imports necesarios para la Entidad Lección
+use App\Core\Repositories\LessonRepositoryInterface;
+use App\Core\Interfaces\EloquentLessonRepository;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -60,6 +64,13 @@ class AppServiceProvider extends ServiceProvider
             CardTranslationRepositoryInterface::class,
             EloquentCardTranslationRepository::class
         );
+        
+        // Lección (Lesson) - ¡NUEVO BINDING!
+        $this->app->bind(
+            LessonRepositoryInterface::class,
+            EloquentLessonRepository::class
+        );
+
 
         // ----------------------------------------------------
         // 2. BINDING PARA STORAGE (Resuelve el BindingResolutionException)
@@ -96,6 +107,15 @@ class AppServiceProvider extends ServiceProvider
                 $app->make(MediaUploader::class) // Ya está resuelto como Singleton arriba
             );
         });
+
+        // Nota: LessonService se podría añadir aquí, si ya lo tuviéramos definido:
+        /*
+        $this->app->singleton(LessonService::class, function ($app) {
+            return new LessonService(
+                $app->make(LessonRepositoryInterface::class)
+            );
+        });
+        */
     }
 
     /**

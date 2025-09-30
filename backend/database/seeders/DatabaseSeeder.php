@@ -33,6 +33,7 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             CardSeeder::class,
             CardTranslationSeeder::class,
+            LessonSeeder::class,
         ]);
     }
 }

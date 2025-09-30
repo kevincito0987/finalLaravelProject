@@ -1534,6 +1534,266 @@
                 ]
             }
         },
+        "/lessons": {
+            "get": {
+                "tags": [
+                    "Lessons"
+                ],
+                "summary": "Listar todas las lecciones",
+                "description": "Devuelve una lista paginada de todas las lecciones. Acceso: user, admin, therapist.",
+                "operationId": "e1abe40dbd1870d06943517976c11507",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de lecciones obtenida con éxito.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/LessonResource"
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Lessons"
+                ],
+                "summary": "Crear una nueva lección",
+                "description": "Crea una nueva lección. Acceso: admin, therapist.",
+                "operationId": "b196bee153377a601911ff0db5a9aa01",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "lessonName",
+                                    "description",
+                                    "lessonType"
+                                ],
+                                "properties": {
+                                    "lessonName": {
+                                        "type": "string",
+                                        "example": "Introducción a la Terapia"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Lección básica sobre conceptos fundamentales."
+                                    },
+                                    "lessonType": {
+                                        "type": "string",
+                                        "example": "video"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Lección creada exitosamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LessonResource"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "No autorizado. Solo 'admin' o 'therapist'."
+                    },
+                    "422": {
+                        "description": "Error de validación."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/lessons/{id}": {
+            "get": {
+                "tags": [
+                    "Lessons"
+                ],
+                "summary": "Obtener una lección por ID",
+                "description": "Devuelve la información de una lección específica. Acceso: user, admin, therapist.",
+                "operationId": "49d538c9b889afd72be7ab2f57ad1fc1",
+                "parameters": [
+                    {
+                        "name": "lesson",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lección obtenida con éxito.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LessonResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Lección no encontrada."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/lessons/{lesson}": {
+            "put": {
+                "tags": [
+                    "Lessons"
+                ],
+                "summary": "Actualizar una lección",
+                "description": "Actualiza una lección existente. Acceso: admin, therapist. Los campos son opcionales.",
+                "operationId": "9f9c81867de31574b33e1add9b82416b",
+                "parameters": [
+                    {
+                        "name": "lesson",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Solo se deben enviar los campos que se desean actualizar.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "lessonName": {
+                                        "description": "Opcional. Máximo 100 caracteres.",
+                                        "type": "string",
+                                        "example": "Conceptos Avanzados de Terapia"
+                                    },
+                                    "description": {
+                                        "description": "Opcional.",
+                                        "type": "string",
+                                        "example": "Actualización de la lección básica."
+                                    },
+                                    "lessonType": {
+                                        "description": "Opcional. Máximo 50 caracteres.",
+                                        "type": "string",
+                                        "example": "lectura"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Lección actualizada exitosamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LessonResource"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "No autorizado. Solo 'admin' o 'therapist'."
+                    },
+                    "404": {
+                        "description": "Lección no encontrada."
+                    },
+                    "422": {
+                        "description": "Error de validación."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Lessons"
+                ],
+                "summary": "Eliminar una lección",
+                "description": "Elimina una lección por su ID. Acceso: admin, therapist.",
+                "operationId": "49e900f2761729d66df94cab08a95d75",
+                "parameters": [
+                    {
+                        "name": "lesson",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Lección eliminada con éxito."
+                    },
+                    "403": {
+                        "description": "No autorizado. Solo 'admin' o 'therapist'."
+                    },
+                    "404": {
+                        "description": "Lección no encontrada."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/auth/supabase/handle": {
             "post": {
                 "tags": [
@@ -1733,6 +1993,33 @@
                 },
                 "type": "object"
             },
+            "StoreLessonRequest": {
+                "title": "Store Lesson Request",
+                "description": "Datos requeridos para crear una nueva lección.",
+                "required": [
+                    "lessonName",
+                    "description",
+                    "lessonType"
+                ],
+                "properties": {
+                    "lessonName": {
+                        "description": "Nombre de la lección. (Máximo 100 caracteres)",
+                        "type": "string",
+                        "example": "Introducción a la Terapia"
+                    },
+                    "description": {
+                        "description": "Descripción detallada de la lección.",
+                        "type": "string",
+                        "example": "Lección básica sobre conceptos fundamentales de la terapia."
+                    },
+                    "lessonType": {
+                        "description": "Tipo de contenido de la lección (e.g., 'video', 'lectura'). (Máximo 50 caracteres)",
+                        "type": "string",
+                        "example": "video"
+                    }
+                },
+                "type": "object"
+            },
             "UpdateCardRequest": {
                 "title": "Update Card Request",
                 "description": "Datos opcionales para actualizar una Card existente. Utiliza la lógica 'sometimes' para permitir actualizaciones parciales (PATCH).",
@@ -1801,6 +2088,28 @@
                         "description": "Nuevo nombre único de la categoría. Se mapea a la columna 'category_name' en la base de datos.",
                         "type": "string",
                         "example": "Emociones"
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateLessonRequest": {
+                "title": "Update Lesson Request",
+                "description": "Datos opcionales para actualizar una lección existente. Al menos un campo debe estar presente.",
+                "properties": {
+                    "lessonName": {
+                        "description": "Nombre de la lección. (Opcional, Máximo 100 caracteres)",
+                        "type": "string",
+                        "example": "Nuevo Nombre de Introducción"
+                    },
+                    "description": {
+                        "description": "Descripción detallada de la lección. (Opcional)",
+                        "type": "string",
+                        "example": "Una descripción revisada y mejorada de la lección."
+                    },
+                    "lessonType": {
+                        "description": "Tipo de contenido de la lección (e.g., 'video', 'lectura'). (Opcional, Máximo 50 caracteres)",
+                        "type": "string",
+                        "example": "lectura"
                     }
                 },
                 "type": "object"
@@ -1920,6 +2229,33 @@
                     }
                 },
                 "type": "object"
+            },
+            "LessonResource": {
+                "title": "Lesson Resource",
+                "description": "Estructura de la respuesta para una lección.",
+                "properties": {
+                    "lessonId": {
+                        "description": "Identificador único de la lección.",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "lessonName": {
+                        "description": "Nombre de la lección.",
+                        "type": "string",
+                        "example": "Introducción a la Terapia Cognitivo-Conductual"
+                    },
+                    "description": {
+                        "description": "Descripción detallada de la lección.",
+                        "type": "string",
+                        "example": "Fundamentos y técnicas básicas de la TCC."
+                    },
+                    "lessonType": {
+                        "description": "Tipo de contenido de la lección (e.g., 'video', 'lectura').",
+                        "type": "string",
+                        "example": "video"
+                    }
+                },
+                "type": "object"
             }
         },
         "securitySchemes": {
@@ -1950,6 +2286,10 @@
         {
             "name": "Communication Methods",
             "description": "Endpoints para la gestión de métodos de comunicación (PECS, Lenguaje de Señas, etc.)"
+        },
+        {
+            "name": "Lessons",
+            "description": "Endpoints para la gestión de lecciones. (Acceso: user, admin, therapist)"
         },
         {
             "name": "Authentication",
