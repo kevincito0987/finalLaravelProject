@@ -1533,6 +1533,83 @@
                     }
                 ]
             }
+        },
+        "/api/auth/supabase/handle": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Autenticación backend mediante token de Supabase.",
+                "description": "Recibe el token JWT obtenido por el cliente desde Supabase y lo valida para autenticar al usuario en la sesión de Laravel.",
+                "operationId": "0f4d5f0e27b354108e7c2c5522569cb7",
+                "requestBody": {
+                    "description": "El token de acceso de Supabase debe ser enviado en el encabezado 'Authorization: Bearer <token>'",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "token": {
+                                        "type": "string",
+                                        "example": "eyJhbGciOiJIUzI1NiI..."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Usuario autenticado con éxito en Laravel.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Autenticado"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Token faltante o inválido.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Token inválido"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Email del usuario no disponible en la respuesta de Supabase.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Email no disponible"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -1548,6 +1625,28 @@
                         "description": "Nombre único del método de comunicación. Se almacena en minúsculas para estandarización.",
                         "type": "string",
                         "example": "pecs"
+                    }
+                },
+                "type": "object"
+            },
+            "ProfileUpdateRequest": {
+                "title": "Profile Update Request",
+                "description": "Datos necesarios para actualizar el nombre y/o correo electrónico del perfil de usuario autenticado.",
+                "required": [
+                    "name",
+                    "email"
+                ],
+                "properties": {
+                    "name": {
+                        "description": "Nombre completo o de usuario. Debe ser una cadena de hasta 255 caracteres.",
+                        "type": "string",
+                        "example": "Andrea García"
+                    },
+                    "email": {
+                        "description": "Correo electrónico único del usuario. Se almacena en minúsculas.",
+                        "type": "string",
+                        "format": "email",
+                        "example": "andrea.garcia@example.com"
                     }
                 },
                 "type": "object"
@@ -1586,6 +1685,54 @@
                 },
                 "type": "object"
             },
+            "StoreCardTranslationRequest": {
+                "title": "Store Card Translation Request",
+                "description": "Datos necesarios para crear una nueva traducción de tarjeta (incluyendo opcionalmente la subida de un archivo de audio).",
+                "required": [
+                    "card_id_translation",
+                    "language_code",
+                    "key_phrase"
+                ],
+                "properties": {
+                    "card_id_translation": {
+                        "description": "ID de la tarjeta a la que pertenece esta traducción (Foreign Key).",
+                        "type": "integer",
+                        "example": 101
+                    },
+                    "language_code": {
+                        "description": "Código de idioma de la traducción (ej: es, en, fr).",
+                        "type": "string",
+                        "example": "es"
+                    },
+                    "key_phrase": {
+                        "description": "La frase clave o palabra de la traducción.",
+                        "type": "string",
+                        "example": "Yo quiero agua"
+                    },
+                    "audio_file": {
+                        "description": "Archivo de audio opcional (mp3, wav, ogg). Si no se proporciona, se generará audio por TTS.",
+                        "type": "string",
+                        "format": "binary",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "StoreCategoryRequest": {
+                "title": "Store Category Request",
+                "description": "Datos necesarios para crear una nueva categoría.",
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "description": "Nombre único de la categoría. Se mapea a la columna 'category_name' en la base de datos.",
+                        "type": "string",
+                        "example": "Lugares"
+                    }
+                },
+                "type": "object"
+            },
             "UpdateCardRequest": {
                 "title": "Update Card Request",
                 "description": "Datos opcionales para actualizar una Card existente. Utiliza la lógica 'sometimes' para permitir actualizaciones parciales (PATCH).",
@@ -1614,6 +1761,61 @@
                         "type": "integer",
                         "example": 5,
                         "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateCardTranslationRequest": {
+                "title": "Update Card Translation Request",
+                "description": "Datos opcionales para actualizar una traducción de tarjeta. Permite actualizar la frase clave o subir un nuevo archivo de audio. Los campos no incluidos se ignoran (PATCH).",
+                "properties": {
+                    "language_code": {
+                        "description": "Código de idioma de la traducción (ej: es, en, fr). Opcional.",
+                        "type": "string",
+                        "example": "en",
+                        "nullable": true
+                    },
+                    "key_phrase": {
+                        "description": "La nueva frase clave o palabra de la traducción. Opcional.",
+                        "type": "string",
+                        "example": "I want water",
+                        "nullable": true
+                    },
+                    "audio_file": {
+                        "description": "Nuevo archivo de audio opcional para reemplazar el existente.",
+                        "type": "string",
+                        "format": "binary",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateCategoryRequest": {
+                "title": "Update Category Request",
+                "description": "Datos necesarios para actualizar el nombre de una categoría existente.",
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "description": "Nuevo nombre único de la categoría. Se mapea a la columna 'category_name' en la base de datos.",
+                        "type": "string",
+                        "example": "Emociones"
+                    }
+                },
+                "type": "object"
+            },
+            "UploadMediaRequest": {
+                "title": "Upload Media Request",
+                "description": "Petición para subir un archivo (imagen o audio).",
+                "required": [
+                    "file"
+                ],
+                "properties": {
+                    "file": {
+                        "description": "El archivo a subir. Debe ser un tipo de imagen (jpeg, png, jpg) o audio (mp3, wav) y no superar los 10MB.",
+                        "type": "string",
+                        "format": "binary"
                     }
                 },
                 "type": "object"
@@ -1748,6 +1950,10 @@
         {
             "name": "Communication Methods",
             "description": "Endpoints para la gestión de métodos de comunicación (PECS, Lenguaje de Señas, etc.)"
+        },
+        {
+            "name": "Authentication",
+            "description": "Autenticación a través de Supabase (OAuth/JWT Validation)"
         },
         {
             "name": "Administración de Usuarios",
