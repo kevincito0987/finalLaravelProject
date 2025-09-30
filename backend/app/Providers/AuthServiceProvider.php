@@ -9,6 +9,7 @@ use Laravel\Passport\Passport;
 use App\Policies\CommunicationMethodPolicy;
 use App\Policies\CardPolicy;
 use App\Policies\CardTranslationPolicy;
+use App\Policies\EvaluationPolicy;
 use App\Policies\LessonCardPolicy;
 use App\Policies\LessonPolicy;
 
@@ -20,7 +21,8 @@ class AuthServiceProvider extends ServiceProvider
         CardPolicy::class,
         CardTranslationPolicy::class,
         LessonPolicy::class,
-        LessonCardPolicy::class
+        LessonCardPolicy::class,
+        EvaluationPolicy::class
      ];
 
     /**

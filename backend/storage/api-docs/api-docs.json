@@ -1547,6 +1547,201 @@
                 ]
             }
         },
+        "/api/evaluations": {
+            "get": {
+                "tags": [
+                    "Evaluations"
+                ],
+                "summary": "Obtiene la lista de todas las Evaluaciones",
+                "description": "Recupera un listado de todas las evaluaciones registradas, incluyendo la lección asociada.",
+                "operationId": "getEvaluationsList",
+                "responses": {
+                    "200": {
+                        "description": "Lista de evaluaciones obtenida exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/EvaluationResource"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Evaluations"
+                ],
+                "summary": "Crea una nueva Evaluación",
+                "description": "Inicia una nueva sesión de evaluación, asociándola a una lección. El 'evaluationId' se autogenera.",
+                "operationId": "createEvaluation",
+                "requestBody": {
+                    "description": "Datos de la evaluación a crear (solo requiere ID de la lección).",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateEvaluationRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Evaluación creada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EvaluationResource"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación: El ID de la lección es inválido o faltante."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/evaluations/{evaluationId}": {
+            "get": {
+                "tags": [
+                    "Evaluations"
+                ],
+                "summary": "Obtiene una Evaluación específica por ID",
+                "description": "Muestra los detalles de una evaluación, incluyendo la lección asociada.",
+                "operationId": "getEvaluationById",
+                "parameters": [
+                    {
+                        "name": "evaluationId",
+                        "in": "path",
+                        "description": "ID de la Evaluación a obtener",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Evaluación obtenida exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EvaluationResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Evaluación no encontrada"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Evaluations"
+                ],
+                "summary": "Actualiza una Evaluación existente",
+                "description": "Modifica la evaluación especificada por ID, permitiendo opcionalmente cambiar la lección asociada.",
+                "operationId": "updateEvaluation",
+                "parameters": [
+                    {
+                        "name": "evaluationId",
+                        "in": "path",
+                        "description": "ID de la Evaluación a actualizar",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Nuevos datos de la evaluación. Solo se puede actualizar el ID de la lección (opcional).",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateEvaluationRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Evaluación actualizada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EvaluationResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Evaluación no encontrada"
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Evaluations"
+                ],
+                "summary": "Elimina una Evaluación por ID",
+                "description": "Elimina la evaluación y sus referencias. Esto es un borrado permanente.",
+                "operationId": "deleteEvaluation",
+                "parameters": [
+                    {
+                        "name": "evaluationId",
+                        "in": "path",
+                        "description": "ID de la Evaluación a eliminar",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Evaluación eliminada exitosamente (No Content)"
+                    },
+                    "404": {
+                        "description": "Evaluación no encontrada"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/lesson-cards": {
             "get": {
                 "tags": [
@@ -2152,6 +2347,31 @@
                 },
                 "type": "object"
             },
+            "CreateEvaluationRequest": {
+                "title": "Create Evaluation Request",
+                "description": "Datos necesarios para registrar una nueva evaluación. El 'evaluationId' se genera automáticamente.",
+                "required": [
+                    "lesson_id_evaluation",
+                    "score"
+                ],
+                "properties": {
+                    "lesson_id_evaluation": {
+                        "description": "ID de la lección a la que corresponde la evaluación.",
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "score": {
+                        "description": "Puntuación obtenida en la evaluación (0.0 a 100.0).",
+                        "type": "number",
+                        "format": "float",
+                        "example": 95.5
+                    }
+                },
+                "type": "object",
+                "xml": {
+                    "name": "CreateEvaluationRequest"
+                }
+            },
             "ProfileUpdateRequest": {
                 "title": "Profile Update Request",
                 "description": "Datos necesarios para actualizar el nombre y/o correo electrónico del perfil de usuario autenticado.",
@@ -2387,6 +2607,27 @@
                 },
                 "type": "object"
             },
+            "UpdateEvaluationRequest": {
+                "title": "Update Evaluation Request",
+                "description": "Datos para modificar una evaluación existente. El 'evaluationId' se toma de la URL.",
+                "properties": {
+                    "lesson_id_evaluation": {
+                        "description": "ID de la lección (opcional si se mantiene el enlace).",
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "score": {
+                        "description": "Nueva puntuación obtenida en la evaluación (0.0 a 100.0).",
+                        "type": "number",
+                        "format": "float",
+                        "example": 98
+                    }
+                },
+                "type": "object",
+                "xml": {
+                    "name": "UpdateEvaluationRequest"
+                }
+            },
             "UpdateLessonCardRequest": {
                 "title": "Update Lesson Card Request",
                 "description": "Datos necesarios para actualizar el orden de una tarjeta dentro de una lección.",
@@ -2545,6 +2786,29 @@
                     "name": "CardTranslationResource"
                 }
             },
+            "EvaluationResource": {
+                "title": "Evaluation Resource",
+                "description": "Define la estructura de una Evaluación, incluyendo la Lección completa si está cargada.",
+                "properties": {
+                    "evaluationId": {
+                        "description": "ID único de la evaluación.",
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "lessonId": {
+                        "description": "ID de la lección a la que pertenece esta evaluación (FK).",
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "lessonData": {
+                        "$ref": "#/components/schemas/LessonResource"
+                    }
+                },
+                "type": "object",
+                "xml": {
+                    "name": "EvaluationResource"
+                }
+            },
             "LessonCardResource": {
                 "title": "LessonCard Resource",
                 "description": "Define la estructura de la asociación LessonCard, incluyendo la tarjeta completa.",
@@ -2591,6 +2855,33 @@
                         "description": "Tipo de contenido de la lección (e.g., 'video', 'lectura').",
                         "type": "string",
                         "example": "video"
+                    }
+                },
+                "type": "object"
+            },
+            "Evaluation": {
+                "title": "Evaluation",
+                "description": "Representa la evaluación asociada a una lección. Esta tabla contiene la estructura base de la evaluación.",
+                "properties": {
+                    "evaluation_id": {
+                        "description": "ID de la evaluación (Clave Primaria).",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "lesson_id_evaluation": {
+                        "description": "ID de la Lección asociada (Clave Foránea).",
+                        "type": "integer",
+                        "example": 101
+                    },
+                    "created_at": {
+                        "description": "Fecha de creación.",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "description": "Fecha de última actualización.",
+                        "type": "string",
+                        "format": "date-time"
                     }
                 },
                 "type": "object"
@@ -2661,6 +2952,10 @@
         {
             "name": "Communication Methods",
             "description": "Endpoints para la gestión de métodos de comunicación (PECS, Lenguaje de Señas, etc.)"
+        },
+        {
+            "name": "Evaluations",
+            "description": "Gestión de las Evaluaciones de Lecciones"
         },
         {
             "name": "LessonCard",

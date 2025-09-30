@@ -7,9 +7,10 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommunicationMethodController;
 use App\Http\Controllers\SupabaseAuthController;
 use App\Http\Controllers\LessonController;
-use App\Http\Controllers\LessonCardController; // <-- CORRECTO: Importa el controlador
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LessonCardController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\EvaluationController; // <-- NUEVO: Importa el controlador de Evaluaciones
+use Illuminate\Support\Facades\Route;
 
 Route::get('/health', fn() => ['ok' => true]);
 Route::get('/health-any-auth', fn() => ['ok' => true])->middleware(['auth:api', 'can:view-health']);
@@ -81,11 +82,13 @@ Route::middleware(['auth:api', 'role:user,therapist,admin'])->group(function () 
     // LESSONS: Acceso de lectura (index, show)
     Route::apiResource('lessons', LessonController::class)->only(['index', 'show']);
     
-    // LESSON CARDS: Acceso de lectura (index, show) <-- ATENCIÓN: RUTA MODIFICADA
-    // Reemplazamos apiResource para show, ya que requiere 2 IDs.
+    // LESSON CARDS: Acceso de lectura (index, show)
     Route::get('lesson-cards', [LessonCardController::class, 'index']); 
     // Show con claves compuestas: /api/lesson-cards/{lesson_id}/{card_id}
     Route::get('lesson-cards/{lesson_id}/{card_id}', [LessonCardController::class, 'show']);
+
+    // EVALUATIONS: Acceso de lectura (index, show) <-- NUEVAS RUTAS DE LECTURA
+    Route::apiResource('evaluations', EvaluationController::class)->only(['index', 'show']);
 });
 
 
@@ -111,19 +114,12 @@ Route::middleware(['auth:api', 'role:therapist,admin'])->group(function () {
     // LESSONS: Acceso de escritura
     Route::apiResource('lessons', LessonController::class)->except(['index', 'show']);
     
-    // LESSON CARDS: Acceso de escritura <-- ATENCIÓN: RUTAS MODIFICADAS
-    
-    // Store solo requiere el endpoint base.
+    // LESSON CARDS: Acceso de escritura
     Route::post('lesson-cards', [LessonCardController::class, 'store']);
-    
-    // Update con claves compuestas: /api/lesson-cards/{lesson_id}/{card_id}
     Route::put('lesson-cards/{lesson_id}/{card_id}', [LessonCardController::class, 'update']); 
     Route::patch('lesson-cards/{lesson_id}/{card_id}', [LessonCardController::class, 'update']);
-    
-    // Delete con claves compuestas: /api/lesson-cards/{lesson_id}/{card_id}
     Route::delete('lesson-cards/{lesson_id}/{card_id}', [LessonCardController::class, 'destroy']);
     
-    // Nota: El apiResource anterior que borraste era:
-    // Route::apiResource('lesson-cards', LessonCardController::class)->except(['index', 'show']);
-    // Al haberlo reemplazado por las rutas manuales, se soluciona el problema de los argumentos.
+    // EVALUATIONS: Acceso de escritura (store, update, destroy) <-- NUEVAS RUTAS DE ESCRITURA
+    Route::apiResource('evaluations', EvaluationController::class)->except(['index', 'show']);
 });

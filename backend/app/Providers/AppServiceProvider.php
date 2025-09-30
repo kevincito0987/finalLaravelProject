@@ -23,7 +23,9 @@ use Illuminate\Support\ServiceProvider;
 // Nuevos Imports necesarios para la Entidad Lección
 use App\Core\Repositories\LessonRepositoryInterface;
 use App\Core\Interfaces\EloquentLessonRepository;
+use App\Core\Interfaces\EvaluationRepositoryInterface;
 use App\Core\Interfaces\LessonCardRepositoryInterface;
+use App\Core\Repositories\EloquentEvaluationRepository;
 use App\Core\Repositories\LessonCardRepository;
 
 class AppServiceProvider extends ServiceProvider
@@ -76,6 +78,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             LessonCardRepositoryInterface::class,
             LessonCardRepository::class
+        );
+
+        $this->app->bind(
+            EvaluationRepositoryInterface::class,
+            EloquentEvaluationRepository::class
         );
 
 
