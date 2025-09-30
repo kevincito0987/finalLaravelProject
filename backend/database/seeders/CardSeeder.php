@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\CommunicationMethod;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str; // Necesario para generar UUID
 
 class CardSeeder extends Seeder
 {
@@ -30,10 +31,11 @@ class CardSeeder extends Seeder
         for ($i = 0; $i < 50; $i++) {
             Card::create([
                 // Simulación de UUID único
-                'uuid' => (string) \Illuminate\Support\Str::uuid(),
-                'image_path' => 'placeholders/card_image_' . ($i + 1) . '.jpg',
-                'phrase' => 'Frase de prueba número ' . ($i + 1),
-                'audio_path' => 'audio/frase_' . ($i + 1) . '.mp3',
+                'uuid' => (string) Str::uuid(),
+                // Usamos un placeholder genérico
+                'image_path' => 'placeholders/card_image_' . ($i + 1) . '.jpg', 
+                
+                // ELIMINADOS: 'phrase' y 'audio_path'
                 
                 // Asignamos una clave foránea aleatoria de las colecciones que obtuvimos
                 'method_id' => $methodIds->random(),

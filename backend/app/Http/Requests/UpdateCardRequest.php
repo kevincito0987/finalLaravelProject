@@ -17,31 +17,47 @@ class UpdateCardRequest extends FormRequest
         $cardId = $this->route('card'); 
 
         return [
-            // UUID debe ser único, excluyendo la tarjeta actual
-            'uuid' => ['sometimes', 'required', 'string', 'max:36', Rule::unique('cards', 'uuid')->ignore($cardId, 'card_id')],
+            // 'sometimes' asegura que solo se valide si está presente
+            'uuid' => ['sometimes', 'string', 'max:36', Rule::unique('cards', 'uuid')->ignore($cardId, 'card_id')],
             'imagePath' => ['sometimes', 'required', 'string', 'max:255'],
-            'phrase' => ['sometimes', 'required', 'string', 'max:255'],
-            'audioPath' => ['nullable', 'string', 'max:255'],
+            // IDs de claves foráneas: 'sometimes' y 'integer'
             'methodId' => ['sometimes', 'required', 'integer', 'exists:communication_methods,method_id'],
             'categoryId' => ['sometimes', 'required', 'integer', 'exists:categories,category_id'],
         ];
     }
 
+    /**
+     * Genera la Entidad de Tarjeta, pasando solo los valores que fueron enviados.
+     * Los campos no enviados resultarán en NULL, lo cual la Entidad acepta.
+     *
+     * Nota: Los campos uuid e imagePath se inicializarán a string vacía si no se envían
+     * debido al constructor de la entidad, pero el Repository debe ignorarlos si
+     * la intención es no actualizar.
+     */
     public function toEntity(): CardEntity
     {
         $validated = $this->validated();
-        $cardId = $this->route('card'); 
+        $cardId = (int) $this->route('card'); 
         
-        // Se usa la función 'data_get' para proporcionar un valor predeterminado 
-        // si el campo no está presente en la solicitud (PUT/PATCH).
+        // Usamos data_get sin valor por defecto. Si el campo no fue validado (no existe en $validated),
+        // data_get devuelve NULL. Esto es clave.
+        $uuid = data_get($validated, 'uuid');
+        $imagePath = data_get($validated, 'imagePath');
+        $methodId = data_get($validated, 'methodId');
+        $categoryId = data_get($validated, 'categoryId');
+
         return new CardEntity(
-            $cardId,
-            data_get($validated, 'uuid', ''),
-            data_get($validated, 'imagePath', ''),
-            data_get($validated, 'phrase', ''),
-            data_get($validated, 'audioPath', null),
-            data_get($validated, 'methodId', 0),
-            data_get($validated, 'categoryId', 0)
+            cardId: $cardId,
+            // Aquí, si $uuid es NULL (no se envió), la Entidad pasará '' automáticamente 
+            // porque el constructor CardEntity espera un 'string' y no acepta NULL para uuid/imagePath.
+            // Por ello, en el Repository, DEBES IGNORAR estas cadenas vacías.
+            uuid: $uuid ?? '', 
+            imagePath: $imagePath ?? '',
+            
+            // Si $methodId es NULL, se pasa NULL (lo cual la Entidad acepta).
+            // Si el Repository ve NULL, debe IGNORAR la actualización del campo.
+            methodId: $methodId !== null ? (int) $methodId : null,
+            categoryIdCard: $categoryId !== null ? (int) $categoryId : null
         );
     }
 }

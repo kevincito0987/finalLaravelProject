@@ -20,16 +20,18 @@ return new class extends Migration
             
             // Campos de la Tarjeta
             $table->text('image_path');
-            $table->string('phrase', 255); 
-            $table->string('audio_path', 255)->nullable(); 
+            
+            // ELIMINADOS: 'phrase' y 'audio_path'
+            // $table->string('phrase', 255); 
+            // $table->string('audio_path', 255)->nullable(); 
             
             // FK: method_id (MÉTODO DE COMUNICACIÓN)
-            // CAMBIO: Debe ser unsignedInteger para MATCH con la PK de communication_methods
+            // Usamos unsignedInteger para coincidir con la PK de communication_methods (si no es BigInt)
             $table->unsignedInteger('method_id');
             $table->foreign('method_id')->references('method_id')->on('communication_methods')->onDelete('cascade');
             
             // FK: category_id_card (CATEGORÍA)
-            // category_id en 'categories' es unsignedBigInt ($table->id), por lo que foreignId es correcto
+            // Se asume que 'categories.category_id' usa UNSIGNED BIG INT (default de $table->id())
             $table->foreignId('category_id_card')
                   ->constrained('categories', 'category_id') 
                   ->onDelete('cascade');

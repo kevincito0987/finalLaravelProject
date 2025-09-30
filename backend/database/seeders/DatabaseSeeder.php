@@ -31,7 +31,8 @@ class DatabaseSeeder extends Seeder
             // Asegúrate de agregar tu nuevo seeder aquí
             CommunicationMethodSeeder::class,
             CategorySeeder::class,
-            CardSeeder::class
+            CardSeeder::class,
+            CardTranslationSeeder::class,
         ]);
     }
 }

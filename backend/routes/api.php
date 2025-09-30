@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CardController;
+use App\Http\Controllers\CardTranslationController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommunicationMethodController;
 use App\Http\Controllers\SupabaseAuthController;
@@ -74,14 +75,19 @@ Route::middleware(['auth:api', 'role:user,therapist,admin'])->group(function () 
         Route::get('/', [CommunicationMethodController::class, 'index']); // Listar todos
         Route::get('/{methodId}', [CommunicationMethodController::class, 'show']); // Mostrar uno por ID
     });
+    
     // CARDS: Acceso de lectura (index, show) <-- ¡AÑADIDO!
     Route::apiResource('cards', CardController::class)->only(['index', 'show']);
     // Ruta para simulación de RFID/UUID
     Route::get('cards/uuid/{uuid}', [CardController::class, 'showByUuid']);
+
+    // CARD TRANSLATIONS: Acceso de lectura (index, show) <-- ¡RUTA FALTANTE AÑADIDA!
+    Route::apiResource('card-translations', CardTranslationController::class)->only(['index', 'show']);
 });
 
 
 // GRUPO DE ACCESO DE ESCRITURA (POST, PUT, DELETE) - Roles: therapist, admin
+// Requiere autenticación y el rol especificado.
 Route::middleware(['auth:api', 'role:therapist,admin'])->group(function () {
 
     // CATEGORIES: Acceso de escritura (store, update, destroy)
@@ -94,6 +100,9 @@ Route::middleware(['auth:api', 'role:therapist,admin'])->group(function () {
         Route::delete('/{methodId}', [CommunicationMethodController::class, 'destroy']); // Eliminar uno
     });
     
-    // CARDS: Acceso de escritura (store, update, destroy) <-- ¡AÑADIDO!
+    // CARDS: Acceso de escritura (store, update, destroy)
     Route::apiResource('cards', CardController::class)->except(['index', 'show']);
+
+    // CARD TRANSLATIONS: Acceso de escritura (store, update, destroy) <-- ¡USANDO apiResource!
+    Route::apiResource('card-translations', CardTranslationController::class)->except(['index', 'show']);
 });

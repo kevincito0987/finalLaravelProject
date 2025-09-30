@@ -9,35 +9,52 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class CardResource extends JsonResource
 {
     /**
-     * @var CardEntity La entidad que estamos transformando
+     * @var CardEntity|array La entidad o el array de datos que estamos transformando
      */
     public $resource; 
 
-    public function __construct(CardEntity $resource)
-    {
-        parent::__construct($resource);
-    }
+    // Opcional: Remueve el constructor si solo usas la clase por defecto (self::$wrap)
+    // public function __construct($resource) 
+    // {
+    //     parent::__construct($resource);
+    // }
 
     /**
-     * Transforma la entidad en un array.
+     * Transforma el recurso (Entidad o Array) en un array.
      *
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array
     {
+        // Determinamos el origen de los datos
+        if ($this->resource instanceof CardEntity) {
+            // Caso 1: Es una entidad individual (POST de creación o GET por ID)
+            $data = $this->resource->toArray();
+            $consecutiveId = null; // No hay ID consecutivo para una entidad individual
+        } else {
+            // Caso 2: Es un array (Viene de CardService::getCards() que ya inyectó el índice)
+            $data = $this->resource;
+            // Usamos data['consecutiveId'] si existe, si no, null
+            $consecutiveId = $data['consecutiveId'] ?? null; 
+        }
+
         return [
-            // Mapeo de Entidad a JSON de salida
-            'cardId' => $this->resource->cardId, 
-            'uuid' => $this->resource->uuid,
-            'imagePath' => $this->resource->imagePath,
+            // El ID consecutivo solo tendrá valor en el listado (Caso 2)
+            'consecutiveId' => $consecutiveId,
+
+            // Mapeo de Entidad/Array a JSON de salida (usando el array $data)
+            'cardId' => $data['cardId'], 
+            'uuid' => $data['uuid'],
+            'imagePath' => $data['imagePath'],
             
             // IDs de Foráneas
-            'methodId' => $this->resource->methodId,
-            'categoryIdCard' => $this->resource->categoryIdCard,
+            'methodId' => $data['methodId'],
+            'categoryIdCard' => $data['categoryIdCard'],
             
-            // Nombres de Relaciones (NUEVOS CAMPOS)
-            'categoryName' => $this->resource->categoryName,
-            'methodName' => $this->resource->methodName,
+            // Nombres de Relaciones
+            // Aseguramos que si los nombres no existen en el array, sean null
+            'categoryName' => $data['categoryName'] ?? null,
+            'methodName' => $data['methodName'] ?? null,
         ];
     }
 }

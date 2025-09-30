@@ -24,17 +24,21 @@ class CardFactory extends Factory
      */
     public function definition(): array
     {
-        // Aseguramos que existan categorías y métodos, o los creamos si es necesario.
+        // 1. Aseguramos que existan categorías y métodos.
+        // Si no existen, los crea la factory de fallback.
         $categoryId = Category::inRandomOrder()->first()->category_id ?? Category::factory()->create()->category_id;
         $methodId = CommunicationMethod::inRandomOrder()->first()->method_id ?? CommunicationMethod::factory()->create()->method_id;
         
-        $phrase = $this->faker->words(2, true);
-
+        // Eliminados: $phrase y su generación
+        
         return [
-            'uuid' => Str::uuid(), // Genera un UUID único (simulación de RFID)
-            'image_path' => 'cards/' . $this->faker->image('public/storage/cards', 400, 300, null, false) . '.png',
-            'phrase' => $phrase,
-            'audio_path' => 'audios/' . Str::slug($phrase) . '.mp3',
+            // Campos requeridos en la DB:
+            'uuid' => Str::uuid(), // Genera un UUID único (esencial)
+            'image_path' => 'https://placehold.co/400x300/F0F0F0/2C3E50/png?text=Tarjeta+' . $this->faker->numberBetween(1, 100),
+            
+            // Eliminados: 'phrase' y 'audio_path'
+            
+            // Claves Foráneas:
             'method_id' => $methodId,
             'category_id_card' => $categoryId,
         ];
