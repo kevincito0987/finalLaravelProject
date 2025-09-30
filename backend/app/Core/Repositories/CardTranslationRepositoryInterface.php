@@ -1,57 +1,53 @@
 <?php
+
 namespace App\Core\Repositories;
 
 use App\Core\Entities\CardTranslationEntity;
 use Illuminate\Support\Collection;
 
+/**
+ * Define las operaciones de acceso a datos (CRUD) para la entidad CardTranslation.
+ */
 interface CardTranslationRepositoryInterface
 {
     /**
-     * Obtiene todas las traducciones.
-     * @return Collection<CardTranslationEntity>
+     * Crea una nueva traducción para una tarjeta.
+     * @param CardTranslationEntity $entity La entidad de la traducción a persistir.
+     * @return CardTranslationEntity
      */
-    public function getAll(): Collection;
+    public function create(CardTranslationEntity $entity): CardTranslationEntity;
 
     /**
-     * Encuentra una traducción por su clave primaria (card_translation_id).
-     * @param int $id
+     * Busca una traducción por su ID primario.
+     * @param int $id El ID primario de la traducción.
      * @return ?CardTranslationEntity
      */
     public function find(int $id): ?CardTranslationEntity;
 
     /**
-     * Encuentra una traducción específica por ID de tarjeta y código de idioma.
-     * @param int $cardId
-     * @param string $langCode
-     * @return ?CardTranslationEntity
-     */
-    public function findByCardAndLang(int $cardId, string $langCode): ?CardTranslationEntity;
-    
-    /**
-     * Obtiene todas las traducciones para una tarjeta específica.
-     * @param int $cardId
+     * Obtiene todas las traducciones de una tarjeta específica.
+     * @param int $cardId El ID de la tarjeta padre.
      * @return Collection<CardTranslationEntity>
      */
-    public function findAllByCardId(int $cardId): Collection;
+    public function getByCardId(int $cardId): Collection;
 
     /**
-     * Crea una nueva traducción.
-     * @param CardTranslationEntity $translation
-     * @return CardTranslationEntity
+     * Obtiene todas las traducciones de la base de datos.
+     * @return Collection<CardTranslationEntity>
      */
-    public function create(CardTranslationEntity $translation): CardTranslationEntity;
+    public function getAll(): Collection;
 
     /**
      * Actualiza una traducción existente.
-     * @param int $id
-     * @param CardTranslationEntity $translation
+     * @param int $id El ID primario de la traducción a actualizar.
+     * @param CardTranslationEntity $entity La entidad con los datos actualizados.
      * @return CardTranslationEntity
      */
-    public function update(int $id, CardTranslationEntity $translation): CardTranslationEntity;
+    public function update(int $id, CardTranslationEntity $entity): CardTranslationEntity;
 
     /**
      * Elimina una traducción por su ID.
-     * @param int $id
+     * @param int $id El ID primario de la traducción a eliminar.
      * @return bool
      */
     public function delete(int $id): bool;

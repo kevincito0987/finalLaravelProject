@@ -1,85 +1,88 @@
 <?php
+
 namespace App\Core\Interfaces;
 
 use App\Core\Entities\CardTranslationEntity;
 use App\Core\Repositories\CardTranslationRepositoryInterface;
 use App\Models\CardTranslation;
-use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Collection;
 
+/**
+ * Implementación del repositorio de traducciones de tarjetas usando Eloquent.
+ * Asegura el mapeo entre las Entidades de Core y los Modelos de Laravel.
+ */
 class EloquentCardTranslationRepository implements CardTranslationRepositoryInterface
 {
-    /**
-     * Convierte un modelo Eloquent CardTranslation a una Entidad CardTranslationEntity.
-     */
-    private function toEntity(CardTranslation $model): CardTranslationEntity
+    protected CardTranslation $model;
+
+    public function __construct(CardTranslation $model)
     {
-        return new CardTranslationEntity(
-            cardTranslationId: $model->card_translation_id,
-            cardIdTranslation: $model->card_id_translation,
-            languageCode: $model->language_code,
-            keyPhrase: $model->key_phrase,
-            audioPath: $model->audio_path,
-        );
+        $this->model = $model;
     }
 
     /**
-     * Convierte una Entidad CardTranslationEntity a un array compatible con la creación/actualización de Eloquent.
+     * Convierte la entidad en un array para Eloquent, mapeando los nombres de la Entidad a la DB.
+     * @param CardTranslationEntity $entity
+     * @return array
      */
-    private function toArray(CardTranslationEntity $entity): array
+    protected function toModelData(CardTranslationEntity $entity): array
     {
         return [
-            'card_id_translation' => $entity->cardIdTranslation,
+            // Mapeo crucial: Entity.cardId (camelCase) -> DB.card_id_translation (snake_case)
+            'card_id_translation' => $entity->cardId, 
             'language_code' => $entity->languageCode,
             'key_phrase' => $entity->keyPhrase,
             'audio_path' => $entity->audioPath,
         ];
     }
 
-    public function getAll(): Collection
+    public function create(CardTranslationEntity $entity): CardTranslationEntity
     {
-        return CardTranslation::all()->map(fn($model) => $this->toEntity($model));
+        // El método create recibe el array mapeado a las columnas de la BD
+        $model = $this->model->create($this->toModelData($entity));
+        // Se mapea el modelo de vuelta a la Entidad (incluyendo el ID generado)
+        return CardTranslationEntity::fromRepository($model->toArray());
     }
 
     public function find(int $id): ?CardTranslationEntity
     {
-        $model = CardTranslation::find($id);
-        return $model ? $this->toEntity($model) : null;
+        $model = $this->model->find($id);
+        return $model ? CardTranslationEntity::fromRepository($model->toArray()) : null;
     }
 
-    public function findByCardAndLang(int $cardId, string $langCode): ?CardTranslationEntity
+    public function getByCardId(int $cardId): Collection
     {
-        $model = CardTranslation::where('card_id_translation', $cardId)
-                                ->where('language_code', $langCode)
-                                ->first();
-        return $model ? $this->toEntity($model) : null;
+        // Se usa 'card_id_translation' en la consulta SQL, que es el nombre de la columna FK
+        return $this->model->where('card_id_translation', $cardId)
+                            ->get()
+                            // Mapea la colección de modelos a una colección de entidades
+                            ->map(fn ($model) => CardTranslationEntity::fromRepository($model->toArray()));
     }
     
-    public function findAllByCardId(int $cardId): Collection
+    public function getAll(): Collection
     {
-        return CardTranslation::where('card_id_translation', $cardId)
-                              ->get()
-                              ->map(fn($model) => $this->toEntity($model));
+        return $this->model->all()
+                            ->map(fn ($model) => CardTranslationEntity::fromRepository($model->toArray()));
     }
 
-    public function create(CardTranslationEntity $translation): CardTranslationEntity
+    public function update(int $id, CardTranslationEntity $entity): CardTranslationEntity
     {
-        $model = CardTranslation::create($this->toArray($translation));
-        return $this->toEntity($model);
-    }
+        $model = $this->model->find($id);
 
-    public function update(int $id, CardTranslationEntity $translation): CardTranslationEntity
-    {
-        $model = CardTranslation::find($id);
         if (!$model) {
-            throw new ModelNotFoundException("Card Translation with ID $id not found.");
+            throw new ModelNotFoundException("CardTranslation con ID {$id} no encontrada para actualizar.");
         }
-        $model->update($this->toArray($translation));
-        return $this->toEntity($model);
+        
+        // El método update recibe el array mapeado a las columnas de la BD
+        $model->update($this->toModelData($entity));
+        
+        // Retorna la Entidad con los datos actualizados
+        return CardTranslationEntity::fromRepository($model->toArray());
     }
 
     public function delete(int $id): bool
     {
-        return CardTranslation::destroy($id) > 0;
+        return $this->model->destroy($id) > 0;
     }
 }

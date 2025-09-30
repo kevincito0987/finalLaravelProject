@@ -3,68 +3,75 @@
 namespace App\Policies;
 
 use App\Models\CardTranslation;
-use App\Models\User; // Asumo que tienes un modelo User
+use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
 class CardTranslationPolicy
 {
     /**
-     * Permite que los administradores eviten cualquier verificación de política.
-     */
-    public function before(User $user, string $ability): ?bool
-    {
-        // EL ADMIN TIENE ACCESO TOTAL (CRUD completo)
-        if ($user->hasRole('admin')) {
-            return true;
-        }
-        return null;
-    }
-    
-    /**
-     * Determina si el usuario puede ver la lista de tarjetas (index).
-     * (Cualquier usuario autenticado puede leer, es decir: user, therapist, admin)
+     * Determina si el usuario puede ver cualquier traducción.
+     * Permitido para todos los usuarios autenticados.
      */
     public function viewAny(User $user): bool
     {
-        // Permitimos el acceso si es 'user' O 'therapist'. 'admin' ya se maneja en before().
-        return $user->hasRole('user') || $user->hasRole('therapist'); 
+        // Todos los usuarios autenticados pueden listar las traducciones
+        return true;
     }
 
     /**
-     * Determina si el usuario puede ver una tarjeta específica (show, showByUuid).
+     * Determina si el usuario puede ver una traducción específica.
+     * Permitido para todos los usuarios autenticados.
      */
-    public function view(User $user, CardTranslation $card): bool
+    public function view(User $user, CardTranslation $cardTranslation): bool
     {
-        // Permitimos el acceso si es 'user' O 'therapist'.
-        return $user->hasRole('user') || $user->hasRole('therapist');
+        // Todos los usuarios autenticados pueden ver una traducción específica
+        return true;
     }
 
-    // -- Roles de Escritura (Solo therapist y admin) --
-
     /**
-     * Determina si el usuario puede crear tarjetas (POST).
+     * Determina si el usuario puede crear traducciones.
+     * Permitido solo para roles 'therapist' o 'admin'.
      */
     public function create(User $user): bool
     {
-        // Solo therapist puede crear. (admin lo hace por before())
-        return $user->hasRole('therapist');
+        // Solo terapeutas o administradores pueden crear
+        return $user->hasRole('therapist') || $user->hasRole('admin');
     }
 
     /**
-     * Determina si el usuario puede actualizar la tarjeta (PUT/PATCH).
+     * Determina si el usuario puede actualizar la traducción.
+     * Permitido solo para roles 'therapist' o 'admin'.
+     * También podríamos añadir lógica si solo el creador puede editar, pero por ahora se basa en el rol.
      */
-    public function update(User $user, CardTranslation $card): bool
+    public function update(User $user, CardTranslation $cardTranslation): bool
     {
-        // Solo therapist puede actualizar.
-        return $user->hasRole('therapist');
+        // Solo terapeutas o administradores pueden actualizar
+        return $user->hasRole('therapist') || $user->hasRole('admin');
     }
 
     /**
-     * Determina si el usuario puede eliminar la tarjeta (DELETE).
+     * Determina si el usuario puede eliminar la traducción.
+     * Permitido solo para roles 'therapist' o 'admin'.
      */
-    public function delete(User $user, CardTranslation $card): bool
+    public function delete(User $user, CardTranslation $cardTranslation): bool
     {
-        // Solo therapist puede eliminar.
-        return $user->hasRole('therapist');
+        // Solo terapeutas o administradores pueden eliminar
+        return $user->hasRole('therapist') || $user->hasRole('admin');
+    }
+
+    /**
+     * Determina si el usuario puede restaurar la traducción (no aplica, pero se incluye por convención).
+     */
+    public function restore(User $user, CardTranslation $cardTranslation): bool
+    {
+        return $user->hasRole('admin');
+    }
+
+    /**
+     * Determina si el usuario puede eliminar permanentemente la traducción (no aplica, pero se incluye por convención).
+     */
+    public function forceDelete(User $user, CardTranslation $cardTranslation): bool
+    {
+        return $user->hasRole('admin');
     }
 }

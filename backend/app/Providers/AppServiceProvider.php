@@ -6,15 +6,19 @@ use App\Core\Interfaces\CommunicationMethodRepositoryInterface;
 use App\Core\Interfaces\EloquentCardRepository;
 use App\Core\Interfaces\EloquentCardTranslationRepository;
 use App\Core\Interfaces\EloquentCategoryRepository;
-use App\Core\Interfaces\UserRepositoryInterface; // Asumo que esta es la ruta correcta para la interfaz del usuario
+use App\Core\Interfaces\MediaStorageInterface;
+use App\Core\Interfaces\UserRepositoryInterface;
 use App\Core\Repositories\CardRepositoryInterface;
 use App\Core\Repositories\CardTranslationRepositoryInterface;
-use Illuminate\Support\Facades\Vite;
-use Illuminate\Support\ServiceProvider;
 use App\Core\Repositories\CategoryRepositoryInterface;
 use App\Core\Repositories\EloquentCommunicationMethodRepository;
 use App\Core\Repositories\EloquentUserRepository;
+use App\Core\Repositories\SupabaseMediaStorage; // Importar la implementación de Supabase
+use App\Core\Services\CardTranslationService;
 use App\Core\Services\CommunicationMethodService;
+use App\Core\Services\MediaUploader;
+use Illuminate\Support\Facades\Vite;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,46 +28,72 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         // ----------------------------------------------------
-        // CÓDIGO CORREGIDO: Un 'bind' por cada par Interfaz/Clase
+        // 1. BINDINGS DE REPOSITORIOS (Interfaz a Implementación)
         // ----------------------------------------------------
         
-        // Binding para Usuario
+        // Usuario
         $this->app->bind(
             UserRepositoryInterface::class,
-            EloquentUserRepository::class // Asume la implementación correcta
+            EloquentUserRepository::class
         );
 
-        // Binding para Métodos de Comunicación
+        // Métodos de Comunicación
         $this->app->bind(
             CommunicationMethodRepositoryInterface::class,
-            EloquentCommunicationMethodRepository::class // Asume la implementación correcta
+            EloquentCommunicationMethodRepository::class
         );
         
-        // Binding para Categoría (el que estaba fallando)
+        // Categoría
         $this->app->bind(
             CategoryRepositoryInterface::class,
             EloquentCategoryRepository::class
         );
 
-        // Binding para la Tarjeta de Comunicación
+        // Tarjeta de Comunicación (Card)
         $this->app->bind(
             CardRepositoryInterface::class,
             EloquentCardRepository::class
         );
 
-        //Binding para la Tarjeta de Comunicación con traduccion
+        // Traducción de Tarjeta (CardTranslation)
         $this->app->bind(
             CardTranslationRepositoryInterface::class,
             EloquentCardTranslationRepository::class
         );
+
+        // ----------------------------------------------------
+        // 2. BINDING PARA STORAGE (Resuelve el BindingResolutionException)
+        // ----------------------------------------------------
+        // Vinculamos la interfaz general de almacenamiento con su implementación específica.
+        $this->app->bind(
+            MediaStorageInterface::class,
+            SupabaseMediaStorage::class
+        );
         
         // ----------------------------------------------------
-        // El resto de tu código queda igual
+        // 3. SINGLETONS DE SERVICIOS (Con inyección de dependencias manual)
         // ----------------------------------------------------
 
+        // Servicio de Métodos de Comunicación
         $this->app->singleton(CommunicationMethodService::class, function ($app) {
             return new CommunicationMethodService(
                 $app->make(CommunicationMethodRepositoryInterface::class)
+            );
+        });
+
+        // Servicio de Subida de Media (depende de MediaStorageInterface, que ya vinculamos)
+        $this->app->singleton(MediaUploader::class, function ($app) {
+            return new MediaUploader(
+                $app->make(MediaStorageInterface::class)
+            );
+        });
+
+        // Servicio de Traducción de Tarjetas (Necesita su repositorio y el MediaUploader)
+        // Agregamos este binding para que se pueda resolver en el controlador (CardTranslationController)
+        $this->app->singleton(CardTranslationService::class, function ($app) {
+            return new CardTranslationService(
+                $app->make(CardTranslationRepositoryInterface::class),
+                $app->make(MediaUploader::class) // Ya está resuelto como Singleton arriba
             );
         });
     }

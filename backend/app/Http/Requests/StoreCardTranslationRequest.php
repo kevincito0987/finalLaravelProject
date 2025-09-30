@@ -20,26 +20,33 @@ class StoreCardTranslationRequest extends FormRequest
      */
     public function rules(): array
     {
-        // Reglas para la creación (POST): card_id_translation es obligatorio y no puede ser ignorado.
+        // Requerimos la FK, el idioma y la frase clave.
+        // El archivo de audio (audio_file) es opcional, ya que puede ser generado por TTS.
         return [
-            'card_id_translation' => ['required', 'integer', 'exists:cards,card_id'],
             'language_code' => ['required', 'string', 'max:5'], 
             'key_phrase' => ['required', 'string'], 
-            'audio_path' => ['nullable', 'string'],
+            
+            // Campo específico para la subida de archivos de audio
+            'audio_file' => [
+                'nullable', 
+                'file', // Debe ser un archivo
+                'mimetypes:audio/mpeg,audio/wav,audio/ogg,audio/mp3', // Tipos de audio permitidos
+                'max:5120', // 5MB máximo
+            ], 
         ];
     }
-
+    
     /**
      * Mensajes de error personalizados.
      */
     public function messages(): array
     {
         return [
-            'card_id_translation.required' => 'El ID de la tarjeta es obligatorio.',
-            'card_id_translation.exists' => 'El ID de la tarjeta proporcionado no existe.',
             'language_code.required' => 'El código de idioma es obligatorio.',
             'language_code.max' => 'El código de idioma no puede superar los 5 caracteres.',
             'key_phrase.required' => 'La frase clave (traducción) es obligatoria.',
+            'audio_file.mimetypes' => 'El archivo debe ser un formato de audio válido (mp3, wav, ogg).',
+            'audio_file.max' => 'El archivo de audio no debe superar los 5MB.',
         ];
     }
 }

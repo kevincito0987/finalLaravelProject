@@ -2,44 +2,74 @@
 
 namespace Database\Factories;
 
-use App\Models\Card;
 use App\Models\CardTranslation;
+use App\Models\Card;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\CardTranslation>
+ */
 class CardTranslationFactory extends Factory
 {
     /**
-     * El nombre del modelo correspondiente a la factory.
+     * El nombre del modelo correspondiente al factory.
+     *
+     * @var string
      */
     protected $model = CardTranslation::class;
 
     /**
-     * Define el estado predeterminado del modelo.
+     * Define el estado por defecto del modelo.
+     *
+     * @return array<string, mixed>
      */
     public function definition(): array
     {
-        // 1. Aseguramos que exista una tarjeta padre.
-        // Si no existen tarjetas, creamos una.
-        $cardId = Card::inRandomOrder()->first()->card_id ?? Card::factory()->create()->card_id;
-        
-        // Definimos códigos de idioma comunes.
-        $languageCode = $this->faker->randomElement(['es', 'en', 'fr', 'de']);
+        // Define una lista de frases comunes y su código de idioma asociado
+        $translations = [
+            ['es', 'Hola'],
+            ['es', 'Adiós'],
+            ['es', 'Gracias'],
+            ['en', 'Hello'],
+            ['en', 'Goodbye'],
+            ['en', 'Thank you'],
+            ['fr', 'Bonjour'],
+            ['fr', 'Au revoir'],
+            ['fr', 'Merci'],
+        ];
 
-        $keyPhrase = match ($languageCode) {
-            'es' => $this->faker->sentence(3, true),
-            'en' => $this->faker->sentence(3, true),
-            'fr' => $this->faker->sentence(3, true),
-            'de' => $this->faker->sentence(3, true),
-            default => $this->faker->sentence(3, true),
-        };
+        // Selecciona una traducción al azar
+        $translation = $this->faker->randomElement($translations);
         
-        $slug = \Illuminate\Support\Str::slug($keyPhrase);
+        // Simula la ruta de un archivo de audio (puede ser null)
+        $audioPath = $this->faker->boolean(70) // 70% de probabilidad de tener audioPath
+            ? 'audio/' . $translation[0] . '/' . $this->faker->uuid() . '.mp3'
+            : null;
 
         return [
-            'card_id_translation' => $cardId,
-            'language_code' => $languageCode,
-            'key_phrase' => $keyPhrase,
-            'audio_path' => "audios/translations/{$languageCode}/{$slug}.mp3",
+            // FK: Aseguramos que la traducción esté vinculada a una Card existente
+            // Usamos 'card_id_translation' ya que es el nombre de la columna en la BD.
+            'card_id_translation' => Card::factory(), 
+            
+            // Columna 'language_code' (ej: 'es', 'en', 'fr')
+            'language_code' => $translation[0], 
+            
+            // Columna 'key_phrase'
+            'key_phrase' => $translation[1], 
+            
+            // Columna 'audio_path' (puede ser null)
+            'audio_path' => $audioPath, 
         ];
+    }
+
+    /**
+     * Indica que esta traducción debe ser para un idioma específico.
+     */
+    public function language(string $code, string $phrase): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'language_code' => $code,
+            'key_phrase' => $phrase,
+        ]);
     }
 }

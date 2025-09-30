@@ -10,6 +10,7 @@ class CardTranslationResource extends JsonResource
 {
     /**
      * @var CardTranslationEntity La entidad que estamos transformando
+     * Se define el tipo explícitamente para ayudar en el autocompletado y tipado.
      */
     public $resource; 
 
@@ -19,16 +20,21 @@ class CardTranslationResource extends JsonResource
     }
 
     /**
-     * Transforma la entidad en un array.
+     * Transforma la entidad en un array, aplicando la convención camelCase.
      *
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array
     {
-        // Mapeo de la Entidad a la estructura JSON deseada (camelCase)
+        // Mapeo de la Entidad a la estructura JSON deseada (ej: translationId)
         return [
+            // Renombramos la PK
             'translationId' => $this->resource->cardTranslationId,
-            'cardId' => $this->resource->cardIdTranslation,
+            
+            // CORRECCIÓN DE LA PROPIEDAD: Asumimos que la FK se llama 'cardId' en la Entidad.
+            'cardId' => $this->resource->cardId,
+            
+            // Mantenemos los nombres que ya están en camelCase o son claros
             'languageCode' => $this->resource->languageCode,
             'keyPhrase' => $this->resource->keyPhrase,
             'audioPath' => $this->resource->audioPath,

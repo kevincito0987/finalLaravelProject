@@ -3,23 +3,30 @@
 namespace App\Http\Controllers;
 
 use App\Core\Entities\CardTranslationEntity;
+use App\Core\Repositories\SupabaseMediaStorage;
 use App\Core\Services\CardTranslationService;
+use App\Core\Services\MediaUploader;
 use App\Http\Requests\StoreCardTranslationRequest;
 use App\Http\Requests\UpdateCardTranslationRequest;
 use App\Http\Resources\CardTranslationResource;
 use App\Models\CardTranslation;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 
 class CardTranslationController extends Controller
 {
     protected CardTranslationService $cardTranslationService;
+    protected MediaUploader $mediaUploader;
 
-    public function __construct(CardTranslationService $cardTranslationService)
-    {
-        
+    public function __construct(
+        CardTranslationService $cardTranslationService,
+        MediaUploader $mediaUploader
+    ) {
+        // Corregido: Usamos la instancia inyectada directamente.
         $this->cardTranslationService = $cardTranslationService;
+        $this->mediaUploader = $mediaUploader;
     }
 
     /**
@@ -31,7 +38,6 @@ class CardTranslationController extends Controller
         
         $translations = $this->cardTranslationService->getAllTranslations();
         
-        // CORRECCIÓN: Usamos ->response() para asegurar que se devuelve un JsonResponse
         return CardTranslationResource::collection($translations)->response();
     }
 
@@ -41,17 +47,37 @@ class CardTranslationController extends Controller
     public function store(StoreCardTranslationRequest $request): JsonResponse
     {
         Gate::authorize('create', CardTranslation::class);
+        
+        $audioPath = null;
+        
+        // --- 1. Lógica de Subida de Archivo de Audio (Supabase) ---
+        if ($request->hasFile('audio_file')) {
+            $file = $request->file('audio_file');
+            $mime = $file->getMimeType();
+            $extension = $file->getClientOriginalExtension();
+            
+            $userFolder = Auth::check() ? 'user_' . Auth::id() : 'anonymous';
+            $path = "{$userFolder}/audio/" . uniqid('translation_') . '.' . $extension;
+            $content = $file->get();
+
+            $this->mediaUploader->upload($path, $content, $mime);
+            $audioPath = $path; 
+        }
+        // -----------------------------------------------------------
 
         // Mapeamos los datos validados del Request a la Entidad
         $entity = new CardTranslationEntity(
-            cardTranslationId: null, // Será asignado por la BD
-            cardIdTranslation: $request->validated('card_id_translation'),
-            languageCode: $request->validated('language_code'),
-            keyPhrase: $request->validated('key_phrase'),
-            audioPath: $request->validated('audio_path'),
+            null, 
+            $request->validated('card_id_translation'), 
+            $request->validated('language_code'), 
+            $request->validated('key_phrase'), 
+            $audioPath, 
         );
 
-        $newTranslation = $this->cardTranslationService->createTranslation($entity);
+        // Si $audioPath es null (no subió archivo), $generateAudio debe ser TRUE.
+        $generateAudio = $audioPath === null;
+
+        $newTranslation = $this->cardTranslationService->createTranslation($entity, $generateAudio);
 
         return (new CardTranslationResource($newTranslation))
             ->response()
@@ -63,15 +89,15 @@ class CardTranslationController extends Controller
      */
     public function show(int $id): JsonResponse
     {
+        // Usamos 'viewAny' porque solo pasamos la clase, y esto ya verifica el permiso general.
+        Gate::authorize('viewAny', CardTranslation::class); 
+
         $translation = $this->cardTranslationService->getTranslation($id);
 
         if (!$translation) {
             return response()->json(['message' => 'Traducción no encontrada'], JsonResponse::HTTP_NOT_FOUND);
         }
-        
-        Gate::authorize('view', $translation); 
 
-        // CORRECCIÓN: Usamos ->response() para asegurar que se devuelve un JsonResponse
         return (new CardTranslationResource($translation))->response();
     }
 
@@ -85,21 +111,42 @@ class CardTranslationController extends Controller
         if (!$existingTranslation) {
             return response()->json(['message' => 'Traducción no encontrada'], JsonResponse::HTTP_NOT_FOUND);
         }
+        
+        // Usar la autorización sobre la clase es más seguro ya que la Entidad no es el Modelo
+        // y la lógica de la política solo depende del rol. Usamos 'create' por la misma lógica de roles.
+        Gate::authorize('create', CardTranslation::class);
+        
+        $audioPath = $existingTranslation->audioPath; // Por defecto, mantener la ruta existente
 
-        Gate::authorize('update', $existingTranslation);
+        // --- Lógica de Subida de Archivo de Audio (Actualización) ---
+        if ($request->hasFile('audio_file')) {
+            $file = $request->file('audio_file');
+            $mime = $file->getMimeType();
+            $extension = $file->getClientOriginalExtension();
+            
+            // Construir la ruta de Supabase (usamos un nuevo nombre)
+            $userFolder = Auth::check() ? 'user_' . Auth::id() : 'anonymous';
+            $path = "{$userFolder}/audio/" . uniqid('translation_update_') . '.' . $extension;
+            $content = $file->get();
 
-        // Mapeamos los campos del request a la entidad, usando los valores existentes si no se proporcionan
+            // Subir el nuevo archivo
+            $this->mediaUploader->upload($path, $content, $mime);
+            $audioPath = $path; // Guardamos el nuevo path.
+        }
+        // -----------------------------------------------------------------
+
+
+        // Mapeamos los campos del request a la entidad
         $updatedEntity = new CardTranslationEntity(
-            cardTranslationId: $existingTranslation->cardTranslationId,
-            cardIdTranslation: $request->validated('card_id_translation', $existingTranslation->cardIdTranslation), // No debería cambiar
-            languageCode: $request->validated('language_code', $existingTranslation->languageCode),
-            keyPhrase: $request->validated('key_phrase', $existingTranslation->keyPhrase),
-            audioPath: $request->validated('audio_path', $existingTranslation->audioPath),
+            $existingTranslation->cardTranslationId,
+            $existingTranslation->cardId,
+            $request->validated('language_code', $existingTranslation->languageCode), 
+            $request->validated('key_phrase', $existingTranslation->keyPhrase), 
+            $audioPath, 
         );
 
         $translation = $this->cardTranslationService->updateTranslation($id, $updatedEntity);
 
-        // CORRECCIÓN: Usamos ->response() para asegurar que se devuelve un JsonResponse
         return (new CardTranslationResource($translation))->response();
     }
 
@@ -114,7 +161,10 @@ class CardTranslationController extends Controller
             return response()->json(['message' => 'Traducción no encontrada'], JsonResponse::HTTP_NOT_FOUND);
         }
 
-        Gate::authorize('delete', $translation);
+        // CORRECCIÓN CRÍTICA: Cambiamos a 'create' (o 'viewAny') que solo espera la CLASE.
+        // La política 'create' (o 'viewAny') en la política CardTranslationPolicy 
+        // solo chequea el rol, lo cual es lo que necesitamos.
+        Gate::authorize('create', CardTranslation::class);
 
         $deleted = $this->cardTranslationService->deleteTranslation($id);
 

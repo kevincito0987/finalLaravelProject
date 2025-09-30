@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 class CardTranslationSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Ejecuta las semillas de la base de datos.
      */
     public function run(): void
     {
@@ -29,30 +29,45 @@ class CardTranslationSeeder extends Seeder
         
         // 2. Iteramos sobre cada ID de tarjeta para asegurar al menos una traducción única por tarjeta.
         foreach ($cardIds as $cardId) {
-            // Aseguramos que la primera traducción sea en 'es' (o un idioma principal)
-            CardTranslation::factory()->create([
-                'card_id_translation' => $cardId,
-                'language_code' => 'es', // Primera traducción forzada a español (o tu idioma principal)
-            ]);
-            $count++;
+            
+            // Verificamos si ya existe una traducción en español (para evitar duplicados si se corre varias veces)
+            $existsEs = CardTranslation::where('card_id_translation', $cardId)
+                                     ->where('language_code', 'es')
+                                     ->exists();
+            
+            if (!$existsEs) {
+                // Aseguramos que la primera traducción sea en 'es' (o un idioma principal)
+                CardTranslation::factory()->language('es', 'Traducción base en Español')->create([
+                    'card_id_translation' => $cardId,
+                ]);
+                $count++;
+            }
+
 
             // 3. Opcional: Creamos algunas traducciones adicionales en otros idiomas aleatorios
-            // Esto solo se hará si hay suficientes idiomas definidos en $languages (más de uno)
             $additionalLanguages = array_diff($languages, ['es']);
             if (!empty($additionalLanguages)) {
                 // Tomamos 1 o 2 idiomas adicionales al azar sin repetir
                 $randomAdditionalLanguages = collect($additionalLanguages)->random(rand(0, 2));
 
                 foreach ($randomAdditionalLanguages as $langCode) {
-                    CardTranslation::factory()->create([
-                        'card_id_translation' => $cardId,
-                        'language_code' => $langCode,
-                    ]);
-                    $count++;
+                    
+                    // Solo creamos si no existe ya una traducción para ese idioma y tarjeta
+                    $existsOther = CardTranslation::where('card_id_translation', $cardId)
+                                                ->where('language_code', $langCode)
+                                                ->exists();
+                                                
+                    if (!$existsOther) {
+                        // Usamos la capacidad de 'state' del Factory para definir el idioma
+                        CardTranslation::factory()->language($langCode, 'Sample Phrase in ' . strtoupper($langCode))->create([
+                            'card_id_translation' => $cardId,
+                        ]);
+                        $count++;
+                    }
                 }
             }
         }
             
-        Log::info("Se han creado {$count} traducciones de tarjetas de ejemplo de forma única.");
+        Log::info("Se han creado {$count} nuevas traducciones de tarjetas de ejemplo de forma única.");
     }
 }
