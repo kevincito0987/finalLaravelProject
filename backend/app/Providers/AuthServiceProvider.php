@@ -10,6 +10,7 @@ use App\Policies\CommunicationMethodPolicy;
 use App\Policies\CardPolicy;
 use App\Policies\CardTranslationPolicy;
 use App\Policies\EvaluationPolicy;
+use App\Policies\EvaluationQuestionPolicy;
 use App\Policies\LessonCardPolicy;
 use App\Policies\LessonPolicy;
 
@@ -22,7 +23,8 @@ class AuthServiceProvider extends ServiceProvider
         CardTranslationPolicy::class,
         LessonPolicy::class,
         LessonCardPolicy::class,
-        EvaluationPolicy::class
+        EvaluationPolicy::class,
+        EvaluationQuestionPolicy::class
      ];
 
     /**

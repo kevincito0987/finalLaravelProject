@@ -9,7 +9,8 @@ use App\Http\Controllers\SupabaseAuthController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\LessonCardController;
 use App\Http\Controllers\MediaController;
-use App\Http\Controllers\EvaluationController; // <-- NUEVO: Importa el controlador de Evaluaciones
+use App\Http\Controllers\EvaluationController; 
+use App\Http\Controllers\EvaluationQuestionController; // Importación necesaria
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', fn() => ['ok' => true]);
@@ -87,8 +88,11 @@ Route::middleware(['auth:api', 'role:user,therapist,admin'])->group(function () 
     // Show con claves compuestas: /api/lesson-cards/{lesson_id}/{card_id}
     Route::get('lesson-cards/{lesson_id}/{card_id}', [LessonCardController::class, 'show']);
 
-    // EVALUATIONS: Acceso de lectura (index, show) <-- NUEVAS RUTAS DE LECTURA
+    // EVALUATIONS: Acceso de lectura (index, show)
     Route::apiResource('evaluations', EvaluationController::class)->only(['index', 'show']);
+
+    // EVALUATION QUESTIONS: Acceso de lectura (index, show) <-- AÑADIDO
+    Route::apiResource('evaluation-questions', EvaluationQuestionController::class)->only(['index', 'show']);
 });
 
 
@@ -120,6 +124,9 @@ Route::middleware(['auth:api', 'role:therapist,admin'])->group(function () {
     Route::patch('lesson-cards/{lesson_id}/{card_id}', [LessonCardController::class, 'update']);
     Route::delete('lesson-cards/{lesson_id}/{card_id}', [LessonCardController::class, 'destroy']);
     
-    // EVALUATIONS: Acceso de escritura (store, update, destroy) <-- NUEVAS RUTAS DE ESCRITURA
+    // EVALUATIONS: Acceso de escritura (store, update, destroy)
     Route::apiResource('evaluations', EvaluationController::class)->except(['index', 'show']);
+    
+    // EVALUATION QUESTIONS: Acceso de escritura (store, update, destroy) <-- AÑADIDO
+    Route::apiResource('evaluation-questions', EvaluationQuestionController::class)->except(['index', 'show']);
 });
