@@ -5,6 +5,20 @@ use Illuminate\Foundation\Http\FormRequest;
 use App\Core\Entities\CategoryEntity;
 use Illuminate\Validation\Rule;
 
+/**
+ * @OA\Schema(
+ * schema="UpdateCategoryRequest",
+ * title="Update Category Request",
+ * description="Datos necesarios para actualizar el nombre de una categoría existente.",
+ * required={"name"},
+ * @OA\Property(
+ * property="name",
+ * type="string",
+ * description="Nuevo nombre único de la categoría. Se mapea a la columna 'category_name' en la base de datos.",
+ * example="Emociones"
+ * )
+ * )
+ */
 class UpdateCategoryRequest extends FormRequest
 {
     public function authorize() { return true; }

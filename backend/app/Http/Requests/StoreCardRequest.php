@@ -6,6 +6,18 @@ use App\Core\Entities\CardEntity;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str; // Necesitamos esta clase para generar el UUID
 
+/**
+ * @OA\Schema(
+ * schema="StoreCardRequest",
+ * title="Store Card Request",
+ * description="Datos necesarios para crear una nueva Card. El 'uuid' es opcional y se genera si no se proporciona.",
+ * required={"imagePath", "methodId", "categoryId"},
+ * @OA\Property(property="uuid", type="string", format="uuid", nullable=true, description="UUID único de la tarjeta (se genera automáticamente si no se envía).", example="a1b2c3d4-e5f6-7890-1234-567890abcdef"),
+ * @OA\Property(property="imagePath", type="string", description="Ruta o URL de la imagen de la tarjeta.", example="images/nueva_card.png"),
+ * @OA\Property(property="methodId", type="integer", description="ID del método de comunicación.", example=1),
+ * @OA\Property(property="categoryId", type="integer", description="ID de la categoría.", example=3)
+ * )
+ */
 class StoreCardRequest extends FormRequest
 {
     public function authorize(): bool

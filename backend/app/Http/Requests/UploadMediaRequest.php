@@ -5,6 +5,20 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * @OA\Schema(
+ * schema="UploadMediaRequest",
+ * title="Upload Media Request",
+ * description="Petición para subir un archivo (imagen o audio).",
+ * required={"file"},
+ * @OA\Property(
+ * property="file",
+ * type="string",
+ * format="binary",
+ * description="El archivo a subir. Debe ser un tipo de imagen (jpeg, png, jpg) o audio (mp3, wav) y no superar los 10MB.",
+ * )
+ * )
+ */
 class UploadMediaRequest extends FormRequest
 {
     public function rules(): array
@@ -19,4 +33,3 @@ class UploadMediaRequest extends FormRequest
         return true;
     }
 }
-

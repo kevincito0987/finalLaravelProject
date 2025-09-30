@@ -15,6 +15,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 
+/**
+ * @OA\Tag(
+ * name="Card Translations",
+ * description="Operaciones relacionadas con las traducciones de las tarjetas (TTS, audio files)."
+ * )
+ */
 class CardTranslationController extends Controller
 {
     protected CardTranslationService $cardTranslationService;
@@ -30,6 +36,23 @@ class CardTranslationController extends Controller
     }
 
     /**
+     * @OA\Get(
+     * path="/api/card-translations",
+     * operationId="getCardTranslationsIndex",
+     * tags={"Card Translations"},
+     * summary="Muestra una lista de todas las traducciones de tarjetas.",
+     * security={{"bearerAuth": {}}},
+     * @OA\Response(
+     * response=200,
+     * description="Lista de traducciones obtenida exitosamente.",
+     * @OA\JsonContent(
+     * type="array",
+     * @OA\Items(ref="#/components/schemas/CardTranslationResource")
+     * )
+     * ),
+     * @OA\Response(response=401, description="No autenticado."),
+     * @OA\Response(response=403, description="Acción no autorizada.")
+     * )
      * Muestra una lista de todas las traducciones.
      */
     public function index(): JsonResponse
@@ -38,10 +61,39 @@ class CardTranslationController extends Controller
         
         $translations = $this->cardTranslationService->getAllTranslations();
         
+        // Asumiendo que CardTranslationResource::collection retorna JsonResponse
         return CardTranslationResource::collection($translations)->response();
     }
 
     /**
+     * @OA\Post(
+     * path="/api/card-translations",
+     * operationId="createCardTranslation",
+     * tags={"Card Translations"},
+     * summary="Crea una nueva traducción para una tarjeta. Genera audio TTS si 'audio_file' no se proporciona.",
+     * security={{"bearerAuth": {}}},
+     * @OA\RequestBody(
+     * required=true,
+     * @OA\MediaType(
+     * mediaType="multipart/form-data",
+     * @OA\Schema(
+     * required={"card_id_translation", "language_code", "key_phrase"},
+     * @OA\Property(property="card_id_translation", type="integer", description="ID de la tarjeta a traducir.", example=10),
+     * @OA\Property(property="language_code", type="string", description="Código del idioma (e.g., es, en).", example="en"),
+     * @OA\Property(property="key_phrase", type="string", description="Frase clave a traducir.", example="Hello, world"),
+     * @OA\Property(property="audio_file", type="string", format="binary", nullable=true, description="Archivo de audio MP3 opcional. Si no se provee, se usa TTS.")
+     * )
+     * )
+     * ),
+     * @OA\Response(
+     * response=201,
+     * description="Traducción creada y audio generado (o subido) exitosamente.",
+     * @OA\JsonContent(ref="#/components/schemas/CardTranslationResource")
+     * ),
+     * @OA\Response(response=401, description="No autenticado."),
+     * @OA\Response(response=403, description="Acción no autorizada (solo terapeutas/administradores)."),
+     * @OA\Response(response=422, description="Error de validación.")
+     * )
      * Crea una nueva traducción.
      */
     public function store(StoreCardTranslationRequest $request): JsonResponse
@@ -85,6 +137,28 @@ class CardTranslationController extends Controller
     }
 
     /**
+     * @OA\Get(
+     * path="/api/card-translations/{id}",
+     * operationId="getCardTranslationById",
+     * tags={"Card Translations"},
+     * summary="Muestra una traducción específica por ID.",
+     * security={{"bearerAuth": {}}},
+     * @OA\Parameter(
+     * name="id",
+     * in="path",
+     * required=true,
+     * @OA\Schema(type="integer"),
+     * description="ID de la traducción."
+     * ),
+     * @OA\Response(
+     * response=200,
+     * description="Traducción obtenida exitosamente.",
+     * @OA\JsonContent(ref="#/components/schemas/CardTranslationResource")
+     * ),
+     * @OA\Response(response=401, description="No autenticado."),
+     * @OA\Response(response=403, description="Acción no autorizada."),
+     * @OA\Response(response=404, description="Traducción no encontrada.")
+     * )
      * Muestra una traducción específica por ID.
      */
     public function show(int $id): JsonResponse
@@ -102,6 +176,42 @@ class CardTranslationController extends Controller
     }
 
     /**
+     * @OA\Post(
+     * path="/api/card-translations/{id}",
+     * operationId="updateCardTranslation",
+     * tags={"Card Translations"},
+     * summary="Actualiza una traducción existente por ID.",
+     * description="Se debe usar POST con campo _method=PUT/PATCH en multipart/form-data. Genera audio TTS si 'audio_file' no se proporciona y se cambia la 'key_phrase'.",
+     * security={{"bearerAuth": {}}},
+     * @OA\Parameter(
+     * name="id",
+     * in="path",
+     * required=true,
+     * @OA\Schema(type="integer"),
+     * description="ID de la traducción a actualizar."
+     * ),
+     * @OA\RequestBody(
+     * required=true,
+     * @OA\MediaType(
+     * mediaType="multipart/form-data",
+     * @OA\Schema(
+     * @OA\Property(property="_method", type="string", enum={"PUT", "PATCH"}, example="PATCH", description="Método HTTP para simular PUT/PATCH."),
+     * @OA\Property(property="language_code", type="string", nullable=true, description="Código del idioma (e.g., es, en).", example="fr"),
+     * @OA\Property(property="key_phrase", type="string", nullable=true, description="Nueva frase clave.", example="Bonjour le monde"),
+     * @OA\Property(property="audio_file", type="string", format="binary", nullable=true, description="Nuevo archivo de audio MP3 opcional. Si no se provee, se usa el audio existente o se genera TTS si la frase cambia.")
+     * )
+     * )
+     * ),
+     * @OA\Response(
+     * response=200,
+     * description="Traducción actualizada exitosamente.",
+     * @OA\JsonContent(ref="#/components/schemas/CardTranslationResource")
+     * ),
+     * @OA\Response(response=401, description="No autenticado."),
+     * @OA\Response(response=403, description="Acción no autorizada."),
+     * @OA\Response(response=404, description="Traducción no encontrada."),
+     * @OA\Response(response=422, description="Error de validación.")
+     * )
      * Actualiza una traducción existente.
      */
     public function update(UpdateCardTranslationRequest $request, int $id): JsonResponse
@@ -151,6 +261,25 @@ class CardTranslationController extends Controller
     }
 
     /**
+     * @OA\Delete(
+     * path="/api/card-translations/{id}",
+     * operationId="deleteCardTranslation",
+     * tags={"Card Translations"},
+     * summary="Elimina una traducción específica por ID.",
+     * security={{"bearerAuth": {}}},
+     * @OA\Parameter(
+     * name="id",
+     * in="path",
+     * required=true,
+     * @OA\Schema(type="integer"),
+     * description="ID de la traducción a eliminar."
+     * ),
+     * @OA\Response(response=204, description="Traducción eliminada exitosamente (No Content)."),
+     * @OA\Response(response=401, description="No autenticado."),
+     * @OA\Response(response=403, description="Acción no autorizada."),
+     * @OA\Response(response=404, description="Traducción no encontrada."),
+     * @OA\Response(response=500, description="Error interno del servidor al intentar eliminar.")
+     * )
      * Elimina una traducción.
      */
     public function destroy(int $id): JsonResponse

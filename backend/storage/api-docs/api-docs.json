@@ -489,6 +489,521 @@
                 ]
             }
         },
+        "/api/cards": {
+            "get": {
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Obtener todas las tarjetas (Cards)",
+                "description": "Devuelve una lista de todas las tarjetas con sus detalles de categoría y método de comunicación.",
+                "operationId": "0cf776c75245f5f70e78d1981e3398c2",
+                "responses": {
+                    "200": {
+                        "description": "Lista de tarjetas obtenida exitosamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/CardResource"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Crear una nueva tarjeta",
+                "operationId": "6a1db83adb51fba2ac318a78bc2a4fde",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreCardRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Tarjeta creada exitosamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CardResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "No autorizado (Requiere rol therapist/admin)."
+                    },
+                    "422": {
+                        "description": "Error de validación."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cards/{card_id}": {
+            "get": {
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Obtener una tarjeta por ID",
+                "description": "Devuelve los detalles de una tarjeta específica por su clave primaria.",
+                "operationId": "7350b288de2e917f6564caa984f7f7db",
+                "parameters": [
+                    {
+                        "name": "card_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tarjeta obtenida exitosamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CardResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Tarjeta no encontrada."
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Eliminar una tarjeta",
+                "operationId": "46d519107786a6310019d149617cdfa0",
+                "parameters": [
+                    {
+                        "name": "card_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Tarjeta eliminada exitosamente (No Content)."
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "No autorizado (Requiere rol therapist/admin)."
+                    },
+                    "404": {
+                        "description": "Tarjeta no encontrada o no pudo ser eliminada."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Actualizar una tarjeta existente",
+                "operationId": "2031d580adc9422592399021c588e1de",
+                "parameters": [
+                    {
+                        "name": "card_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateCardRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Tarjeta actualizada exitosamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CardResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "No autorizado (Requiere rol therapist/admin)."
+                    },
+                    "404": {
+                        "description": "Tarjeta no encontrada."
+                    },
+                    "422": {
+                        "description": "Error de validación."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cards/uuid/{uuid}": {
+            "get": {
+                "tags": [
+                    "Cards"
+                ],
+                "summary": "Obtener una tarjeta por UUID",
+                "description": "Devuelve los detalles de una tarjeta específica por su UUID único.",
+                "operationId": "cfa9fee4343802c9da342309117bfee4",
+                "parameters": [
+                    {
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tarjeta obtenida exitosamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CardResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Tarjeta no encontrada."
+                    }
+                }
+            }
+        },
+        "/api/card-translations": {
+            "get": {
+                "tags": [
+                    "Card Translations"
+                ],
+                "summary": "Muestra una lista de todas las traducciones de tarjetas.",
+                "operationId": "getCardTranslationsIndex",
+                "responses": {
+                    "200": {
+                        "description": "Lista de traducciones obtenida exitosamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/CardTranslationResource"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "Acción no autorizada."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Card Translations"
+                ],
+                "summary": "Crea una nueva traducción para una tarjeta. Genera audio TTS si 'audio_file' no se proporciona.",
+                "operationId": "createCardTranslation",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "card_id_translation",
+                                    "language_code",
+                                    "key_phrase"
+                                ],
+                                "properties": {
+                                    "card_id_translation": {
+                                        "description": "ID de la tarjeta a traducir.",
+                                        "type": "integer",
+                                        "example": 10
+                                    },
+                                    "language_code": {
+                                        "description": "Código del idioma (e.g., es, en).",
+                                        "type": "string",
+                                        "example": "en"
+                                    },
+                                    "key_phrase": {
+                                        "description": "Frase clave a traducir.",
+                                        "type": "string",
+                                        "example": "Hello, world"
+                                    },
+                                    "audio_file": {
+                                        "description": "Archivo de audio MP3 opcional. Si no se provee, se usa TTS.",
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Traducción creada y audio generado (o subido) exitosamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CardTranslationResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "Acción no autorizada (solo terapeutas/administradores)."
+                    },
+                    "422": {
+                        "description": "Error de validación."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/card-translations/{id}": {
+            "get": {
+                "tags": [
+                    "Card Translations"
+                ],
+                "summary": "Muestra una traducción específica por ID.",
+                "operationId": "getCardTranslationById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la traducción.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Traducción obtenida exitosamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CardTranslationResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "Acción no autorizada."
+                    },
+                    "404": {
+                        "description": "Traducción no encontrada."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Card Translations"
+                ],
+                "summary": "Actualiza una traducción existente por ID.",
+                "description": "Se debe usar POST con campo _method=PUT/PATCH en multipart/form-data. Genera audio TTS si 'audio_file' no se proporciona y se cambia la 'key_phrase'.",
+                "operationId": "updateCardTranslation",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la traducción a actualizar.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "_method": {
+                                        "description": "Método HTTP para simular PUT/PATCH.",
+                                        "type": "string",
+                                        "enum": [
+                                            "PUT",
+                                            "PATCH"
+                                        ],
+                                        "example": "PATCH"
+                                    },
+                                    "language_code": {
+                                        "description": "Código del idioma (e.g., es, en).",
+                                        "type": "string",
+                                        "example": "fr",
+                                        "nullable": true
+                                    },
+                                    "key_phrase": {
+                                        "description": "Nueva frase clave.",
+                                        "type": "string",
+                                        "example": "Bonjour le monde",
+                                        "nullable": true
+                                    },
+                                    "audio_file": {
+                                        "description": "Nuevo archivo de audio MP3 opcional. Si no se provee, se usa el audio existente o se genera TTS si la frase cambia.",
+                                        "type": "string",
+                                        "format": "binary",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Traducción actualizada exitosamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CardTranslationResource"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "Acción no autorizada."
+                    },
+                    "404": {
+                        "description": "Traducción no encontrada."
+                    },
+                    "422": {
+                        "description": "Error de validación."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Card Translations"
+                ],
+                "summary": "Elimina una traducción específica por ID.",
+                "operationId": "deleteCardTranslation",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la traducción a eliminar.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Traducción eliminada exitosamente (No Content)."
+                    },
+                    "401": {
+                        "description": "No autenticado."
+                    },
+                    "403": {
+                        "description": "Acción no autorizada."
+                    },
+                    "404": {
+                        "description": "Traducción no encontrada."
+                    },
+                    "500": {
+                        "description": "Error interno del servidor al intentar eliminar."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/categories": {
             "get": {
                 "tags": [
@@ -1021,6 +1536,190 @@
         }
     },
     "components": {
+        "schemas": {
+            "CommunicationMethodRequest": {
+                "title": "Communication Method Request",
+                "description": "Datos necesarios para crear o actualizar un método de comunicación.",
+                "required": [
+                    "method_name"
+                ],
+                "properties": {
+                    "method_name": {
+                        "description": "Nombre único del método de comunicación. Se almacena en minúsculas para estandarización.",
+                        "type": "string",
+                        "example": "pecs"
+                    }
+                },
+                "type": "object"
+            },
+            "StoreCardRequest": {
+                "title": "Store Card Request",
+                "description": "Datos necesarios para crear una nueva Card. El 'uuid' es opcional y se genera si no se proporciona.",
+                "required": [
+                    "imagePath",
+                    "methodId",
+                    "categoryId"
+                ],
+                "properties": {
+                    "uuid": {
+                        "description": "UUID único de la tarjeta (se genera automáticamente si no se envía).",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+                        "nullable": true
+                    },
+                    "imagePath": {
+                        "description": "Ruta o URL de la imagen de la tarjeta.",
+                        "type": "string",
+                        "example": "images/nueva_card.png"
+                    },
+                    "methodId": {
+                        "description": "ID del método de comunicación.",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "categoryId": {
+                        "description": "ID de la categoría.",
+                        "type": "integer",
+                        "example": 3
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateCardRequest": {
+                "title": "Update Card Request",
+                "description": "Datos opcionales para actualizar una Card existente. Utiliza la lógica 'sometimes' para permitir actualizaciones parciales (PATCH).",
+                "properties": {
+                    "uuid": {
+                        "description": "UUID único de la tarjeta. Solo se valida si se envía.",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+                        "nullable": true
+                    },
+                    "imagePath": {
+                        "description": "Ruta o URL de la imagen de la tarjeta.",
+                        "type": "string",
+                        "example": "images/nueva_card_v2.png",
+                        "nullable": true
+                    },
+                    "methodId": {
+                        "description": "ID del método de comunicación.",
+                        "type": "integer",
+                        "example": 2,
+                        "nullable": true
+                    },
+                    "categoryId": {
+                        "description": "ID de la categoría.",
+                        "type": "integer",
+                        "example": 5,
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "CardCollection": {
+                "title": "Card Collection",
+                "description": "Estructura de la respuesta para obtener una lista de tarjetas.",
+                "properties": {
+                    "data": {
+                        "description": "Lista de recursos de tarjeta individuales.",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CardResource"
+                        }
+                    },
+                    "meta": {
+                        "description": "Metadata de paginación (si se implementa), omitido si no hay paginación.",
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "CardResource": {
+                "title": "Card Resource",
+                "description": "Representación de una tarjeta de comunicación (Card) con sus datos de identificación y relaciones.",
+                "properties": {
+                    "cardId": {
+                        "description": "ID primario de la tarjeta.",
+                        "type": "integer",
+                        "example": 52
+                    },
+                    "uuid": {
+                        "description": "UUID único de la tarjeta.",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "8a0e0a9e-9c19-4d50-9e91-54dae0705053"
+                    },
+                    "imagePath": {
+                        "description": "Ruta o URL de la imagen.",
+                        "type": "string",
+                        "example": "placeholders/card_image_52.jpg"
+                    },
+                    "methodId": {
+                        "description": "ID del método de comunicación.",
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "categoryIdCard": {
+                        "description": "ID de la categoría.",
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "categoryName": {
+                        "description": "Nombre de la categoría.",
+                        "type": "string",
+                        "example": "Sentimientos",
+                        "nullable": true
+                    },
+                    "methodName": {
+                        "description": "Nombre del método de comunicación.",
+                        "type": "string",
+                        "example": "Auditivo",
+                        "nullable": true
+                    },
+                    "consecutiveId": {
+                        "description": "ID consecutivo/índice de ordenamiento. Solo presente en listados (index).",
+                        "type": "integer",
+                        "example": 1,
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "CardTranslationResource": {
+                "title": "Card Translation Resource",
+                "description": "Estructura de datos para la traducción de una tarjeta, incluyendo la ruta del archivo de audio TTS/subido.",
+                "properties": {
+                    "translationId": {
+                        "description": "ID único de la traducción.",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "cardId": {
+                        "description": "ID de la tarjeta a la que pertenece esta traducción.",
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "languageCode": {
+                        "description": "Código del idioma de la traducción (e.g., 'en', 'es').",
+                        "type": "string",
+                        "example": "en"
+                    },
+                    "keyPhrase": {
+                        "description": "La frase clave traducida (el texto que se reproduce).",
+                        "type": "string",
+                        "example": "Hello, world"
+                    },
+                    "audioPath": {
+                        "description": "Ruta del archivo de audio generado por TTS o subido.",
+                        "type": "string",
+                        "example": "user_1/audio/translation_abc123.mp3"
+                    }
+                },
+                "type": "object"
+            }
+        },
         "securitySchemes": {
             "bearerAuth": {
                 "type": "http",
@@ -1033,6 +1732,14 @@
         {
             "name": "Auth",
             "description": "Autenticación y perfil"
+        },
+        {
+            "name": "Cards",
+            "description": "Operaciones CRUD para la gestión de tarjetas (Cards) de comunicación."
+        },
+        {
+            "name": "Card Translations",
+            "description": "Operaciones relacionadas con las traducciones de las tarjetas (TTS, audio files)."
         },
         {
             "name": "Categories",

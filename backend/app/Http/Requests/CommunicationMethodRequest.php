@@ -5,6 +5,20 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
+/**
+ * @OA\Schema(
+ * schema="CommunicationMethodRequest",
+ * title="Communication Method Request",
+ * description="Datos necesarios para crear o actualizar un método de comunicación.",
+ * required={"method_name"},
+ * @OA\Property(
+ * property="method_name",
+ * type="string",
+ * description="Nombre único del método de comunicación. Se almacena en minúsculas para estandarización.",
+ * example="pecs"
+ * )
+ * )
+ */
 class CommunicationMethodRequest extends FormRequest
 {
     /**
@@ -67,4 +81,3 @@ class CommunicationMethodRequest extends FormRequest
         }
     }
 }
-    

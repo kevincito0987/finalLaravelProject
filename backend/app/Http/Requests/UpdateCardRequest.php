@@ -5,10 +5,22 @@ use App\Core\Entities\CardEntity;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
+/**
+ * @OA\Schema(
+ * schema="UpdateCardRequest",
+ * title="Update Card Request",
+ * description="Datos opcionales para actualizar una Card existente. Utiliza la lógica 'sometimes' para permitir actualizaciones parciales (PATCH).",
+ * @OA\Property(property="uuid", type="string", format="uuid", nullable=true, description="UUID único de la tarjeta. Solo se valida si se envía.", example="a1b2c3d4-e5f6-7890-1234-567890abcdef"),
+ * @OA\Property(property="imagePath", type="string", nullable=true, description="Ruta o URL de la imagen de la tarjeta.", example="images/nueva_card_v2.png"),
+ * @OA\Property(property="methodId", type="integer", nullable=true, description="ID del método de comunicación.", example=2),
+ * @OA\Property(property="categoryId", type="integer", nullable=true, description="ID de la categoría.", example=5)
+ * )
+ */
 class UpdateCardRequest extends FormRequest
 {
     public function authorize(): bool
     {
+        // El middleware de rol ya protege esta ruta (therapist/admin)
         return true;
     }
 

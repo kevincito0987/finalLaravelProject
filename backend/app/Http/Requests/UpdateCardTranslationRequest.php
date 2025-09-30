@@ -4,6 +4,34 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * @OA\Schema(
+ * schema="UpdateCardTranslationRequest",
+ * title="Update Card Translation Request",
+ * description="Datos opcionales para actualizar una traducción de tarjeta. Permite actualizar la frase clave o subir un nuevo archivo de audio. Los campos no incluidos se ignoran (PATCH).",
+ * @OA\Property(
+ * property="language_code",
+ * type="string",
+ * description="Código de idioma de la traducción (ej: es, en, fr). Opcional.",
+ * example="en",
+ * nullable=true
+ * ),
+ * @OA\Property(
+ * property="key_phrase",
+ * type="string",
+ * description="La nueva frase clave o palabra de la traducción. Opcional.",
+ * example="I want water",
+ * nullable=true
+ * ),
+ * @OA\Property(
+ * property="audio_file",
+ * type="string",
+ * format="binary",
+ * description="Nuevo archivo de audio opcional para reemplazar el existente.",
+ * nullable=true
+ * )
+ * )
+ */
 class UpdateCardTranslationRequest extends FormRequest
 {
     /**

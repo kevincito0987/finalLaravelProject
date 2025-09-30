@@ -4,6 +4,39 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * @OA\Schema(
+ * schema="StoreCardTranslationRequest",
+ * title="Store Card Translation Request",
+ * description="Datos necesarios para crear una nueva traducción de tarjeta (incluyendo opcionalmente la subida de un archivo de audio).",
+ * required={"card_id_translation", "language_code", "key_phrase"},
+ * @OA\Property(
+ * property="card_id_translation",
+ * type="integer",
+ * description="ID de la tarjeta a la que pertenece esta traducción (Foreign Key).",
+ * example=101
+ * ),
+ * @OA\Property(
+ * property="language_code",
+ * type="string",
+ * description="Código de idioma de la traducción (ej: es, en, fr).",
+ * example="es"
+ * ),
+ * @OA\Property(
+ * property="key_phrase",
+ * type="string",
+ * description="La frase clave o palabra de la traducción.",
+ * example="Yo quiero agua"
+ * ),
+ * @OA\Property(
+ * property="audio_file",
+ * type="string",
+ * format="binary",
+ * description="Archivo de audio opcional (mp3, wav, ogg). Si no se proporciona, se generará audio por TTS.",
+ * nullable=true
+ * )
+ * )
+ */
 class StoreCardTranslationRequest extends FormRequest
 {
     /**
@@ -20,9 +53,10 @@ class StoreCardTranslationRequest extends FormRequest
      */
     public function rules(): array
     {
-        // Requerimos la FK, el idioma y la frase clave.
-        // El archivo de audio (audio_file) es opcional, ya que puede ser generado por TTS.
+        // Nota: Agregué la validación para 'card_id_translation' ya que es
+        // una FK requerida en la lógica del Controller y la Entidad.
         return [
+            'card_id_translation' => ['required', 'integer', 'exists:cards,card_id'],
             'language_code' => ['required', 'string', 'max:5'], 
             'key_phrase' => ['required', 'string'], 
             
@@ -42,6 +76,8 @@ class StoreCardTranslationRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'card_id_translation.required' => 'El ID de la tarjeta es obligatorio.',
+            'card_id_translation.exists' => 'El ID de la tarjeta proporcionado no existe.',
             'language_code.required' => 'El código de idioma es obligatorio.',
             'language_code.max' => 'El código de idioma no puede superar los 5 caracteres.',
             'key_phrase.required' => 'La frase clave (traducción) es obligatoria.',

@@ -6,6 +6,21 @@ use App\Core\Entities\CardEntity;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @OA\Schema(
+ * schema="CardResource",
+ * title="Card Resource",
+ * description="Representación de una tarjeta de comunicación (Card) con sus datos de identificación y relaciones.",
+ * @OA\Property(property="cardId", type="integer", example=52, description="ID primario de la tarjeta."),
+ * @OA\Property(property="uuid", type="string", format="uuid", example="8a0e0a9e-9c19-4d50-9e91-54dae0705053", description="UUID único de la tarjeta."),
+ * @OA\Property(property="imagePath", type="string", example="placeholders/card_image_52.jpg", description="Ruta o URL de la imagen."),
+ * @OA\Property(property="methodId", type="integer", example=2, description="ID del método de comunicación."),
+ * @OA\Property(property="categoryIdCard", type="integer", example=2, description="ID de la categoría."),
+ * @OA\Property(property="categoryName", type="string", nullable=true, example="Sentimientos", description="Nombre de la categoría."),
+ * @OA\Property(property="methodName", type="string", nullable=true, example="Auditivo", description="Nombre del método de comunicación."),
+ * @OA\Property(property="consecutiveId", type="integer", nullable=true, example=1, description="ID consecutivo/índice de ordenamiento. Solo presente en listados (index).")
+ * )
+ */
 class CardResource extends JsonResource
 {
     /**
@@ -52,7 +67,7 @@ class CardResource extends JsonResource
             'categoryIdCard' => $data['categoryIdCard'],
             
             // Nombres de Relaciones
-            // Aseguramos que si los nombres no existen en el array, sean null
+            // Aseguramos que los nombres no existen en el array, sean null
             'categoryName' => $data['categoryName'] ?? null,
             'methodName' => $data['methodName'] ?? null,
         ];

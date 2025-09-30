@@ -6,6 +6,18 @@ use App\Core\Entities\CardTranslationEntity;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @OA\Schema(
+ * schema="CardTranslationResource",
+ * title="Card Translation Resource",
+ * description="Estructura de datos para la traducción de una tarjeta, incluyendo la ruta del archivo de audio TTS/subido.",
+ * @OA\Property(property="translationId", type="integer", description="ID único de la traducción.", example=1),
+ * @OA\Property(property="cardId", type="integer", description="ID de la tarjeta a la que pertenece esta traducción.", example=10),
+ * @OA\Property(property="languageCode", type="string", description="Código del idioma de la traducción (e.g., 'en', 'es').", example="en"),
+ * @OA\Property(property="keyPhrase", type="string", description="La frase clave traducida (el texto que se reproduce).", example="Hello, world"),
+ * @OA\Property(property="audioPath", type="string", description="Ruta del archivo de audio generado por TTS o subido.", example="user_1/audio/translation_abc123.mp3"),
+ * )
+ */
 class CardTranslationResource extends JsonResource
 {
     /**
