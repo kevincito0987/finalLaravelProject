@@ -7,45 +7,49 @@ use Illuminate\Foundation\Http\FormRequest;
 /**
  * @OA\Schema(
  * schema="StoreCardTranslationRequest",
- * title="Store Card Translation Request",
- * description="Datos necesarios para crear una nueva traducción de tarjeta (incluyendo opcionalmente la subida de un archivo de audio).",
- * required={"card_id_translation", "language_code", "key_phrase"},
- * @OA\Property(
- * property="card_id_translation",
- * type="integer",
- * description="ID de la tarjeta a la que pertenece esta traducción (Foreign Key).",
- * example=101
- * ),
+ * title="Crear Traducción de Tarjeta",
+ * description="Datos requeridos para crear una nueva traducción. El ID de la tarjeta principal (FK) se asume que se obtiene de la ruta de la API. Se espera 'audio_file' O 'audio_url' o ninguno (para forzar TTS).",
+ * required={"language_code", "key_phrase"},
  * @OA\Property(
  * property="language_code",
  * type="string",
- * description="Código de idioma de la traducción (ej: es, en, fr).",
- * example="es"
+ * maxLength=10,
+ * description="Código del idioma de la traducción (e.g., 'en', 'fr').",
+ * example="en"
  * ),
  * @OA\Property(
  * property="key_phrase",
  * type="string",
- * description="La frase clave o palabra de la traducción.",
- * example="Yo quiero agua"
+ * maxLength=500,
+ * description="La frase clave traducida.",
+ * example="Hello, nice to meet you"
  * ),
  * @OA\Property(
  * property="audio_file",
  * type="string",
  * format="binary",
- * description="Archivo de audio opcional (mp3, wav, ogg). Si no se proporciona, se generará audio por TTS.",
- * nullable=true
+ * nullable=true,
+ * description="Archivo de audio a subir (MP3/WAV/OGG), máx 5MB. Prohíbe el uso de 'audio_url'."
+ * ),
+ * @OA\Property(
+ * property="audio_url",
+ * type="string",
+ * format="url",
+ * nullable=true,
+ * maxLength=2048,
+ * description="URL externa del archivo de audio. Prohíbe el uso de 'audio_file'."
  * )
  * )
+ * Define las reglas de validación para crear una nueva traducción de tarjeta.
  */
 class StoreCardTranslationRequest extends FormRequest
 {
     /**
-     * Determina si el usuario está autorizado para hacer esta petición.
+     * Determina si el usuario está autorizado a realizar esta petición.
      */
     public function authorize(): bool
     {
-        // La autorización se maneja a nivel de Policy.
-        return true;
+        return true; 
     }
 
     /**
@@ -53,36 +57,41 @@ class StoreCardTranslationRequest extends FormRequest
      */
     public function rules(): array
     {
-        // Nota: Agregué la validación para 'card_id_translation' ya que es
-        // una FK requerida en la lógica del Controller y la Entidad.
         return [
-            'card_id_translation' => ['required', 'integer', 'exists:cards,card_id'],
-            'language_code' => ['required', 'string', 'max:5'], 
-            'key_phrase' => ['required', 'string'], 
-            
-            // Campo específico para la subida de archivos de audio
+            // ESTE CAMPO DEBE SER REQUERIDO, ENTERO Y EXISTIR EN LA TABLA 'CARDS'
+            'card_id_translation' => ['required', 'integer', 'exists:cards,card_id'], 
+            'language_code' => ['required', 'string', 'max:10'],
+            'key_phrase' => ['required', 'string', 'max:500'],
+
+            // Campos de audio (mutuamente excluyentes)
             'audio_file' => [
                 'nullable', 
-                'file', // Debe ser un archivo
-                'mimetypes:audio/mpeg,audio/wav,audio/ogg,audio/mp3', // Tipos de audio permitidos
-                'max:5120', // 5MB máximo
+                'file',
+                'mimetypes:audio/mpeg,audio/wav,audio/ogg,audio/mp3',
+                'max:5120',
+                'prohibits:audio_url'
+            ], 
+            
+            'audio_url' => [
+                'nullable', 
+                'url',
+                'max:2048',
+                'prohibits:audio_file'
             ], 
         ];
     }
-    
+
     /**
-     * Mensajes de error personalizados.
+     * Prepara los datos para la validación.
+     * Esto es opcional, pero ayuda a asegurar que el campo esté disponible.
      */
-    public function messages(): array
+    protected function prepareForValidation()
     {
-        return [
-            'card_id_translation.required' => 'El ID de la tarjeta es obligatorio.',
-            'card_id_translation.exists' => 'El ID de la tarjeta proporcionado no existe.',
-            'language_code.required' => 'El código de idioma es obligatorio.',
-            'language_code.max' => 'El código de idioma no puede superar los 5 caracteres.',
-            'key_phrase.required' => 'La frase clave (traducción) es obligatoria.',
-            'audio_file.mimetypes' => 'El archivo debe ser un formato de audio válido (mp3, wav, ogg).',
-            'audio_file.max' => 'El archivo de audio no debe superar los 5MB.',
-        ];
+        // Si el cliente envía el ID como 'cardId' o 'card_id', puedes normalizarlo
+        if ($this->has('cardId') && !$this->has('card_id_translation')) {
+            $this->merge([
+                'card_id_translation' => $this->input('cardId'),
+            ]);
+        }
     }
 }

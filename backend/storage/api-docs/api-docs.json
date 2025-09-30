@@ -763,9 +763,10 @@
                 "tags": [
                     "Card Translations"
                 ],
-                "summary": "Crea una nueva traducción para una tarjeta. Genera audio TTS si 'audio_file' no se proporciona.",
+                "summary": "Crea una nueva traducción para una tarjeta. Genera audio TTS si no se proporciona 'audio_file' ni 'audio_url'.",
                 "operationId": "createCardTranslation",
                 "requestBody": {
+                    "description": "Datos para crear la traducción. 'audio_file' y 'audio_url' son mutuamente excluyentes.",
                     "required": true,
                     "content": {
                         "multipart/form-data": {
@@ -777,7 +778,7 @@
                                 ],
                                 "properties": {
                                     "card_id_translation": {
-                                        "description": "ID de la tarjeta a traducir.",
+                                        "description": "ID de la tarjeta principal (FK).",
                                         "type": "integer",
                                         "example": 10
                                     },
@@ -792,9 +793,15 @@
                                         "example": "Hello, world"
                                     },
                                     "audio_file": {
-                                        "description": "Archivo de audio MP3 opcional. Si no se provee, se usa TTS.",
+                                        "description": "Archivo de audio MP3 opcional. Prohíbe el uso de 'audio_url'.",
                                         "type": "string",
                                         "format": "binary",
+                                        "nullable": true
+                                    },
+                                    "audio_url": {
+                                        "description": "URL externa del archivo de audio. Prohíbe el uso de 'audio_file'.",
+                                        "type": "string",
+                                        "format": "url",
                                         "nullable": true
                                     }
                                 },
@@ -805,7 +812,7 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Traducción creada y audio generado (o subido) exitosamente.",
+                        "description": "Traducción creada y audio generado (o subido/enlazado) exitosamente.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -881,7 +888,7 @@
                     "Card Translations"
                 ],
                 "summary": "Actualiza una traducción existente por ID.",
-                "description": "Se debe usar POST con campo _method=PUT/PATCH en multipart/form-data. Genera audio TTS si 'audio_file' no se proporciona y se cambia la 'key_phrase'.",
+                "description": "Se debe usar POST con campo _method=PUT/PATCH en multipart/form-data. Si 'key_phrase' cambia y no se proporciona 'audio_file' o 'audio_url', se regenera el audio TTS.",
                 "operationId": "updateCardTranslation",
                 "parameters": [
                     {
@@ -922,9 +929,15 @@
                                         "nullable": true
                                     },
                                     "audio_file": {
-                                        "description": "Nuevo archivo de audio MP3 opcional. Si no se provee, se usa el audio existente o se genera TTS si la frase cambia.",
+                                        "description": "Nuevo archivo de audio MP3 opcional. Prohíbe el uso de 'audio_url'.",
                                         "type": "string",
                                         "format": "binary",
+                                        "nullable": true
+                                    },
+                                    "audio_url": {
+                                        "description": "Nueva URL externa del archivo de audio. Prohíbe el uso de 'audio_file'.",
+                                        "type": "string",
+                                        "format": "url",
                                         "nullable": true
                                     }
                                 },
@@ -1946,33 +1959,36 @@
                 "type": "object"
             },
             "StoreCardTranslationRequest": {
-                "title": "Store Card Translation Request",
-                "description": "Datos necesarios para crear una nueva traducción de tarjeta (incluyendo opcionalmente la subida de un archivo de audio).",
+                "title": "Crear Traducción de Tarjeta",
+                "description": "Datos requeridos para crear una nueva traducción. El ID de la tarjeta principal (FK) se asume que se obtiene de la ruta de la API. Se espera 'audio_file' O 'audio_url' o ninguno (para forzar TTS).",
                 "required": [
-                    "card_id_translation",
                     "language_code",
                     "key_phrase"
                 ],
                 "properties": {
-                    "card_id_translation": {
-                        "description": "ID de la tarjeta a la que pertenece esta traducción (Foreign Key).",
-                        "type": "integer",
-                        "example": 101
-                    },
                     "language_code": {
-                        "description": "Código de idioma de la traducción (ej: es, en, fr).",
+                        "description": "Código del idioma de la traducción (e.g., 'en', 'fr').",
                         "type": "string",
-                        "example": "es"
+                        "maxLength": 10,
+                        "example": "en"
                     },
                     "key_phrase": {
-                        "description": "La frase clave o palabra de la traducción.",
+                        "description": "La frase clave traducida.",
                         "type": "string",
-                        "example": "Yo quiero agua"
+                        "maxLength": 500,
+                        "example": "Hello, nice to meet you"
                     },
                     "audio_file": {
-                        "description": "Archivo de audio opcional (mp3, wav, ogg). Si no se proporciona, se generará audio por TTS.",
+                        "description": "Archivo de audio a subir (MP3/WAV/OGG), máx 5MB. Prohíbe el uso de 'audio_url'.",
                         "type": "string",
                         "format": "binary",
+                        "nullable": true
+                    },
+                    "audio_url": {
+                        "description": "URL externa del archivo de audio. Prohíbe el uso de 'audio_file'.",
+                        "type": "string",
+                        "format": "url",
+                        "maxLength": 2048,
                         "nullable": true
                     }
                 },
@@ -2021,40 +2037,8 @@
                 "type": "object"
             },
             "UpdateCardRequest": {
-                "title": "Update Card Request",
-                "description": "Datos opcionales para actualizar una Card existente. Utiliza la lógica 'sometimes' para permitir actualizaciones parciales (PATCH).",
-                "properties": {
-                    "uuid": {
-                        "description": "UUID único de la tarjeta. Solo se valida si se envía.",
-                        "type": "string",
-                        "format": "uuid",
-                        "example": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-                        "nullable": true
-                    },
-                    "imagePath": {
-                        "description": "Ruta o URL de la imagen de la tarjeta.",
-                        "type": "string",
-                        "example": "images/nueva_card_v2.png",
-                        "nullable": true
-                    },
-                    "methodId": {
-                        "description": "ID del método de comunicación.",
-                        "type": "integer",
-                        "example": 2,
-                        "nullable": true
-                    },
-                    "categoryId": {
-                        "description": "ID de la categoría.",
-                        "type": "integer",
-                        "example": 5,
-                        "nullable": true
-                    }
-                },
-                "type": "object"
-            },
-            "UpdateCardTranslationRequest": {
                 "title": "Update Card Translation Request",
-                "description": "Datos opcionales para actualizar una traducción de tarjeta. Permite actualizar la frase clave o subir un nuevo archivo de audio. Los campos no incluidos se ignoran (PATCH).",
+                "description": "Datos opcionales para actualizar una traducción de tarjeta. Permite actualizar la frase clave, subir un nuevo archivo de audio, o enviar una URL de audio existente.",
                 "properties": {
                     "language_code": {
                         "description": "Código de idioma de la traducción (ej: es, en, fr). Opcional.",
@@ -2069,7 +2053,39 @@
                         "nullable": true
                     },
                     "audio_file": {
-                        "description": "Nuevo archivo de audio opcional para reemplazar el existente.",
+                        "description": "Nuevo archivo de audio opcional para reemplazar el existente. Si se envía como string, se usa como URL directa.",
+                        "type": "string",
+                        "format": "binary",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateCardTranslationRequest": {
+                "title": "Update Card Translation Request",
+                "description": "Datos opcionales para actualizar una traducción de tarjeta. Permite actualizar la frase clave, subir un nuevo archivo de audio o proporcionar una URL de audio externa.",
+                "properties": {
+                    "language_code": {
+                        "description": "Código de idioma de la traducción (ej: es, en, fr). Opcional.",
+                        "type": "string",
+                        "example": "en",
+                        "nullable": true
+                    },
+                    "key_phrase": {
+                        "description": "La nueva frase clave o palabra de la traducción. Opcional.",
+                        "type": "string",
+                        "example": "I want water",
+                        "nullable": true
+                    },
+                    "audio_url": {
+                        "description": "URL de audio externa (ej. de S3, Cloudflare, etc.) para usar como fuente de audio. Opcional.",
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://mycdn.com/audio/water.mp3",
+                        "nullable": true
+                    },
+                    "audio_file": {
+                        "description": "Nuevo archivo de audio opcional para reemplazar el existente (solo si se usa multipart/form-data).",
                         "type": "string",
                         "format": "binary",
                         "nullable": true
@@ -2199,36 +2215,39 @@
                 "type": "object"
             },
             "CardTranslationResource": {
-                "title": "Card Translation Resource",
-                "description": "Estructura de datos para la traducción de una tarjeta, incluyendo la ruta del archivo de audio TTS/subido.",
+                "title": "CardTranslationResource",
+                "description": "Datos detallados de una traducción de tarjeta.",
                 "properties": {
                     "translationId": {
-                        "description": "ID único de la traducción.",
+                        "description": "Identificador único de la traducción.",
                         "type": "integer",
-                        "example": 1
+                        "example": 123
                     },
                     "cardId": {
                         "description": "ID de la tarjeta a la que pertenece esta traducción.",
                         "type": "integer",
-                        "example": 10
+                        "example": 45
                     },
                     "languageCode": {
-                        "description": "Código del idioma de la traducción (e.g., 'en', 'es').",
+                        "description": "Código ISO del idioma de la traducción (ej: 'es', 'zh').",
                         "type": "string",
-                        "example": "en"
+                        "example": "zh"
                     },
                     "keyPhrase": {
-                        "description": "La frase clave traducida (el texto que se reproduce).",
+                        "description": "La frase traducida o clave principal.",
                         "type": "string",
-                        "example": "Hello, world"
+                        "example": "It works"
                     },
                     "audioPath": {
-                        "description": "Ruta del archivo de audio generado por TTS o subido.",
+                        "description": "La URL pública y completa del archivo de audio TTS.",
                         "type": "string",
-                        "example": "user_1/audio/translation_abc123.mp3"
+                        "example": "https://bmcnrnnhyazclvwgrieb.supabase.co/storage/v1/object/public/laravel/user_2/audio/translation_68dc2c933c568.mp3"
                     }
                 },
-                "type": "object"
+                "type": "object",
+                "xml": {
+                    "name": "CardTranslationResource"
+                }
             },
             "LessonResource": {
                 "title": "Lesson Resource",

@@ -33,7 +33,7 @@ class EloquentCardTranslationRepository implements CardTranslationRepositoryInte
             'card_id_translation' => $entity->cardId, 
             'language_code' => $entity->languageCode,
             'key_phrase' => $entity->keyPhrase,
-            'audio_path' => $entity->audioPath,
+            'audio_path' => $entity->audioPath, // Simplemente guardamos el string que nos pase el servicio
         ];
     }
 

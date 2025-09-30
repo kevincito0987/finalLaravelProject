@@ -13,7 +13,7 @@ use App\Models\CardTranslation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @OA\Tag(
@@ -30,7 +30,6 @@ class CardTranslationController extends Controller
         CardTranslationService $cardTranslationService,
         MediaUploader $mediaUploader
     ) {
-        // Corregido: Usamos la instancia inyectada directamente.
         $this->cardTranslationService = $cardTranslationService;
         $this->mediaUploader = $mediaUploader;
     }
@@ -57,11 +56,10 @@ class CardTranslationController extends Controller
      */
     public function index(): JsonResponse
     {
-        Gate::authorize('viewAny', CardTranslation::class);
+        Gate::authorize('viewAny', CardTranslation::class); 
         
         $translations = $this->cardTranslationService->getAllTranslations();
         
-        // Asumiendo que CardTranslationResource::collection retorna JsonResponse
         return CardTranslationResource::collection($translations)->response();
     }
 
@@ -70,24 +68,26 @@ class CardTranslationController extends Controller
      * path="/api/card-translations",
      * operationId="createCardTranslation",
      * tags={"Card Translations"},
-     * summary="Crea una nueva traducción para una tarjeta. Genera audio TTS si 'audio_file' no se proporciona.",
+     * summary="Crea una nueva traducción para una tarjeta. Genera audio TTS si no se proporciona 'audio_file' ni 'audio_url'.",
      * security={{"bearerAuth": {}}},
      * @OA\RequestBody(
      * required=true,
+     * description="Datos para crear la traducción. 'audio_file' y 'audio_url' son mutuamente excluyentes.",
      * @OA\MediaType(
      * mediaType="multipart/form-data",
      * @OA\Schema(
      * required={"card_id_translation", "language_code", "key_phrase"},
-     * @OA\Property(property="card_id_translation", type="integer", description="ID de la tarjeta a traducir.", example=10),
+     * @OA\Property(property="card_id_translation", type="integer", description="ID de la tarjeta principal (FK).", example=10),
      * @OA\Property(property="language_code", type="string", description="Código del idioma (e.g., es, en).", example="en"),
      * @OA\Property(property="key_phrase", type="string", description="Frase clave a traducir.", example="Hello, world"),
-     * @OA\Property(property="audio_file", type="string", format="binary", nullable=true, description="Archivo de audio MP3 opcional. Si no se provee, se usa TTS.")
+     * @OA\Property(property="audio_file", type="string", format="binary", nullable=true, description="Archivo de audio MP3 opcional. Prohíbe el uso de 'audio_url'."),
+     * @OA\Property(property="audio_url", type="string", format="url", nullable=true, description="URL externa del archivo de audio. Prohíbe el uso de 'audio_file'.")
      * )
      * )
      * ),
      * @OA\Response(
      * response=201,
-     * description="Traducción creada y audio generado (o subido) exitosamente.",
+     * description="Traducción creada y audio generado (o subido/enlazado) exitosamente.",
      * @OA\JsonContent(ref="#/components/schemas/CardTranslationResource")
      * ),
      * @OA\Response(response=401, description="No autenticado."),
@@ -101,8 +101,9 @@ class CardTranslationController extends Controller
         Gate::authorize('create', CardTranslation::class);
         
         $audioPath = null;
-        
-        // --- 1. Lógica de Subida de Archivo de Audio (Supabase) ---
+        $generateAudio = true; // Por defecto intentamos generar TTS
+
+        // --- 1. Lógica de Audio: Archivo de Audio Subido ---
         if ($request->hasFile('audio_file')) {
             $file = $request->file('audio_file');
             $mime = $file->getMimeType();
@@ -112,22 +113,32 @@ class CardTranslationController extends Controller
             $path = "{$userFolder}/audio/" . uniqid('translation_') . '.' . $extension;
             $content = $file->get();
 
-            $this->mediaUploader->upload($path, $content, $mime);
-            $audioPath = $path; 
+            try {
+                $this->mediaUploader->upload($path, $content, $mime); 
+                $audioPath = $path; 
+                $generateAudio = false; // No necesitamos TTS
+            } catch (\Exception $e) {
+                Log::error("Fallo al subir archivo de audio: " . $e->getMessage());
+                // Si falla la subida, volvemos a intentar TTS
+                $audioPath = null;
+                $generateAudio = true;
+            }
+        } 
+        // --- 2. Lógica de Audio: URL Externa ---
+        elseif ($request->has('audio_url')) {
+            $audioPath = $request->input('audio_url'); 
+            $generateAudio = false;
         }
         // -----------------------------------------------------------
 
         // Mapeamos los datos validados del Request a la Entidad
         $entity = new CardTranslationEntity(
             null, 
-            $request->validated('card_id_translation'), 
+            $request->validated('card_id_translation'), // Aquí usamos el ID del cuerpo de la petición
             $request->validated('language_code'), 
             $request->validated('key_phrase'), 
-            $audioPath, 
+            $audioPath, // Null si se debe generar, o la ruta/URL
         );
-
-        // Si $audioPath es null (no subió archivo), $generateAudio debe ser TRUE.
-        $generateAudio = $audioPath === null;
 
         $newTranslation = $this->cardTranslationService->createTranslation($entity, $generateAudio);
 
@@ -163,7 +174,6 @@ class CardTranslationController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        // Usamos 'viewAny' porque solo pasamos la clase, y esto ya verifica el permiso general.
         Gate::authorize('viewAny', CardTranslation::class); 
 
         $translation = $this->cardTranslationService->getTranslation($id);
@@ -181,7 +191,7 @@ class CardTranslationController extends Controller
      * operationId="updateCardTranslation",
      * tags={"Card Translations"},
      * summary="Actualiza una traducción existente por ID.",
-     * description="Se debe usar POST con campo _method=PUT/PATCH en multipart/form-data. Genera audio TTS si 'audio_file' no se proporciona y se cambia la 'key_phrase'.",
+     * description="Se debe usar POST con campo _method=PUT/PATCH en multipart/form-data. Si 'key_phrase' cambia y no se proporciona 'audio_file' o 'audio_url', se regenera el audio TTS.",
      * security={{"bearerAuth": {}}},
      * @OA\Parameter(
      * name="id",
@@ -198,7 +208,8 @@ class CardTranslationController extends Controller
      * @OA\Property(property="_method", type="string", enum={"PUT", "PATCH"}, example="PATCH", description="Método HTTP para simular PUT/PATCH."),
      * @OA\Property(property="language_code", type="string", nullable=true, description="Código del idioma (e.g., es, en).", example="fr"),
      * @OA\Property(property="key_phrase", type="string", nullable=true, description="Nueva frase clave.", example="Bonjour le monde"),
-     * @OA\Property(property="audio_file", type="string", format="binary", nullable=true, description="Nuevo archivo de audio MP3 opcional. Si no se provee, se usa el audio existente o se genera TTS si la frase cambia.")
+     * @OA\Property(property="audio_file", type="string", format="binary", nullable=true, description="Nuevo archivo de audio MP3 opcional. Prohíbe el uso de 'audio_url'."),
+     * @OA\Property(property="audio_url", type="string", format="url", nullable=true, description="Nueva URL externa del archivo de audio. Prohíbe el uso de 'audio_file'.")
      * )
      * )
      * ),
@@ -222,26 +233,49 @@ class CardTranslationController extends Controller
             return response()->json(['message' => 'Traducción no encontrada'], JsonResponse::HTTP_NOT_FOUND);
         }
         
-        // Usar la autorización sobre la clase es más seguro ya que la Entidad no es el Modelo
-        // y la lógica de la política solo depende del rol. Usamos 'create' por la misma lógica de roles.
         Gate::authorize('create', CardTranslation::class);
         
         $audioPath = $existingTranslation->audioPath; // Por defecto, mantener la ruta existente
+        $shouldRegenerateAudio = false; 
+        $audioProvidedInRequest = false;
 
         // --- Lógica de Subida de Archivo de Audio (Actualización) ---
         if ($request->hasFile('audio_file')) {
+            $audioProvidedInRequest = true;
             $file = $request->file('audio_file');
             $mime = $file->getMimeType();
             $extension = $file->getClientOriginalExtension();
             
-            // Construir la ruta de Supabase (usamos un nuevo nombre)
+            // 1. Subir el nuevo archivo
             $userFolder = Auth::check() ? 'user_' . Auth::id() : 'anonymous';
             $path = "{$userFolder}/audio/" . uniqid('translation_update_') . '.' . $extension;
             $content = $file->get();
 
-            // Subir el nuevo archivo
-            $this->mediaUploader->upload($path, $content, $mime);
-            $audioPath = $path; // Guardamos el nuevo path.
+            try {
+                $this->mediaUploader->upload($path, $content, $mime);
+                $audioPath = $path; // Guardamos el nuevo path.
+            } catch (\Exception $e) {
+                Log::error("Fallo al subir archivo de audio en la actualización: " . $e->getMessage());
+                // Si falla la subida, mantenemos el path anterior y NO regeneramos/cambiamos nada.
+                $audioPath = $existingTranslation->audioPath; 
+                $audioProvidedInRequest = false; // Ignoramos el intento de subida
+            }
+        } 
+        // --- Lógica de URL Externa (Actualización) ---
+        elseif ($request->has('audio_url')) {
+            $audioProvidedInRequest = true;
+            $audioPath = $request->input('audio_url'); 
+        }
+
+        // Si NO se proporcionó audio (archivo o URL), verificamos si se cambió la key_phrase para TTS.
+        if (!$audioProvidedInRequest) {
+            $newKeyPhrase = $request->validated('key_phrase', $existingTranslation->keyPhrase);
+
+            if ($newKeyPhrase !== $existingTranslation->keyPhrase) {
+                // Si la frase cambia, necesitamos generar nuevo TTS.
+                $shouldRegenerateAudio = true;
+                $audioPath = null; // Indicamos que el servicio debe generar y guardar.
+            }
         }
         // -----------------------------------------------------------------
 
@@ -252,10 +286,11 @@ class CardTranslationController extends Controller
             $existingTranslation->cardId,
             $request->validated('language_code', $existingTranslation->languageCode), 
             $request->validated('key_phrase', $existingTranslation->keyPhrase), 
-            $audioPath, 
+            $audioPath, // Será la nueva ruta/URL, o null si se espera TTS, o la ruta antigua.
         );
 
-        $translation = $this->cardTranslationService->updateTranslation($id, $updatedEntity);
+        // Pasamos el ID y el flag de regeneración al servicio.
+        $translation = $this->cardTranslationService->updateTranslation($id, $updatedEntity, $shouldRegenerateAudio);
 
         return (new CardTranslationResource($translation))->response();
     }
@@ -290,9 +325,7 @@ class CardTranslationController extends Controller
             return response()->json(['message' => 'Traducción no encontrada'], JsonResponse::HTTP_NOT_FOUND);
         }
 
-        // CORRECCIÓN CRÍTICA: Cambiamos a 'create' (o 'viewAny') que solo espera la CLASE.
-        // La política 'create' (o 'viewAny') en la política CardTranslationPolicy 
-        // solo chequea el rol, lo cual es lo que necesitamos.
+        // Se mantiene 'create' para chequear el permiso general (asumiendo que solo los creadores pueden eliminar).
         Gate::authorize('create', CardTranslation::class);
 
         $deleted = $this->cardTranslationService->deleteTranslation($id);

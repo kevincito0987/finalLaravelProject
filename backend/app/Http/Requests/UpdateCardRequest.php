@@ -1,75 +1,89 @@
 <?php
+
 namespace App\Http\Requests;
 
-use App\Core\Entities\CardEntity;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 /**
  * @OA\Schema(
  * schema="UpdateCardRequest",
- * title="Update Card Request",
- * description="Datos opcionales para actualizar una Card existente. Utiliza la lógica 'sometimes' para permitir actualizaciones parciales (PATCH).",
- * @OA\Property(property="uuid", type="string", format="uuid", nullable=true, description="UUID único de la tarjeta. Solo se valida si se envía.", example="a1b2c3d4-e5f6-7890-1234-567890abcdef"),
- * @OA\Property(property="imagePath", type="string", nullable=true, description="Ruta o URL de la imagen de la tarjeta.", example="images/nueva_card_v2.png"),
- * @OA\Property(property="methodId", type="integer", nullable=true, description="ID del método de comunicación.", example=2),
- * @OA\Property(property="categoryId", type="integer", nullable=true, description="ID de la categoría.", example=5)
+ * title="Update Card Translation Request",
+ * description="Datos opcionales para actualizar una traducción de tarjeta. Permite actualizar la frase clave, subir un nuevo archivo de audio, o enviar una URL de audio existente.",
+ * @OA\Property(
+ * property="language_code",
+ * type="string",
+ * description="Código de idioma de la traducción (ej: es, en, fr). Opcional.",
+ * example="en",
+ * nullable=true
+ * ),
+ * @OA\Property(
+ * property="key_phrase",
+ * type="string",
+ * description="La nueva frase clave o palabra de la traducción. Opcional.",
+ * example="I want water",
+ * nullable=true
+ * ),
+ * @OA\Property(
+ * property="audio_file",
+ * type="string",
+ * format="binary",
+ * description="Nuevo archivo de audio opcional para reemplazar el existente. Si se envía como string, se usa como URL directa.",
+ * nullable=true
+ * )
  * )
  */
 class UpdateCardRequest extends FormRequest
 {
+    /**
+     * Determina si el usuario está autorizado para hacer esta petición.
+     */
     public function authorize(): bool
     {
-        // El middleware de rol ya protege esta ruta (therapist/admin)
+        // La autorización se maneja a nivel de Policy.
         return true;
     }
 
+    /**
+     * Obtiene las reglas de validación que se aplican a la petición.
+     */
     public function rules(): array
     {
-        $cardId = $this->route('card'); 
-
         return [
-            // 'sometimes' asegura que solo se valide si está presente
-            'uuid' => ['sometimes', 'string', 'max:36', Rule::unique('cards', 'uuid')->ignore($cardId, 'card_id')],
-            'imagePath' => ['sometimes', 'required', 'string', 'max:255'],
-            // IDs de claves foráneas: 'sometimes' y 'integer'
-            'methodId' => ['sometimes', 'required', 'integer', 'exists:communication_methods,method_id'],
-            'categoryId' => ['sometimes', 'required', 'integer', 'exists:categories,category_id'],
+            'language_code' => ['sometimes', 'string', 'max:5'], 
+            'key_phrase' => ['sometimes', 'string'], 
+            
+            // Regla para el campo de audio: puede ser un archivo O una cadena de texto (URL).
+            // Usamos una regla condicional para manejar ambos casos de manera limpia:
+            // 1. Si se detecta un archivo (multipart/form-data), valida como file.
+            // 2. Si no hay archivo, valida como string (útil para JSON o URL directa).
+            'audio_file' => [
+                'sometimes',
+                'nullable', 
+                // La validación real se hará en el controlador para diferenciar File de String.
+                // Aquí solo aseguramos que si es un file, cumpla con los requisitos.
+                Rule::when($this->hasFile('audio_file'), [
+                    'file', 
+                    'mimetypes:audio/mpeg,audio/wav,audio/ogg,audio/mp3',
+                    'max:5120', // 5MB máximo
+                ], [
+                    // Si no es un archivo subido, solo puede ser una URL de texto.
+                    'string',
+                ]),
+            ],
         ];
     }
-
+    
     /**
-     * Genera la Entidad de Tarjeta, pasando solo los valores que fueron enviados.
-     * Los campos no enviados resultarán en NULL, lo cual la Entidad acepta.
-     *
-     * Nota: Los campos uuid e imagePath se inicializarán a string vacía si no se envían
-     * debido al constructor de la entidad, pero el Repository debe ignorarlos si
-     * la intención es no actualizar.
+     * Mensajes de error personalizados.
      */
-    public function toEntity(): CardEntity
+    public function messages(): array
     {
-        $validated = $this->validated();
-        $cardId = (int) $this->route('card'); 
-        
-        // Usamos data_get sin valor por defecto. Si el campo no fue validado (no existe en $validated),
-        // data_get devuelve NULL. Esto es clave.
-        $uuid = data_get($validated, 'uuid');
-        $imagePath = data_get($validated, 'imagePath');
-        $methodId = data_get($validated, 'methodId');
-        $categoryId = data_get($validated, 'categoryId');
-
-        return new CardEntity(
-            cardId: $cardId,
-            // Aquí, si $uuid es NULL (no se envió), la Entidad pasará '' automáticamente 
-            // porque el constructor CardEntity espera un 'string' y no acepta NULL para uuid/imagePath.
-            // Por ello, en el Repository, DEBES IGNORAR estas cadenas vacías.
-            uuid: $uuid ?? '', 
-            imagePath: $imagePath ?? '',
-            
-            // Si $methodId es NULL, se pasa NULL (lo cual la Entidad acepta).
-            // Si el Repository ve NULL, debe IGNORAR la actualización del campo.
-            methodId: $methodId !== null ? (int) $methodId : null,
-            categoryIdCard: $categoryId !== null ? (int) $categoryId : null
-        );
+        return [
+            'language_code.max' => 'El código de idioma no puede superar los 5 caracteres.',
+            'audio_file.mimetypes' => 'El archivo debe ser un formato de audio válido (mp3, wav, ogg).',
+            'audio_file.max' => 'El archivo de audio no debe superar los 5MB.',
+            'audio_file.string' => 'El campo audio_file, si no es un archivo, debe ser una cadena de texto (URL).',
+        ];
     }
 }

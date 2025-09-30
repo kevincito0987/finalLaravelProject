@@ -4,63 +4,65 @@ namespace App\Core\Services;
 
 use App\Core\Entities\CardTranslationEntity;
 use App\Core\Repositories\CardTranslationRepositoryInterface;
-use App\Core\Services\MediaUploader; 
-use App\Models\Media; // Necesario para registrar el path en la tabla 'media' local
+// La clase SupabaseMediaStorage se mantiene para la función estática isSupabasePath
+use App\Core\Repositories\SupabaseMediaStorage; 
+use App\Models\Media; 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class CardTranslationService
 {
+    // AÑADIDO: Constantes para construir la URL pública de Supabase. 
+    // Estas DEBEN coincidir con la configuración de tu storage.
+    protected const SUPABASE_BASE_URL = 'https://abcdefghijk.supabase.co/storage/v1/object/public/';
+    protected const BUCKET_NAME = 'media'; 
+
     protected CardTranslationRepositoryInterface $translationRepository;
-    protected MediaUploader $mediaUploader; // Inyectado para manejar la subida a Supabase
+    // Mantenemos la inyección de MediaUploader, pero SOLO usaremos upload/delete, NO getPublicUrl
+    protected $mediaUploader; 
     
     public function __construct(
         CardTranslationRepositoryInterface $translationRepository,
-        MediaUploader $mediaUploader 
+        // Asumimos que $mediaUploader es la clase que maneja la subida y eliminación real
+        $mediaUploader 
     ) {
         $this->translationRepository = $translationRepository;
         $this->mediaUploader = $mediaUploader;
     }
 
+    // =================================================================
+    // MÉTODOS PÚBLICOS DE NEGOCIO (Sin cambios en la lógica)
+    // =================================================================
+    
     /**
-     * Crea una traducción, generando el archivo de audio TTS y subiéndolo a Supabase.
-     * * @param CardTranslationEntity $entity Entidad con cardId, languageCode y keyPhrase.
-     * @param bool $generateAudio Indica si se debe intentar generar el audio TTS.
-     * @return CardTranslationEntity
+     * Crea una traducción. La prioridad de audio es: Path provisto > TTS (si se solicita).
      */
     public function createTranslation(CardTranslationEntity $entity, bool $generateAudio = true): CardTranslationEntity
     {
-        // 1. Inicialmente, el audioPath es nulo
-        $audioPath = $entity->audioPath;
-
-        if ($generateAudio) {
+        if ($generateAudio && empty($entity->audioPath)) {
             try {
-                // 2. Genera el audio y lo sube a Supabase, obteniendo el path.
                 $audioPath = $this->generateAndUploadAudio($entity->keyPhrase, $entity->languageCode);
-                $entity->audioPath = $audioPath; // Asignamos el path generado
+                $entity->audioPath = $audioPath;
             } catch (\Exception $e) {
-                // Si la generación o subida falla, logueamos y la traducción se guarda sin audio.
                 Log::error("TTS/Supabase Falló para '{$entity->keyPhrase}': " . $e->getMessage());
-                // Aseguramos que el path sea null para no guardar paths inválidos
                 $entity->audioPath = null;
             }
         }
-
-        // 3. Guarda en la base de datos
+        
         return $this->translationRepository->create($entity);
     }
 
     /**
-     * Lógica para actualizar una traducción, con opción a regenerar el audio.
-     * * @param int $id ID de la traducción a actualizar.
-     * @param CardTranslationEntity $entity Entidad con los datos a actualizar.
-     * @return CardTranslationEntity
+     * Lógica para actualizar una traducción.
      */
-    public function updateTranslation(int $id, CardTranslationEntity $entity): CardTranslationEntity
+    public function updateTranslation(
+        int $id, 
+        CardTranslationEntity $entity, 
+        bool $regenerateAudio = false
+    ): CardTranslationEntity
     {
         $existing = $this->translationRepository->find($id);
 
@@ -68,37 +70,50 @@ class CardTranslationService
             throw new ModelNotFoundException("Traducción con ID {$id} no encontrada.");
         }
 
-        $regenerateAudio = false;
-
-        // Si la frase clave o el idioma cambian, debemos regenerar el audio
-        if ($entity->keyPhrase !== $existing->keyPhrase || $entity->languageCode !== $existing->languageCode) {
-            $regenerateAudio = true;
-        }
-
+        $oldPath = $existing->audioPath;
+        $newPath = $entity->audioPath; 
+        
+        // ---------------------------------------------------------------------
+        // 1. Decidir el Path de Audio Final
+        // ---------------------------------------------------------------------
+        
         if ($regenerateAudio) {
-            // 1. Eliminar el archivo antiguo de Supabase si existe
-            if ($existing->audioPath) {
-                $this->deleteMediaFile($existing->audioPath);
-            }
-
-            // 2. Generar y subir el nuevo audio
             try {
                 $newPath = $this->generateAndUploadAudio($entity->keyPhrase, $entity->languageCode);
-                $entity->audioPath = $newPath;
             } catch (\Exception $e) {
                 Log::error("TTS/Supabase Falló al regenerar audio para '{$entity->keyPhrase}': " . $e->getMessage());
-                $entity->audioPath = null; // Falla, no guardamos path
+                $newPath = null;
             }
+        } 
+        
+        elseif (empty($entity->audioPath)) {
+            $newPath = $oldPath;
+        }
+
+        // ---------------------------------------------------------------------
+        // 2. Limpieza y Registro
+        // ---------------------------------------------------------------------
+        
+        if ($oldPath && $oldPath !== $newPath && SupabaseMediaStorage::isSupabasePath($oldPath)) {
+            $this->deleteMediaFile($oldPath);
         }
         
-        // 3. Actualizar la traducción
+        if (SupabaseMediaStorage::isSupabasePath($newPath)) {
+            $this->ensureMediaRecordExists($newPath, $entity->keyPhrase, $entity->languageCode);
+        }
+
+        // ---------------------------------------------------------------------
+        // 3. Persistir
+        // ---------------------------------------------------------------------
+        
+        $entity->audioPath = $newPath;
+        $entity->cardTranslationId = $id;
+
         return $this->translationRepository->update($id, $entity);
     }
     
     /**
      * Obtiene una traducción por su ID.
-     * @param int $id
-     * @return ?CardTranslationEntity
      */
     public function getTranslation(int $id): ?CardTranslationEntity
     {
@@ -107,41 +122,37 @@ class CardTranslationService
     
     /**
      * Obtiene todas las traducciones.
-     * @return Collection<CardTranslationEntity>
      */
     public function getAllTranslations(): Collection
     {
-        return $this->translationRepository->getAll();
+        return $this->translationRepository->getAll(); 
     }
     
     /**
-     * Elimina una traducción y su archivo de audio asociado (si existe).
-     * @param int $id
-     * @return bool
+     * Elimina una traducción y su archivo de audio asociado.
      */
     public function deleteTranslation(int $id): bool
     {
         $entity = $this->translationRepository->find($id);
 
-        if ($entity && $entity->audioPath) {
-            // Lógica para eliminar el archivo de Supabase y el registro en la tabla 'media'
+        if ($entity && $entity->audioPath && SupabaseMediaStorage::isSupabasePath($entity->audioPath)) {
             $this->deleteMediaFile($entity->audioPath);
         }
 
         return $this->translationRepository->delete($id);
     }
     
+    // =================================================================
+    // MÉTODOS PROTEGIDOS DE MEDIA
+    // =================================================================
+    
     /**
      * Lógica para eliminar el archivo de media de Supabase y de la BD local.
-     * @param string $path El path en Supabase.
      */
     protected function deleteMediaFile(string $path): void
     {
         try {
-            // Eliminar el archivo del bucket Supabase
-            Storage::disk('supabase')->delete($path);
-            
-            // Eliminar el registro de la tabla 'media' local
+            $this->mediaUploader->delete($path);
             Media::where('path', $path)->delete(); 
             
             Log::info("Archivo de media eliminado de Supabase y BD: {$path}");
@@ -150,41 +161,72 @@ class CardTranslationService
         }
     }
 
+    /**
+     * Construye la URL pública de Supabase a partir del path de almacenamiento.
+     * REEMPLAZA AL MÉTODO 'getPublicUrl' que no existe.
+     * @param string $path El path del archivo DENTRO del bucket.
+     * @return string La URL completa y accesible.
+     */
+    protected function buildSupabasePublicUrl(string $path): string
+    {
+        // Construcción directa usando las constantes definidas en el servicio
+        return self::SUPABASE_BASE_URL . self::BUCKET_NAME . '/' . $path;
+    }
 
-    // =================================================================
-    // LÓGICA CLAVE DE INTEGRACIÓN TTS/SUPABASE
-    // =================================================================
+    /**
+     * Asegura que exista un registro en la tabla 'media' para un path de Supabase.
+     */
+    protected function ensureMediaRecordExists(string $path, string $keyPhrase, string $languageCode): void
+    {
+        if (Media::where('path', $path)->exists()) {
+            return;
+        }
+
+        try {
+            // ** CORRECCIÓN APLICADA AQUÍ: Se llama a la función interna buildSupabasePublicUrl **
+            $url = $this->buildSupabasePublicUrl($path); 
+            $mime = 'audio/mpeg'; 
+
+            Media::create([
+                'path' => $path,
+                'url' => $url,
+                'mime' => $mime,
+                'type' => 'audio',
+                'user_id' => Auth::id(),
+                'metadata' => [
+                    'translation_phrase' => $keyPhrase, 
+                    'language_code' => $languageCode
+                ]
+            ]);
+            Log::info("Registro local de media creado/actualizado para path de Supabase: {$path}");
+        } catch (\Exception $e) {
+            Log::error("Fallo al crear registro de media local para {$path}: " . $e->getMessage());
+        }
+    }
+
 
     /**
      * Lógica para generar audio TTS y subirlo a Supabase.
-     * * @param string $text Texto a convertir a voz.
-     * @param string $languageCode Idioma para TTS (ej: 'es', 'en').
-     * @return ?string El path del archivo en Supabase (o null si falla).
      */
     protected function generateAndUploadAudio(string $text, string $languageCode): ?string
     {
         // ----------------------------------------------------------------
-        // PASO 1: GENERACIÓN DE AUDIO TTS
-        // ** INTEGRACIÓN REQUERIDA: Conecta tu API de TTS (ej. Gemini o Google Cloud TTS) aquí. **
+        // PASO 1: GENERACIÓN DE AUDIO TTS (SIMULACIÓN)
         // ----------------------------------------------------------------
         
         $audioBinaryContent = null;
-        $mime = 'audio/mpeg'; // Mime type común para audio
+        $mime = 'audio/mpeg'; 
         $extension = 'mp3';
         
-        // --- INICIO DE SIMULACIÓN ---
-        // DEBES REEMPLAZAR ESTE BLOQUE con la llamada a la API TTS real.
         try {
-            // Aquí iría tu código de llamada a la API:
-            // $audioBinaryContent = $ttsApi->generateAudio($text, $languageCode);
-            
-            // Por ahora, simulamos un contenido binario.
-            $audioBinaryContent = "Simulated binary audio content for: {$text}"; 
+            if (strlen($text) < 3) {
+                throw new \Exception("Texto demasiado corto para TTS.");
+            }
+            $audioBinaryContent = "Simulated binary audio content for: {$text} in {$languageCode}"; 
             Log::info("Simulación de audio TTS generada.");
-            
+
         } catch (\Exception $e) {
             Log::error("Error en la llamada a la API TTS: " . $e->getMessage());
-            // Lanza una excepción para detener el proceso de subida si falla la generación
             throw new \Exception("Fallo al generar audio TTS.");
         }
 
@@ -194,28 +236,17 @@ class CardTranslationService
         }
 
         // ----------------------------------------------------------------
-        // PASO 2: SUBIDA A SUPABASE (Usando la lógica de tu MediaController)
+        // PASO 2: SUBIDA A SUPABASE
         // ----------------------------------------------------------------
 
         $userFolder = Auth::check() ? 'user_' . Auth::id() : 'anonymous';
-        // Limpiamos la frase y la truncamos para un nombre de archivo seguro y descriptivo
         $slug = Str::slug(substr($text, 0, 50)); 
         $path = "{$userFolder}/audio/translations/{$languageCode}/{$slug}-" . uniqid() . ".{$extension}";
 
-        // Subir el contenido binario usando el MediaUploader inyectado
-        $url = $this->mediaUploader->upload($path, $audioBinaryContent, $mime);
+        $this->mediaUploader->upload($path, $audioBinaryContent, $mime);
         
-        // 3. Registrar en la tabla 'media' para trazabilidad
-        Media::create([
-            'path' => $path,
-            'url' => $url,
-            'mime' => $mime,
-            'type' => 'audio',
-            'user_id' => Auth::id(),
-        ]);
-        
-        Log::info("Audio subido a Supabase y registrado en BD local: {$path}");
+        $this->ensureMediaRecordExists($path, $text, $languageCode);
 
-        return $path; // Devolvemos el PATH de Supabase (es lo que guarda la DB)
+        return $path;
     }
 }
