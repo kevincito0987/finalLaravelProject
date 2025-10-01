@@ -35,7 +35,10 @@ class DatabaseSeeder extends Seeder
             CardTranslationSeeder::class,
             LessonSeeder::class,
             EvaluationSeeder::class,
-            EvaluationQuestionSeeder::class
+            EvaluationQuestionSeeder::class,
+            UserLessonSeeder::class,
+            LessonCardSeeder::class,
+            UserProgressSeeder::class
         ]);
     }
 }

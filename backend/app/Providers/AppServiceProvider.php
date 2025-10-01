@@ -27,10 +27,12 @@ use App\Core\Interfaces\EvaluationQuestionRepositoryInterface;
 use App\Core\Interfaces\EvaluationRepositoryInterface;
 use App\Core\Interfaces\LessonCardRepositoryInterface;
 use App\Core\Interfaces\UserLessonRepositoryInterface;
+use App\Core\Interfaces\UserProgressRepositoryInterface;
 use App\Core\Repositories\EloquentEvaluationQuestionRepository;
 use App\Core\Repositories\EloquentEvaluationRepository;
 use App\Core\Repositories\LessonCardRepository;
 use App\Repositories\EloquentUserLessonRepository;
+use App\Repositories\EloquentUserProgressRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -97,6 +99,12 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             UserLessonRepositoryInterface::class,
             EloquentUserLessonRepository::class
+        );
+
+        // Binding para UserProgress
+        $this->app->bind(
+            UserProgressRepositoryInterface::class,
+            EloquentUserProgressRepository::class
         );
 
 

@@ -30,14 +30,25 @@ class UserLessonFactory extends Factory
         // Define la probabilidad de que una lección esté completada (ej: 60%)
         $isCompleted = $this->faker->boolean(60);
 
+        // CORRECCIÓN CLAVE para Lesson ID: 
+        // 1. Intentamos obtener un lesson_id existente (asumiendo que la clave es 'lesson_id').
+        // 2. Si la tabla Lessons está vacía (first() retorna null), usamos el operador ?? 
+        //    para crear una Lesson de fábrica y obtener su 'lesson_id'.
+        $lessonId = Lesson::inRandomOrder()->first()->lesson_id 
+                    ?? Lesson::factory()->create()->lesson_id;
+
+        // Asumiendo que User sigue usando 'id' como clave primaria.
+        $userId = User::inRandomOrder()->first()->id 
+                  ?? User::factory()->create()->id;
+
+
         return [
-            // Asume que los modelos User y Lesson existen y se obtienen sus IDs
-            'user_id' => User::factory(),
-            'lesson_id' => Lesson::factory(),
+            'user_id' => $userId, 
+            'lesson_id' => $lessonId, // Usamos la clave primaria correcta
             
             'completed_at' => $isCompleted 
-                ? $this->faker->dateTimeBetween('-1 year', 'now') // Fecha de completado si está completada
-                : null, // Null si está en progreso
+                ? $this->faker->dateTimeBetween('-1 year', 'now') 
+                : null,
             
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),

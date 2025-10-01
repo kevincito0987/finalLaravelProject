@@ -10,8 +10,9 @@ use App\Http\Controllers\LessonController;
 use App\Http\Controllers\LessonCardController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\EvaluationController; 
-use App\Http\Controllers\EvaluationQuestionController; // Importación necesaria
+use App\Http\Controllers\EvaluationQuestionController; 
 use App\Http\Controllers\UserLessonController;
+use App\Http\Controllers\UserProgressController; // ¡Importación necesaria!
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', fn() => ['ok' => true]);
@@ -92,10 +93,15 @@ Route::middleware(['auth:api', 'role:user,therapist,admin'])->group(function () 
     // EVALUATIONS: Acceso de lectura (index, show)
     Route::apiResource('evaluations', EvaluationController::class)->only(['index', 'show']);
 
-    // EVALUATION QUESTIONS: Acceso de lectura (index, show) <-- AÑADIDO
+    // EVALUATION QUESTIONS: Acceso de lectura (index, show) 
     Route::apiResource('evaluation-questions', EvaluationQuestionController::class)->only(['index', 'show']);
 
     Route::apiResource('user-lessons', UserLessonController::class)->only(['index', 'show']);
+    
+    // ----------------------------------------------------------------------
+    // USER PROGRESS: Acceso de lectura (index, show) para TODOS los roles
+    // ----------------------------------------------------------------------
+    Route::apiResource('user-progress', UserProgressController::class)->only(['index', 'show']);
 });
 
 
@@ -130,8 +136,13 @@ Route::middleware(['auth:api', 'role:therapist,admin'])->group(function () {
     // EVALUATIONS: Acceso de escritura (store, update, destroy)
     Route::apiResource('evaluations', EvaluationController::class)->except(['index', 'show']);
     
-    // EVALUATION QUESTIONS: Acceso de escritura (store, update, destroy) <-- AÑADIDO
+    // EVALUATION QUESTIONS: Acceso de escritura (store, update, destroy)
     Route::apiResource('evaluation-questions', EvaluationQuestionController::class)->except(['index', 'show']);
 
     Route::apiResource('user-lessons', UserLessonController::class)->except(['index', 'show']);
+
+    // ----------------------------------------------------------------------
+    // USER PROGRESS: Acceso de escritura (store, update, destroy) para ADMIN y THERAPIST
+    // ----------------------------------------------------------------------
+    Route::apiResource('user-progress', UserProgressController::class)->except(['index', 'show']);
 });

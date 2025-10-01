@@ -31,7 +31,10 @@ class UserLessonSeeder extends Seeder
                 // Generar un registro de progreso con una probabilidad de completado
                 UserLesson::factory()->create([
                     'user_id' => $user->id,
-                    'lesson_id' => $lesson->id,
+                    
+                    // CORRECCIÓN CLAVE: Usamos $lesson->lesson_id
+                    'lesson_id' => $lesson->lesson_id, 
+                    
                     // El Factory maneja la lógica de 'completed_at'
                 ]);
             });
@@ -40,7 +43,9 @@ class UserLessonSeeder extends Seeder
             if (!UserLesson::where('user_id', $user->id)->whereNotNull('completed_at')->exists()) {
                  UserLesson::factory()->completed()->create([
                     'user_id' => $user->id,
-                    'lesson_id' => $lessons->random()->id,
+                    
+                    // CORRECCIÓN CLAVE: Usamos $lessons->random()->lesson_id
+                    'lesson_id' => $lessons->random()->lesson_id, 
                 ]);
             }
         });

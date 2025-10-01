@@ -6,45 +6,28 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('user_lessons', function (Blueprint $table) {
             $table->id();
             
-            // 1. Relación con el usuario (users)
-            // La tabla 'users' usa 'id', por lo que esta sintaxis funciona correctamente.
-            $table->foreignId('user_id')
-                ->constrained('users')
-                ->onDelete('cascade')
-                ->comment('ID del usuario que completa la lección.');
-
-            // 2. Relación con la lección (lessons)
-            // Usamos unsignedBigInteger porque la clave primaria en 'lessons' es 'lesson_id' (BIGINT UNSIGNED)
-            $table->unsignedBigInteger('lesson_id')
-                ->comment('ID de la lección.');
+            // Clave foránea para User (asumiendo que User tiene 'id')
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             
-            // Definimos la clave foránea explícitamente para apuntar a 'lesson_id' en la tabla 'lessons'.
-            $table->foreign('lesson_id')
-                  ->references('lesson_id') // <--- CLAVE DE LA CORRECCIÓN
-                  ->on('lessons')
-                  ->onDelete('cascade');
+            // CORRECCIÓN CLAVE: 
+            // 1. Define la columna con el tipo correcto (unsignedBigInteger es lo más común para IDs).
+            $table->unsignedBigInteger('lesson_id');
+            // 2. Define la restricción foránea, indicando la columna 'lesson_id' en la tabla 'lessons'.
+            $table->foreign('lesson_id')->references('lesson_id')->on('lessons')->cascadeOnDelete();
             
-            // Campo de Progreso
-            $table->timestamp('completed_at')->nullable()->comment('Fecha y hora en que la lección fue completada.');
-
+            $table->timestamp('completed_at')->nullable();
             $table->timestamps();
-
-            // Restricción única para evitar duplicados.
-            $table->unique(['user_id', 'lesson_id'], 'user_lesson_unique');
+            
+            // Aseguramos que la combinación user_id y lesson_id sea única
+            $table->unique(['user_id', 'lesson_id']); 
         });
     }
-
-    /**
-     * Reverse the migrations.
-     */
+    
     public function down(): void
     {
         Schema::dropIfExists('user_lessons');
