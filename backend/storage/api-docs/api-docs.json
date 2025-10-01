@@ -1742,6 +1742,240 @@
                 ]
             }
         },
+        "/api/evaluation-questions": {
+            "get": {
+                "tags": [
+                    "Evaluation Questions"
+                ],
+                "summary": "Listar todas las preguntas de evaluación",
+                "operationId": "ddfd43bf4a513330b0690aeb11f0ce16",
+                "responses": {
+                    "200": {
+                        "description": "Lista de preguntas de evaluación",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/EvaluationQuestionResource"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Evaluation Questions"
+                ],
+                "summary": "Crear una nueva pregunta de evaluación",
+                "operationId": "0b17061efbf25775d72a837bcb0bb12d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "evaluation_id_question",
+                                    "card_id_evaluation",
+                                    "question_text"
+                                ],
+                                "properties": {
+                                    "evaluation_id_question": {
+                                        "description": "ID de la Evaluación a la que pertenece (FK)",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "card_id_evaluation": {
+                                        "description": "ID de la Card asociada (FK)",
+                                        "type": "integer",
+                                        "example": 10
+                                    },
+                                    "question_text": {
+                                        "type": "string",
+                                        "example": "¿Qué concepto se describe en esta tarjeta?"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Pregunta creada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EvaluationQuestionResource"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    },
+                    "403": {
+                        "description": "No autorizado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/evaluation-questions/{questionId}": {
+            "get": {
+                "tags": [
+                    "Evaluation Questions"
+                ],
+                "summary": "Mostrar una pregunta de evaluación específica",
+                "operationId": "c38263962b3f9ac37e5d69514289acdc",
+                "parameters": [
+                    {
+                        "name": "questionId",
+                        "in": "path",
+                        "description": "ID de la pregunta a mostrar",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalles de la pregunta",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EvaluationQuestionResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Pregunta no encontrada"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Evaluation Questions"
+                ],
+                "summary": "Actualizar una pregunta de evaluación existente",
+                "operationId": "f6d9550ec4a02e9e120d5a663acb2d8e",
+                "parameters": [
+                    {
+                        "name": "questionId",
+                        "in": "path",
+                        "description": "ID de la pregunta a actualizar",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "evaluation_id_question": {
+                                        "description": "ID de la Evaluación (opcional)",
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "card_id_evaluation": {
+                                        "description": "ID de la Card (opcional)",
+                                        "type": "integer",
+                                        "example": 11
+                                    },
+                                    "question_text": {
+                                        "type": "string",
+                                        "example": "¿Cuál es el concepto central? (actualizado)"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pregunta actualizada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EvaluationQuestionResource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Pregunta no encontrada"
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    },
+                    "403": {
+                        "description": "No autorizado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Evaluation Questions"
+                ],
+                "summary": "Eliminar una pregunta de evaluación",
+                "operationId": "c103b3af9759d3c45369604e50b1e7c4",
+                "parameters": [
+                    {
+                        "name": "questionId",
+                        "in": "path",
+                        "description": "ID de la pregunta a eliminar",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Pregunta eliminada exitosamente"
+                    },
+                    "404": {
+                        "description": "Pregunta no encontrada"
+                    },
+                    "403": {
+                        "description": "No autorizado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/lesson-cards": {
             "get": {
                 "tags": [
@@ -2786,6 +3020,44 @@
                     "name": "CardTranslationResource"
                 }
             },
+            "EvaluationQuestionResource": {
+                "title": "Evaluation Question Resource",
+                "description": "Estructura de la respuesta para una Pregunta de Evaluación",
+                "properties": {
+                    "questionId": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "evaluationId": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "cardId": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "questionText": {
+                        "type": "string",
+                        "example": "¿Cuál es la respuesta correcta?"
+                    },
+                    "correctAnswer": {
+                        "type": "string",
+                        "example": "Opción A"
+                    },
+                    "options": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "Opción A",
+                            "Opción B",
+                            "Opción C"
+                        ]
+                    }
+                },
+                "type": "object"
+            },
             "EvaluationResource": {
                 "title": "Evaluation Resource",
                 "description": "Define la estructura de una Evaluación, incluyendo la Lección completa si está cargada.",
@@ -2956,6 +3228,10 @@
         {
             "name": "Evaluations",
             "description": "Gestión de las Evaluaciones de Lecciones"
+        },
+        {
+            "name": "Evaluation Questions",
+            "description": "Gestión de las Preguntas de Evaluación asociadas a Cards y Evaluaciones."
         },
         {
             "name": "LessonCard",

@@ -13,6 +13,7 @@ use App\Policies\EvaluationPolicy;
 use App\Policies\EvaluationQuestionPolicy;
 use App\Policies\LessonCardPolicy;
 use App\Policies\LessonPolicy;
+use App\Policies\UserLessonPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -24,7 +25,8 @@ class AuthServiceProvider extends ServiceProvider
         LessonPolicy::class,
         LessonCardPolicy::class,
         EvaluationPolicy::class,
-        EvaluationQuestionPolicy::class
+        EvaluationQuestionPolicy::class,
+        UserLessonPolicy::class
      ];
 
     /**
