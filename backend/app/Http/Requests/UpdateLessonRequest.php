@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Core\Entities\Lessons\LessonEntity;
 use Illuminate\Foundation\Http\FormRequest;
-use App\Core\Entities\LessonEntity; // Asegúrate de tener esta importación
 
 /**
  * Request para la actualización de una lección (PUT/PATCH).

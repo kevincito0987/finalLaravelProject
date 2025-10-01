@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
+use App\Core\Entities\User\UserLessonEntity;
 use App\Models\User;
-use App\Core\Entities\UserLessonEntity; // Importamos la Entidad de Dominio
 
 /**
  * Define las reglas de autorización para gestionar el progreso de las lecciones de un usuario (UserLessonEntity).

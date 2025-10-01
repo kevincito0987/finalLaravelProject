@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources;
 
-use App\Core\Entities\CardEntity;
+use App\Core\Entities\Card\CardEntity;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 

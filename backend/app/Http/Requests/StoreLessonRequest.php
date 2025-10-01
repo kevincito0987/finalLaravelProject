@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Core\Entities\Lessons\LessonEntity;
 use Illuminate\Foundation\Http\FormRequest;
-use App\Core\Entities\LessonEntity; // Importa la Entidad
 
 /**
  * @OA\Schema(

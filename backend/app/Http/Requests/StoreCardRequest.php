@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Core\Entities\CardEntity;
+use App\Core\Entities\Card\CardEntity;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str; // Necesitamos esta clase para generar el UUID
 

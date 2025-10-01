@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Core\Entities\CardTranslationEntity;
+use App\Core\Entities\Card\CardTranslationEntity;
 use App\Core\Repositories\SupabaseMediaStorage;
 use App\Core\Services\CardTranslationService;
 use App\Core\Services\MediaUploader;

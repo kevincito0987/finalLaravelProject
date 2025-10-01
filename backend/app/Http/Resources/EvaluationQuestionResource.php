@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Core\Entities\EvaluationQuestion; 
+use App\Core\Entities\Evaluation\EvaluationQuestion; 
 // Si usas otros recursos para las relaciones, asegúrate de que existan o coméntalos
 // use App\Http\Resources\EvaluationResource; 
 // use App\Http\Resources\LessonCardResource; 

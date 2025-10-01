@@ -2,36 +2,35 @@
 
 namespace App\Providers;
 
+use App\Core\Interfaces\CardRepositoryInterface;
+use App\Core\Interfaces\CardTranslationRepositoryInterface;
+use App\Core\Interfaces\CategoryRepositoryInterface;
 use App\Core\Interfaces\CommunicationMethodRepositoryInterface;
-use App\Core\Interfaces\EloquentCardRepository;
-use App\Core\Interfaces\EloquentCardTranslationRepository;
-use App\Core\Interfaces\EloquentCategoryRepository;
-use App\Core\Interfaces\MediaStorageInterface;
-use App\Core\Interfaces\UserRepositoryInterface;
-use App\Core\Repositories\CardRepositoryInterface;
-use App\Core\Repositories\CardTranslationRepositoryInterface;
-use App\Core\Repositories\CategoryRepositoryInterface;
-use App\Core\Repositories\EloquentCommunicationMethodRepository;
-use App\Core\Repositories\EloquentUserRepository;
-use App\Core\Repositories\SupabaseMediaStorage; // Importar la implementación de Supabase
-use App\Core\Services\CardTranslationService;
-use App\Core\Services\CommunicationMethodService;
-use App\Core\Services\MediaUploader;
-use Illuminate\Support\Facades\Vite;
-use Illuminate\Support\ServiceProvider;
-
-// Nuevos Imports necesarios para la Entidad Lección
-use App\Core\Repositories\LessonRepositoryInterface;
-use App\Core\Interfaces\EloquentLessonRepository;
 use App\Core\Interfaces\EvaluationQuestionRepositoryInterface;
 use App\Core\Interfaces\EvaluationRepositoryInterface;
 use App\Core\Interfaces\LessonCardRepositoryInterface;
+use App\Core\Interfaces\LessonRepositoryInterface;
+use App\Core\Interfaces\MediaStorageInterface;
 use App\Core\Interfaces\UserLessonRepositoryInterface;
 use App\Core\Interfaces\UserProgressRepositoryInterface;
+use App\Core\Interfaces\UserRepositoryInterface;
+use App\Core\Repositories\EloquentCardRepository;
+use App\Core\Repositories\EloquentCardTranslationRepository;
+use App\Core\Repositories\EloquentCategoryRepository;
+use App\Core\Repositories\EloquentCommunicationMethodRepository;
 use App\Core\Repositories\EloquentEvaluationQuestionRepository;
 use App\Core\Repositories\EloquentEvaluationRepository;
+use App\Core\Repositories\EloquentLessonRepository;
+use App\Core\Repositories\EloquentUserRepository;
 use App\Core\Repositories\LessonCardRepository;
+use App\Core\Repositories\SupabaseMediaStorage;
+use App\Core\Services\CardTranslationService;
+use App\Core\Services\CommunicationMethodService;
+use App\Core\Services\MediaUploader;
 use App\Repositories\EloquentUserLessonRepository;
+use Illuminate\Support\Facades\Vite;
+use Illuminate\Support\ServiceProvider;
+
 use App\Repositories\EloquentUserProgressRepository;
 
 class AppServiceProvider extends ServiceProvider

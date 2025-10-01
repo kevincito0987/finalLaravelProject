@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
+use App\Core\Entities\Evaluation\EvaluationQuestion;
 use App\Models\User;
-use App\Core\Entities\EvaluationQuestion; // Importamos la Entidad de Dominio
 
 /**
  * Define las reglas de autorización para gestionar las Preguntas de Evaluación.

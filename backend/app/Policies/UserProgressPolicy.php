@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
+use App\Core\Entities\User\UserProgressEntity;
 use App\Models\User;
-use App\Core\Entities\UserProgressEntity; // Importamos la Entidad de Dominio
 
 /**
  * Define las reglas de autorización para gestionar el progreso general de un usuario (UserProgressEntity).

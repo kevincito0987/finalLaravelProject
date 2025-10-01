@@ -1,8 +1,8 @@
 <?php
 namespace App\Http\Requests;
 
+use App\Core\Entities\Card\CategoryEntity;
 use Illuminate\Foundation\Http\FormRequest;
-use App\Core\Entities\CategoryEntity;
 use Illuminate\Validation\Rule;
 
 /**

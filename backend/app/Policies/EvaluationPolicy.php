@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
+use App\Core\Entities\Evaluation\EvaluationEntity;
 use App\Models\User;
-use App\Core\Entities\EvaluationEntity; // Usamos la Entidad Pura para las verificaciones
 
 /**
  * Define las reglas de autorización para gestionar las Evaluaciones.

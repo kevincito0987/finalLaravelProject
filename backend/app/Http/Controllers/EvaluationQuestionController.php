@@ -8,7 +8,7 @@ use App\Core\Interfaces\EvaluationQuestionRepositoryInterface;
 use App\Http\Requests\StoreEvaluationQuestionRequest;
 use App\Http\Requests\UpdateEvaluationQuestionRequest;
 use Illuminate\Http\JsonResponse;
-use App\Core\Entities\EvaluationQuestion; // Necesario para la autorización a nivel de Entidad/Clase
+use App\Core\Entities\Evaluation\EvaluationQuestion; // Necesario para la autorización a nivel de Entidad/Clase
 // Importaciones de Swagger
 use OpenApi\Annotations as OA;
 
