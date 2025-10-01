@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Core\Entities;
+namespace App\Core\Entities\User;
 
 /**
  * Entidad de Dominio Pura (POPO).

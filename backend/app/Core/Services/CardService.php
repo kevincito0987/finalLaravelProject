@@ -1,12 +1,12 @@
 <?php
 namespace App\Core\Services;
 
-use App\Core\Entities\CardEntity;
-use App\Core\Repositories\CardRepositoryInterface;
 use App\Core\CommunicationStrategies\CommunicationStrategyInterface;
 use App\Core\CommunicationStrategies\VisualStrategy;
 use App\Core\CommunicationStrategies\AudioStrategy;
 use App\Core\CommunicationStrategies\TactileStrategy;
+use App\Core\Entities\Card\CardEntity;
+use App\Core\Interfaces\CardRepositoryInterface;
 use Illuminate\Support\Collection;
 
 class CardService

@@ -2,7 +2,7 @@
 
 namespace App\Core\Interfaces;
 
-use App\Core\Entities\UserEntity;
+use App\Core\Entities\User\UserEntity;
 
 interface UserRepositoryInterface
 {

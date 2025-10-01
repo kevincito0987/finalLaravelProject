@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Core\Repositories;
+namespace App\Core\Interfaces;
 
-use App\Core\Entities\LessonEntity;
+use App\Core\Entities\Lessons\LessonEntity;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 /**

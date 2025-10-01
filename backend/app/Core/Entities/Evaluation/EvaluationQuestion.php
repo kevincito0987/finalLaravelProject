@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Core\Entities;
+namespace App\Core\Entities\Evaluation;
 
 /**
  * Entidad de Dominio para Evaluation Question (Pregunta de Evaluación).

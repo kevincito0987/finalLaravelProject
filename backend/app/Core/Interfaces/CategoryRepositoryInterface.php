@@ -1,7 +1,8 @@
 <?php
-namespace App\Core\Repositories;
 
-use App\Core\Entities\CategoryEntity;
+namespace App\Core\Interfaces;
+
+use App\Core\Entities\Card\CategoryEntity;
 use Illuminate\Support\Collection;
 
 interface CategoryRepositoryInterface

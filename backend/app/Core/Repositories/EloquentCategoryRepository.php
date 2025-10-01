@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Core\Interfaces;
+namespace App\Core\Repositories;
 
-use App\Core\Entities\CategoryEntity;
-use App\Core\Repositories\CategoryRepositoryInterface;
+use App\Core\Entities\Card\CategoryEntity;
+use App\Core\Interfaces\CategoryRepositoryInterface;
 use App\Models\Category;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;

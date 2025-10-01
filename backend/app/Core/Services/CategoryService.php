@@ -1,8 +1,8 @@
 <?php
 namespace App\Core\Services;
 
-use App\Core\Entities\CategoryEntity;
-use App\Core\Repositories\CategoryRepositoryInterface;
+use App\Core\Entities\Card\CategoryEntity;
+use App\Core\Interfaces\CategoryRepositoryInterface;
 use Illuminate\Support\Collection;
 
 class CategoryService

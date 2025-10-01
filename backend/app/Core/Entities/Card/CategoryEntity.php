@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Core\Entities;
+namespace App\Core\Entities\Card;
 
 class CategoryEntity
 {

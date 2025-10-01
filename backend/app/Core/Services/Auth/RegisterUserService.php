@@ -3,7 +3,7 @@
 // app/Core/Services/Auth/RegisterUserService.php
 namespace App\Core\Services\Auth;
 
-use App\Core\Entities\UserEntity;
+use App\Core\Entities\User\UserEntity;
 use App\Core\Interfaces\UserRepositoryInterface;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\UserRegisteredMail; // Asegúrate de que esta clase exista

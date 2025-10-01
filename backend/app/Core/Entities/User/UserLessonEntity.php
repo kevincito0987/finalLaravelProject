@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Core\Entities;
+namespace App\Core\Entities\User;
 
+use App\Core\Entities\Lessons\LessonEntity;
 use DateTime;
 use App\Models\UserLesson;
 

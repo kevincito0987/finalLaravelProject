@@ -2,7 +2,7 @@
 
 namespace App\Core\CommunicationStrategies;
 
-use App\Core\Entities\CardEntity;
+use App\Core\Entities\Card\CardEntity;
 use Illuminate\Support\Collection;
 
 /**

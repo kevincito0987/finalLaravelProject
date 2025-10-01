@@ -2,7 +2,7 @@
 
 namespace App\Core\Interfaces;
 
-use App\Core\Entities\EvaluationQuestion;
+use App\Core\Entities\Evaluation\EvaluationQuestion;
 
 /**
  * Contrato de Repositorio para la Entidad EvaluationQuestion.

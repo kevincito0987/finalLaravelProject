@@ -2,7 +2,7 @@
 
 namespace App\Core\Interfaces;
 
-use App\Core\Entities\UserProgressEntity;
+use App\Core\Entities\User\UserProgressEntity;
 use Illuminate\Support\Collection;
 
 interface UserProgressRepositoryInterface

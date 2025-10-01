@@ -2,9 +2,8 @@
 
 namespace App\Core\Services;
 
-use App\Core\Entities\CardTranslationEntity;
-use App\Core\Repositories\CardTranslationRepositoryInterface;
-// La clase SupabaseMediaStorage se mantiene para la función estática isSupabasePath
+use App\Core\Entities\Card\CardTranslationEntity;
+use App\Core\Interfaces\CardTranslationRepositoryInterface;
 use App\Core\Repositories\SupabaseMediaStorage; 
 use App\Models\Media; 
 use Illuminate\Support\Collection;

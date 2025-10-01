@@ -2,7 +2,7 @@
 
 namespace App\Core\Services\User;
 
-use App\Core\Entities\UserEntity;
+use App\Core\Entities\User\UserEntity;
 use App\Core\Interfaces\UserRepositoryInterface;
 
 class CreateAdminService

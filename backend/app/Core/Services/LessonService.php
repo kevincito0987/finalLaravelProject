@@ -2,8 +2,8 @@
 
 namespace App\Core\Services;
 
-use App\Core\Entities\LessonEntity;
-use App\Core\Repositories\LessonRepositoryInterface;
+use App\Core\Entities\Lessons\LessonEntity;
+use App\Core\Interfaces\LessonRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Core\Repositories;
+namespace App\Core\Interfaces;
 
-use App\Core\Entities\CardTranslationEntity;
+use App\Core\Entities\Card\CardTranslationEntity;
 use Illuminate\Support\Collection;
 
 /**

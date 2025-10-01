@@ -2,8 +2,8 @@
 
 namespace App\Core\Services;
 
+use App\Core\Entities\User\UserLessonEntity;
 use App\Core\Interfaces\UserLessonRepositoryInterface;
-use App\Core\Entities\UserLessonEntity;
 use Illuminate\Support\Collection;
 use Exception;
 

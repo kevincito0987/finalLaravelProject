@@ -2,8 +2,8 @@
 
 namespace App\Core\Services;
 
+use App\Core\Entities\Evaluation\EvaluationQuestion;
 use App\Core\Interfaces\EvaluationQuestionRepositoryInterface;
-use App\Core\Entities\EvaluationQuestion;
 
 /**
  * Servicio de Evaluación de Preguntas (Caso de Uso).

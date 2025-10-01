@@ -2,7 +2,7 @@
 
 namespace App\Core\Services;
 
-use App\Core\Entities\LessonCardEntity;
+use App\Core\Entities\Lessons\LessonCardEntity;
 use App\Core\Interfaces\LessonCardRepositoryInterface;
 use Illuminate\Support\Collection;
 

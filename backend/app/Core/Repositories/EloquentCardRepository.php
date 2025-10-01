@@ -1,8 +1,9 @@
 <?php
-namespace App\Core\Interfaces;
 
-use App\Core\Entities\CardEntity;
-use App\Core\Repositories\CardRepositoryInterface;
+namespace App\Core\Repositories;
+
+use App\Core\Entities\Card\CardEntity;
+use App\Core\Interfaces\CardRepositoryInterface;
 use App\Models\Card;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;

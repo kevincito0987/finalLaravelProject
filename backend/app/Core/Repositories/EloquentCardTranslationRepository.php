@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Core\Interfaces;
+namespace App\Core\Repositories;
 
-use App\Core\Entities\CardTranslationEntity;
-use App\Core\Repositories\CardTranslationRepositoryInterface;
+use App\Core\Entities\Card\CardTranslationEntity;
+use App\Core\Interfaces\CardTranslationRepositoryInterface;
 use App\Models\CardTranslation;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;

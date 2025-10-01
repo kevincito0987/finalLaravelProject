@@ -2,7 +2,7 @@
 
 namespace App\Core\Services;
 
-use App\Core\Entities\EvaluationEntity;
+use App\Core\Entities\Evaluation\EvaluationEntity;
 use App\Core\Interfaces\EvaluationRepositoryInterface;
 use Illuminate\Support\Collection;
 

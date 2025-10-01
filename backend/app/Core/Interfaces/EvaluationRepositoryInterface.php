@@ -2,7 +2,7 @@
 
 namespace App\Core\Interfaces;
 
-use App\Core\Entities\EvaluationEntity;
+use App\Core\Entities\Evaluation\EvaluationEntity;
 use Illuminate\Support\Collection;
 
 /**

@@ -3,9 +3,9 @@
 namespace App\Core\Services;
 
 use App\Core\Entities\CommunicationMethod;
-use App\Core\Interfaces\CommunicationMethodRepositoryInterface;
 use Illuminate\Support\Collection;
 use App\Core\Exceptions\NotFoundException; // Asumo que tienes una excepción base para no encontrados
+use App\Core\Interfaces\CommunicationMethodRepositoryInterface;
 
 /**
  * Clase de servicio que encapsula la lógica de negocio para los Métodos de Comunicación.

@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Core\Interfaces;
+namespace App\Core\Repositories;
 
-use App\Core\Entities\LessonEntity;
-use App\Core\Repositories\LessonRepositoryInterface;
+use App\Core\Entities\Lessons\LessonEntity;
+use App\Core\Interfaces\LessonRepositoryInterface;
 use App\Models\Lesson; // Asegúrate de que este es el modelo correcto
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Pagination\LengthAwarePaginator;

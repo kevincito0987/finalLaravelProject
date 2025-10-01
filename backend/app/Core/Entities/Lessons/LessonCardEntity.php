@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Core\Entities;
+namespace App\Core\Entities\Lessons;
 
 use App\Models\LessonCard;
 use Illuminate\Http\Request;

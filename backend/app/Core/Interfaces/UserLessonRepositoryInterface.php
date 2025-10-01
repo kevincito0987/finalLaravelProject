@@ -2,8 +2,8 @@
 
 namespace App\Core\Interfaces;
 
-use App\Core\Entities\UserLessonEntity;
 use App\Core\Entities\LessonEntity; // Necesario para tipar el retorno de las colecciones
+use App\Core\Entities\User\UserLessonEntity;
 use Illuminate\Support\Collection;
 
 /**
