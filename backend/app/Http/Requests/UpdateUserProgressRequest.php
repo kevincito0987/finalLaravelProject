@@ -4,18 +4,19 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Request para actualizar el progreso existente de una tarjeta (PUT/PATCH).
+ * Al igual que el POST, se basa en las claves compuestas y NO requiere progress_id.
+ */
 class UpdateUserProgressRequest extends FormRequest
 {
     /**
      * Determina si el usuario está autorizado a realizar esta solicitud.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
-        // Permitir a los usuarios autenticados actualizar su progreso.
-        // Aquí podrías agregar lógica para asegurar que solo el dueño del progreso pueda actualizarlo.
-        return true; 
+        // En una aplicación real, aquí verificarías permisos.
+        return true;
     }
 
     /**
@@ -25,50 +26,29 @@ class UpdateUserProgressRequest extends FormRequest
      */
     public function rules(): array
     {
-        // Usamos 'sometimes' para que el campo sea opcional, 
-        // pero si se envía, debe cumplir las reglas.
         return [
-            // Clave foránea del Usuario
-            'user_id_progress' => [
-                'sometimes', 
-                'integer', 
-                'exists:users,id' // Debe existir en la tabla 'users'
-            ],
-            
-            // Clave foránea de la Card
-            'card_id_progress' => [
-                'sometimes', 
-                'integer', 
-                'exists:cards,card_id_evaluation' // Debe existir en la tabla 'cards' con la PK correcta
-            ],
-            
-            // Contador de uso
-            'use_count' => [
-                'sometimes', 
-                'integer', 
-                'min:0' // No puede ser negativo
-            ],
+            // Claves compuestas para identificar el progreso
+            'user_id' => ['required', 'integer', 'exists:users,id'],
+            'lesson_id' => ['required', 'integer', 'exists:lessons,id'],
+            'card_id' => ['required', 'integer', 'exists:cards,id'],
 
-            // Fecha/hora de último uso
-            'last_used_at' => [
-                'sometimes',
-                'date' // Debe tener un formato de fecha/hora válido
-            ],
+            // Dato de progreso: el nuevo Score
+            'score' => ['required', 'integer', 'min:0', 'max:5'],
         ];
     }
     
     /**
-     * Personaliza los mensajes de error para la validación.
+     * Personaliza los mensajes de error.
      *
      * @return array
      */
     public function messages(): array
     {
         return [
-            'user_id_progress.exists' => 'El ID de usuario proporcionado no es válido.',
-            'card_id_progress.exists' => 'El ID de ficha proporcionado no es válido.',
-            'use_count.min' => 'El contador de uso debe ser como mínimo :min.',
-            'last_used_at.date' => 'El formato de fecha de último uso no es válido.',
+            'score.required' => 'El campo de score es obligatorio.',
+            'score.min' => 'El score debe ser al menos :min.',
+            'score.max' => 'El score no puede ser mayor a :max.',
+            'card_id.required' => 'El ID de la tarjeta es obligatorio.',
         ];
     }
 }

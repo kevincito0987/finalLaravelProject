@@ -2,7 +2,7 @@
 
 namespace App\Core\Repositories;
 
-use App\Core\Entities\UserEntity;
+use App\Core\Entities\User\UserEntity;
 use App\Core\Interfaces\UserRepositoryInterface;
 use App\Models\User;
 use App\Models\Role;

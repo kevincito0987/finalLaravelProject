@@ -12,32 +12,25 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('user_progress', function (Blueprint $table) {
-            // Clave Primaria Compuesta (Primary Key)
-            // Usamos primary() después de las columnas para definir la clave compuesta.
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('lesson_card_id')->constrained('lesson_cards')->onDelete('cascade');
+            $table->id('progress_id'); 
             
-            // Campos específicos del progreso
-            $table->unsignedSmallInteger('score')
-                  ->default(0)
-                  ->comment('Puntuación o nivel de familiaridad (ej: 0-5).');
+            // Usamos nombres estándar (user_id, lesson_id, card_id). 
+            // Esto corrige el error de 'user_id_progress' del GET.
+            $table->foreignId('user_id')->constrained('users')->references('id')->onDelete('cascade');
             
-            $table->dateTime('last_reviewed_at')
-                  ->nullable()
-                  ->comment('Fecha de la última vez que el usuario revisó la tarjeta.');
+            // Si la tabla 'lessons' usa 'id' como PK, esta línea es correcta.
+            // Si usa 'lesson_id', deberías usar $table->foreignId('lesson_id')->constrained('lessons', 'lesson_id').
+            // Asumiremos 'id' como PK para corregir el error 3734.
+            $table->foreignId('lesson_id')->constrained('lessons')->references('lesson_id')->onDelete('cascade');
+            
+            $table->foreignId('card_id')->constrained('cards')->references('card_id')->onDelete('cascade');
 
-            $table->unsignedInteger('review_count')
-                  ->default(0)
-                  ->comment('Número de veces que se ha revisado la tarjeta.');
+            $table->integer('use_count')->default(0);
+            $table->integer('score')->default(0);
+            $table->timestamp('last_used_at')->nullable();
+            
+            $table->unique(['user_id', 'lesson_id', 'card_id']);
 
-            $table->unsignedSmallInteger('consecutive_correct_answers')
-                  ->default(0)
-                  ->comment('Respuestas correctas consecutivas para algoritmos tipo spaced repetition.');
-            
-            // Definición de la clave primaria compuesta
-            $table->primary(['user_id', 'lesson_card_id']);
-            
-            // Timestamps automáticos (created_at y updated_at)
             $table->timestamps();
         });
     }
@@ -47,6 +40,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_progresses');
+        Schema::dropIfExists('user_progress');
     }
 };

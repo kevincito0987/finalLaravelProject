@@ -4,52 +4,62 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Carbon; // Importamos Carbon
+use App\Models\User; // Asumiendo que esta es la ubicación
 
-/**
- * @property int $progress_id
- * @property int $user_id_progress
- * @property int $card_id_progress
- * @property int $use_count
- * @property Carbon|null $last_used_at // Tipado a Carbon
- */
 class UserProgress extends Model
 {
     use HasFactory;
 
     protected $table = 'user_progress';
-    protected $primaryKey = 'progress_id';
-    public $incrementing = true;
-    public $timestamps = false; // Desactivamos created_at y updated_at
 
+    // *** CRUCIAL: Indicamos a Eloquent que la PK se llama progress_id ***
+    protected $primaryKey = 'progress_id';
+    
+    // Indica que la clave primaria NO es un autoincremento si no lo fuera.
+    // Aunque $table->id('progress_id') es autoincremental, es bueno ser explícito.
+    public $incrementing = true; 
+
+    // Claves foráneas en esta tabla: user_id, lesson_id, card_id
     protected $fillable = [
-        'user_id_progress',
-        'card_id_progress',
-        'use_count',
+        'user_id', 
+        'lesson_id', 
+        'card_id', 
+        'use_count', 
+        'score',
         'last_used_at',
     ];
 
-    /**
-     * Los atributos que deben ser casteados a tipos nativos.
-     * Es crucial que 'last_used_at' se casteé a 'datetime' para que Eloquent
-     * lo convierta a un objeto Carbon (o DateTime).
-     * @var array<string, string>
-     */
     protected $casts = [
+        'use_count' => 'integer',
+        'score' => 'integer',
         'last_used_at' => 'datetime',
     ];
-    
-    // --- Relaciones (sin cambios) ---
 
-    public function user(): BelongsTo
+    /**
+     * Define la relación con el usuario.
+     * La FK en 'user_progress' es 'user_id', y la PK en 'users' es 'user_id'.
+     */
+    public function user()
     {
-        return $this->belongsTo(User::class, 'user_id_progress');
+        // belongsTo(RelatedModel, ForeignColumnInThisTable, PrimaryColumnInRelatedTable)
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
+    }
+    
+    /**
+     * Define la relación con la lección.
+     * Asumiendo que Lesson::class usa 'lesson_id' como PK.
+     */
+    public function lesson()
+    {
+        return $this->belongsTo(Lesson::class, 'lesson_id', 'lesson_id');
     }
 
-    public function card(): BelongsTo
+    /**
+     * Define la relación con la tarjeta.
+     * Asumiendo que Card::class usa 'card_id' como PK.
+     */
+    public function card()
     {
-        // Asumiendo que el modelo de tarjeta se llama LessonCard
-        return $this->belongsTo(LessonCard::class, 'card_id_progress', 'card_id_evaluation');
+        return $this->belongsTo(Card::class, 'card_id', 'card_id');
     }
 }

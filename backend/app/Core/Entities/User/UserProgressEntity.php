@@ -2,56 +2,61 @@
 
 namespace App\Core\Entities\User;
 
-use DateTime;
+use DateTimeImmutable;
 
 /**
- * Entidad que representa el progreso y uso de una tarjeta por parte de un usuario.
- * Utiliza los nombres de columna tal como están definidos en la base de datos.
+ * Representación pura del progreso del usuario en una Tarjeta específica dentro de una Lección específica.
+ *
+ * Esta entidad debe ser agnóstica a la base de datos (Eloquent o cualquier ORM).
  */
 class UserProgressEntity
 {
     private ?int $progressId;
-    private int $userIdProgress;
-    private int $cardIdProgress;
+    private int $userId;
+    private int $lessonId;      // Clave que apunta a Lesson (parte de la clave compuesta de LessonCard)
+    private int $cardId;        // Clave que apunta a Card (parte de la clave compuesta de LessonCard)
     private int $useCount;
-    private ?DateTime $lastUsedAt;
+    private int $score;         // Puntuación o nivel de dominio de la tarjeta
+    private ?DateTimeImmutable $lastUsedAt;
 
-    /**
-     * @param int|null $progressId ID de clave primaria (puede ser nulo al crear)
-     * @param int $userIdProgress FK al usuario
-     * @param int $cardIdProgress FK a la tarjeta de lección
-     * @param int $useCount Contador de uso de la tarjeta
-     * @param DateTime|null $lastUsedAt Marca de tiempo de la última vez que se usó
-     */
     public function __construct(
         ?int $progressId,
-        int $userIdProgress,
-        int $cardIdProgress,
+        int $userId,
+        int $lessonId,
+        int $cardId,
         int $useCount,
-        ?DateTime $lastUsedAt = null
+        int $score,
+        ?DateTimeImmutable $lastUsedAt = null
     ) {
         $this->progressId = $progressId;
-        $this->userIdProgress = $userIdProgress;
-        $this->cardIdProgress = $cardIdProgress;
+        $this->userId = $userId;
+        $this->lessonId = $lessonId;
+        $this->cardId = $cardId;
         $this->useCount = $useCount;
+        $this->score = $score;
         $this->lastUsedAt = $lastUsedAt;
     }
 
-    // --- Getters ---
+    // --- Getters: Acceso de solo lectura a las propiedades ---
 
     public function getProgressId(): ?int
     {
         return $this->progressId;
     }
 
-    public function getUserIdProgress(): int
+    public function getUserId(): int
     {
-        return $this->userIdProgress;
+        return $this->userId;
     }
 
-    public function getCardIdProgress(): int
+    public function getLessonId(): int
     {
-        return $this->cardIdProgress;
+        return $this->lessonId;
+    }
+
+    public function getCardId(): int
+    {
+        return $this->cardId;
     }
 
     public function getUseCount(): int
@@ -59,19 +64,30 @@ class UserProgressEntity
         return $this->useCount;
     }
 
-    public function getLastUsedAt(): ?DateTime
+    public function getScore(): int
+    {
+        return $this->score;
+    }
+
+    public function getLastUsedAt(): ?DateTimeImmutable
     {
         return $this->lastUsedAt;
     }
 
-    // --- Métodos de Negocio (Ejemplo) ---
+    // --- Setters: Métodos para actualizar el estado del progreso ---
 
-    /**
-     * Incrementa el contador de uso y actualiza la marca de tiempo de último uso.
-     */
-    public function markUsed(): void
+    public function setUseCount(int $useCount): void
     {
-        $this->useCount++;
-        $this->lastUsedAt = new DateTime();
+        $this->useCount = $useCount;
+    }
+    
+    public function setScore(int $score): void
+    {
+        $this->score = $score;
+    }
+
+    public function setLastUsedAt(?DateTimeImmutable $lastUsedAt): void
+    {
+        $this->lastUsedAt = $lastUsedAt;
     }
 }

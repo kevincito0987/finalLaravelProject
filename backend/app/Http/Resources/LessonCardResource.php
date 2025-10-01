@@ -24,24 +24,6 @@ class LessonCardResource extends JsonResource
      *
      * @param \Illuminate\Http\Request $request
      * @return array<string, mixed>
-     * * @OA\Property(
-     * property="orderInLesson",
-     * type="integer",
-     * description="Posición ordinal de la tarjeta dentro de la lección.",
-     * example=1
-     * )
-     * @OA\Property(
-     * property="lessonId",
-     * type="integer",
-     * description="ID de la lección a la que pertenece esta asociación.",
-     * example=5
-     * )
-     * @OA\Property(
-     * property="cardData",
-     * type="object",
-     * description="Datos completos de la tarjeta (Card) asociada a esta posición.",
-     * ref="#/components/schemas/CardResource"
-     * )
      */
     public function toArray(Request $request): array
     {
@@ -50,18 +32,17 @@ class LessonCardResource extends JsonResource
             // Posición de la tarjeta dentro de la lección
             'orderInLesson' => $this->order_in_lesson,
             
-            // ID de la lección a la que pertenece (mapeando de lesson_id_sesion)
-            'lessonId' => $this->lesson_id_sesion,
+            // ID de la lección (usando el nombre de campo real)
+            'lessonId' => $this->lesson_id, // Usamos lesson_id
 
             // 2. Información de la Tarjeta (Card) completa
-            // Usamos CardResource para formatear la Card de acuerdo a tu esquema
-            'cardData' => $this->whenLoaded('card_sesion', function () {
-                // 'card_sesion' es el nombre de la relación que apunta al modelo Card
-                // Pasamos la instancia relacionada al CardResource
-                return new CardResource($this->card_sesion);
+            // Usamos la relación 'card' (LessonCard::card())
+            'cardData' => $this->whenLoaded('card', function () {
+                // 'card' es el nombre de la relación que apunta al modelo Card
+                return new CardResource($this->card);
             }, [
                 // Fallback: Si la Card no fue cargada, solo devolvemos el ID.
-                'cardId' => $this->card_id_sesion,
+                'cardId' => $this->card_id, // Usamos card_id
             ]),
         ];
     }

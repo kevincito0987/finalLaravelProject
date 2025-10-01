@@ -3,44 +3,47 @@
 namespace Database\Factories;
 
 use App\Models\UserProgress;
-use App\Models\User;
-use App\Models\LessonCard;
+use App\Models\User; // Asumimos que necesitas Users, Lessons y Cards
+use App\Models\Lesson;
+use App\Models\Card;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\UserProgress>
+ */
 class UserProgressFactory extends Factory
 {
     /**
-     * The name of the factory's corresponding model.
-     *
+     * El nombre del modelo correspondiente.
      * @var string
      */
     protected $model = UserProgress::class;
 
     /**
-     * Define the model's default state.
+     * Define el estado por defecto del modelo.
      *
      * @return array<string, mixed>
      */
     public function definition(): array
     {
-        // Aseguramos que existan usuarios y lesson_cards para usar sus IDs
-        $userId = User::inRandomOrder()->first()->id ?? User::factory()->create()->id;
-        $lessonCardId = LessonCard::inRandomOrder()->first()->id ?? LessonCard::factory()->create()->id;
-
-        $reviewCount = $this->faker->numberBetween(1, 20);
+        // Nota: Asegúrate de que las tablas User, Lesson y Card ya tienen datos o factorías funcionando.
         
+        // Seleccionamos un ID de usuario, lección y tarjeta aleatorios.
+        $userId = User::factory();
+        $lessonId = Lesson::factory();
+        $cardId = Card::factory();
+
         return [
-            // Usamos un ID de usuario que ya exista
+            // Los IDs se resuelven automáticamente con el estado
             'user_id' => $userId, 
-            // Usamos un ID de LessonCard que ya exista
-            'lesson_card_id' => $lessonCardId, 
-            'score' => $this->faker->numberBetween(1, 5), // Puntuación de 1 a 5
-            'last_reviewed_at' => Carbon::now()->subDays($this->faker->numberBetween(1, 30)),
-            'review_count' => $reviewCount,
-            'consecutive_correct_answers' => $this->faker->numberBetween(0, 5),
-            'created_at' => $this->faker->dateTimeThisYear(),
-            'updated_at' => $this->faker->dateTimeThisMonth(),
+            'lesson_id' => $lessonId,
+            'card_id' => $cardId,
+            
+            // Datos de progreso
+            'use_count' => $this->faker->numberBetween(1, 50),
+            'score' => $this->faker->numberBetween(0, 5), // Nivel de dominio
+            'last_used_at' => Carbon::now()->subDays($this->faker->numberBetween(1, 30)),
         ];
     }
 }

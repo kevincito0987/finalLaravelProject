@@ -2,93 +2,154 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\UserProgress;
+// Importaciones de Clases de Dominio y Aplicación
+use App\Core\Services\UserProgressService;
 use App\Http\Requests\StoreUserProgressRequest;
 use App\Http\Requests\UpdateUserProgressRequest;
-use Illuminate\Http\Request;
+use App\Http\Resources\UserProgressResource; 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth; // Necesario para obtener el usuario autenticado
+use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Controller para gestionar el progreso del usuario.
+ * Proporciona endpoints para registrar (POST), actualizar (PUT), obtener (GET) y eliminar (DELETE) el score de una tarjeta.
+ */
 class UserProgressController extends Controller
 {
+    private UserProgressService $userProgressService;
+
     /**
-     * Muestra una lista de todos los registros de progreso del usuario.
+     * Inyección del servicio de dominio a través del constructor.
+     */
+    public function __construct(UserProgressService $userProgressService)
+    {
+        $this->userProgressService = $userProgressService;
+    }
+
+    /**
+     * Devuelve una lista de todos los registros de progreso del usuario autenticado.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function index(): JsonResponse
     {
-        // Esto podría ser filtrado por el usuario autenticado en un entorno real.
-        $progress = UserProgress::with(['user', 'card'])->get();
-        return response()->json($progress);
+        // 1. Obtener el ID del usuario autenticado.
+        $userId = Auth::id();
+
+        // 2. Llamar al servicio para obtener todos los progresos de ese usuario.
+        // Asumimos que quieres filtrar por el usuario autenticado para una aplicación real.
+        $progressEntities = $this->userProgressService->getAllUserProgress($userId);
+
+        // 3. Devolver la colección usando el Resource Collection.
+        // NOTA: UserProgressResource::collection() es lo que convierte el array de Entidades a una respuesta JSON.
+        return UserProgressResource::collection($progressEntities)->response();
     }
 
+
     /**
-     * Almacena un nuevo registro de progreso en la base de datos.
+     * Maneja el registro inicial o la actualización de una nueva entrada de progreso (POST).
      *
-     * @param  \App\Http\Requests\StoreUserProgressRequest  $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param StoreUserProgressRequest $request La solicitud validada para almacenar.
+     * @return JsonResponse
      */
     public function store(StoreUserProgressRequest $request): JsonResponse
     {
-        // Los datos ya están validados por StoreUserProgressRequest
-        $progress = UserProgress::create($request->validated());
-
-        // Cargamos las relaciones para la respuesta
-        $progress->load('user', 'card');
+        $validated = $request->validated();
         
-        return response()->json([
-            'message' => 'Progreso de usuario creado exitosamente.',
-            'data' => $progress
-        ], 201); // Código 201 para "Creado"
+        // 1. Llamar al servicio, usando el orden de parámetros (userId, lessonId, cardId, newMasteryLevel/score).
+        $progressEntity = $this->userProgressService->registerCardProgress(
+            $validated['user_id'],
+            $validated['lesson_id'],
+            $validated['card_id'],
+            $validated['score']
+        );
+
+        // 2. Devolver la respuesta 201 Created.
+        return (new UserProgressResource($progressEntity))
+                ->response()
+                ->setStatusCode(Response::HTTP_CREATED);
     }
 
     /**
-     * Muestra un registro de progreso específico.
+     * Maneja la actualización explícita del progreso existente (PUT).
      *
-     * @param  \App\Models\UserProgress  $userProgress
-     * @return \Illuminate\Http\JsonResponse
+     * @param UpdateUserProgressRequest $request La solicitud validada para actualizar.
+     * @return JsonResponse
      */
-    public function show(UserProgress $userProgress): JsonResponse
+    public function update(UpdateUserProgressRequest $request): JsonResponse
     {
-        // Cargamos las relaciones para asegurar que la respuesta es completa
-        $userProgress->load('user', 'card');
-        return response()->json($userProgress);
+        $validated = $request->validated();
+        
+        // 1. Llamar al mismo método de servicio, usando el orden de parámetros.
+        $progressEntity = $this->userProgressService->registerCardProgress(
+            $validated['user_id'],
+            $validated['lesson_id'],
+            $validated['card_id'],
+            $validated['score']
+        );
+
+        // 2. Devolver la respuesta 200 OK.
+        return (new UserProgressResource($progressEntity))
+                ->response()
+                ->setStatusCode(Response::HTTP_OK);
     }
 
     /**
-     * Actualiza un registro de progreso existente en la base de datos.
+     * Obtiene el progreso actual de una tarjeta específica usando las claves compuestas.
      *
-     * @param  \App\Http\Requests\UpdateUserProgressRequest  $request
-     * @param  \App\Models\UserProgress  $userProgress
-     * @return \Illuminate\Http\JsonResponse
+     * @param int $userId
+     * @param int $lessonId
+     * @param int $cardId
+     * @return JsonResponse
      */
-    public function update(UpdateUserProgressRequest $request, UserProgress $userProgress): JsonResponse
+    public function show(int $userId, int $lessonId, int $cardId): JsonResponse
     {
-        // Los datos ya están validados por UpdateUserProgressRequest.
-        // Solo se actualizarán los campos que se hayan enviado en la solicitud.
-        $userProgress->update($request->validated());
+        $progressEntity = $this->userProgressService->getCurrentCardProgress(
+            userId: $userId,
+            lessonId: $lessonId,
+            cardId: $cardId
+        );
 
-        // Volvemos a cargar las relaciones (opcional, pero útil para verificar)
-        $userProgress->load('user', 'card');
+        if (!$progressEntity) {
+            return response()->json([
+                'message' => 'Progreso no encontrado para la tarjeta especificada.',
+            ], Response::HTTP_NOT_FOUND);
+        }
 
-        return response()->json([
-            'message' => 'Progreso de usuario actualizado exitosamente.',
-            'data' => $userProgress
-        ]);
+        // 2. Llamar a ->response() en el Resource para que devuelva un JsonResponse.
+        return (new UserProgressResource($progressEntity))->response();
     }
 
     /**
-     * Elimina un registro de progreso de la base de datos.
+     * Elimina un registro de progreso por sus claves compuestas.
      *
-     * @param  \App\Models\UserProgress  $userProgress
-     * @return \Illuminate\Http\JsonResponse
+     * @param int $userId
+     * @param int $lessonId
+     * @param int $cardId
+     * @return JsonResponse
      */
-    public function destroy(UserProgress $userProgress): JsonResponse
+    public function destroy(int $userId, int $lessonId, int $cardId): JsonResponse
     {
-        $userProgress->delete();
+        // 1. Buscar la entidad por sus claves.
+        $progressEntity = $this->userProgressService->getCurrentCardProgress(
+            userId: $userId,
+            lessonId: $lessonId,
+            cardId: $cardId
+        );
 
-        return response()->json([
-            'message' => 'Progreso de usuario eliminado exitosamente.'
-        ], 204); // Código 204 para "Sin Contenido"
+        if (!$progressEntity) {
+            // Si no existe, devuelve 204 No Content.
+            return response()->json(null, Response::HTTP_NO_CONTENT);
+        }
+
+        // 2. Delegar la eliminación al servicio.
+        if (!$this->userProgressService->deleteProgress($progressEntity)) {
+             return response()->json(['message' => 'No se pudo eliminar el progreso.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        // 3. Devolver 204 No Content.
+        return response()->json(null, Response::HTTP_NO_CONTENT);
     }
 }

@@ -2,58 +2,60 @@
 
 namespace App\Http\Resources;
 
+use App\Core\Entities\User\UserProgressEntity;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-// Importa los Resources que se usarán dentro de este
-use App\Http\Resources\UserResource;
-use App\Http\Resources\CardResource;
-use App\Models\UserProgress;
 
+/**
+ * Resource para formatear y exponer la entidad UserProgressEntity
+ * como una respuesta JSON limpia para la API.
+ */
 class UserProgressResource extends JsonResource
 {
     /**
-     * Transforma el recurso en un array.
+     * @var UserProgressEntity
+     */
+    public $resource;
+
+    /**
+     * Constructor para asegurar que el recurso solo acepta la entidad de dominio.
+     * @param UserProgressEntity $resource
+     */
+    public function __construct(UserProgressEntity $resource)
+    {
+        parent::__construct($resource);
+    }
+
+    /**
+     * Transforma la entidad en un array para ser serializado como JSON.
      *
-     * @param  Request  $request
+     * @param Request $request
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array
     {
-        // 1. Determinar si la relación anidada a la Card real existe y fue cargada.
-        // Ahora usamos $this->card->card_sesion para reflejar el nombre de tu relación.
-        $realCard = $this->whenLoaded('card', function (UserProgress $progress) {
-            // $progress->card es el modelo LessonCard
-            // $progress->card->card_sesion es el modelo Card real
-            return $progress->card->card_sesion ?? null;
-        });
-
+        // El método format() de DateTimeImmutable se usa para garantizar un formato ISO 8601 estándar.
+        $lastUsedAt = $this->resource->getLastUsedAt();
+        
         return [
-            // 2. Campos primarios y de progreso
-            'progress_id' => $this->progress_id, 
-            'use_count' => $this->use_count,
-            'last_used_at' => $this->last_used_at,
+            // Identificador primario, null si no ha sido persistido
+            'progress_id' => $this->resource->getProgressId(),
 
-            // 3. Relación con el USUARIO
-            'user' => $this->whenLoaded('user', function () {
-                return new UserResource($this->user);
-            }, $this->user_id_progress),
+            // Claves foráneas (no se exponen todas si no son necesarias, pero aquí se incluyen)
+            'user_id' => $this->resource->getUserId(),
+            'lesson_id' => $this->resource->getLessonId(),
+            'card_id' => $this->resource->getCardId(),
+            
+            // Atributos de progreso
+            'use_count' => $this->resource->getUseCount(),
+            'score' => $this->resource->getScore(),
+            
+            // Fecha, formateada para consumo de API
+            'last_used_at' => $lastUsedAt ? $lastUsedAt->format(DATE_ATOM) : null, // Ejemplo: 2024-05-15T10:00:00+00:00
 
-            // 4. Relación con la FICHA/CARD (LessonCard -> Card)
-            'card' => $this->whenLoaded('card', function () use ($realCard) {
-                // Solo serializa con CardResource si $realCard tiene contenido.
-                if ($realCard) {
-                    return new CardResource($realCard);
-                }
-                
-                // Fallback si la relación anidada no se cargó o es nula
-                return $this->card_id_progress; 
-                
-            }, $this->card_id_progress), 
-
-            // 5. Incluir el ID de LessonCard 
-            'lesson_card_id' => $this->whenLoaded('card', function () {
-                return $this->card->id ?? null;
-            }),
+            // Se puede añadir un campo booleano calculado para el frontend
+            // Asumiendo que el score 3 es el de completado (regla de negocio del servicio)
+            'is_completed' => $this->resource->getScore() >= 3, 
         ];
     }
 }

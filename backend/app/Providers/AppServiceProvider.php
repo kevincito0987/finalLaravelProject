@@ -22,6 +22,7 @@ use App\Core\Repositories\EloquentEvaluationQuestionRepository;
 use App\Core\Repositories\EloquentEvaluationRepository;
 use App\Core\Repositories\EloquentLessonRepository;
 use App\Core\Repositories\EloquentUserRepository;
+use App\Core\Repositories\EloquentUserProgressRepository;
 use App\Core\Repositories\LessonCardRepository;
 use App\Core\Repositories\SupabaseMediaStorage;
 use App\Core\Services\CardTranslationService;
@@ -30,8 +31,6 @@ use App\Core\Services\MediaUploader;
 use App\Repositories\EloquentUserLessonRepository;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
-
-use App\Repositories\EloquentUserProgressRepository;
 
 class AppServiceProvider extends ServiceProvider
 {

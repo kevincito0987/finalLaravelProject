@@ -4,73 +4,53 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Request para registrar el progreso inicial de una tarjeta.
+ * No requiere progress_id, ya que se basa en las claves compuestas (user_id, lesson_id, card_id).
+ */
 class StoreUserProgressRequest extends FormRequest
 {
     /**
      * Determina si el usuario está autorizado a realizar esta solicitud.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
-        // Generalmente, se permite a los usuarios autenticados crear registros de progreso.
-        return true; 
+        // Asume autorización para fines de ejemplo.
+        return true;
     }
 
     /**
      * Obtiene las reglas de validación que se aplican a la solicitud.
+     * El campo clave es 'score' para el nivel de dominio.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
      */
     public function rules(): array
     {
-        // Nota: Asumo que 'cards' es el nombre de la tabla de LessonCard
-        // y que 'card_id_evaluation' es la clave primaria en esa tabla.
         return [
-            // Clave foránea del Usuario (requerida)
-            'user_id_progress' => [
-                'required', 
-                'integer', 
-                'exists:users,id' // Valida que exista en la tabla 'users'
-            ],
-            
-            // Clave foránea de la Card (requerida)
-            'card_id_progress' => [
-                'required', 
-                'integer', 
-                'exists:cards,card_id_evaluation' // Valida que exista en la tabla 'cards' usando su PK
-            ],
-            
-            // Contador de uso inicial (requerido, debe ser un entero >= 0)
-            'use_count' => [
-                'required', 
-                'integer', 
-                'min:0'
-            ],
-            
-            // Fecha/hora de último uso. Opcional en la creación, pero si se envía, debe ser un formato válido.
-            'last_used_at' => [
-                'nullable',
-                'date' // Asegura que es un formato de fecha/hora válido
-            ],
+            // Claves compuestas para identificar el progreso (DEBEN existir)
+            'user_id' => ['required', 'integer', 'exists:users,id'],
+            'lesson_id' => ['required', 'integer', 'exists:lessons,lesson_id'],
+            'card_id' => ['required', 'integer', 'exists:cards,card_id'],
+
+            // Dato de progreso: el nuevo Score (alineado con el servicio y la entidad)
+            // Asumiendo que el score es un entero entre 0 y 5
+            'score' => ['required', 'integer', 'min:0', 'max:5'],
         ];
     }
     
     /**
-     * Personaliza los mensajes de error para la validación.
+     * Personaliza los mensajes de error.
      *
      * @return array
      */
     public function messages(): array
     {
         return [
-            'user_id_progress.required' => 'El ID del usuario es obligatorio.',
-            'user_id_progress.exists' => 'El usuario especificado no existe.',
-            'card_id_progress.required' => 'El ID de la ficha es obligatorio.',
-            'card_id_progress.exists' => 'La ficha especificada no existe.',
-            'use_count.required' => 'El contador de uso es obligatorio.',
-            'use_count.min' => 'El contador de uso debe ser como mínimo :min.',
-            'last_used_at.date' => 'El formato de fecha de último uso no es válido.',
+            'score.required' => 'El campo de score es obligatorio.',
+            'score.min' => 'El score debe ser al menos :min.',
+            'score.max' => 'El score no puede ser mayor a :max.',
+            'user_id.exists' => 'El usuario especificado no existe.',
         ];
     }
 }
