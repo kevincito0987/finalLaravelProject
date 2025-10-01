@@ -108,6 +108,7 @@ Para optimizar el tiempo y enfocarnos en la lógica del backend, se utilizará l
 ## 🧑‍💻 Desarrolladores Principales
 
 - **kevincito0987**: [GitHub](https://github.com/kevincito0987) 🚀
+- **DevB4n**: [GitHub](https://github.com/DevB4n) 🚀
 
 ---
 
