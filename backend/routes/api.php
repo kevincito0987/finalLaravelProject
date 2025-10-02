@@ -12,20 +12,23 @@ use App\Http\Controllers\MediaController;
 use App\Http\Controllers\EvaluationController; 
 use App\Http\Controllers\EvaluationQuestionController; 
 use App\Http\Controllers\UserLessonController;
-use App\Http\Controllers\UserProgressController; // ¡Importación necesaria!
+use App\Http\Controllers\UserProgressController; 
 use Illuminate\Support\Facades\Route;
 
+// Rutas de salud con el middleware 'active' añadido (asumiendo que deberían estar protegidas)
 Route::get('/health', fn() => ['ok' => true]);
-Route::get('/health-any-auth', fn() => ['ok' => true])->middleware(['auth:api', 'can:view-health']);
-Route::get('/health-admin', fn() => ['ok' => true])->middleware(['auth:api', 'can:view-health-admin']);
+Route::get('/health-any-auth', fn() => ['ok' => true])->middleware(['auth:api', 'active', 'can:view-health']);
+Route::get('/health-admin', fn() => ['ok' => true])->middleware(['auth:api', 'active', 'can:view-health-admin']);
 
 
 Route::prefix('posts')->group(function () {
-    Route::middleware(['throttle:api', 'auth:api', 'role:user,therapist,admin'])->group(function () {
+    // Middleware 'active' aplicado
+    Route::middleware(['throttle:api', 'auth:api', 'active', 'role:user,therapist,admin'])->group(function () {
     });
 
-    //Escritor o administrador
-    Route::middleware(['throttle:api', 'auth:api', 'role:therapist,admin'])->group(function () {
+    // Escritor o administrador
+    // Middleware 'active' aplicado
+    Route::middleware(['throttle:api', 'auth:api', 'active', 'role:therapist,admin'])->group(function () {
     });
 });
 
@@ -35,9 +38,9 @@ Route::post('/supabase-auth', [SupabaseAuthController::class, 'handle']);
 // GRUPO DE RUTAS DE AUTENTICACIÓN (Prefijo: /api/auth)
 Route::prefix('auth')->group(function () {
     // ----------------------------------------------------------------------
-    // 1. Rutas PÚBLICAS de Auth (Login, Signup, Create Roles)
+    // 1. Rutas PÚBLICAS de Auth (Login, Signup, Create Roles) - NO llevan 'active'
     // ----------------------------------------------------------------------
-    Route::post('login', [AuthController::class, 'login'])->name('login');
+    Route::post('login', [AuthController::class, 'login'])->name('login'); // La lógica 'is_active' está dentro del Controller
     Route::post('signup', [AuthController::class, 'signup']);
     
     Route::post('create-admin', [AuthController::class, 'createAdmin']);
@@ -51,8 +54,9 @@ Route::prefix('auth')->group(function () {
 
     // ----------------------------------------------------------------------
     // 2. Rutas Protegidas (Me, Logout) - Requieren SOLO autenticación
+    // Middleware 'active' aplicado aquí
     // ----------------------------------------------------------------------
-    Route::middleware(['auth:api'])->group(function () {
+    Route::middleware(['auth:api', 'active'])->group(function () {
         Route::get('me', [AuthController::class, 'me']);
         Route::post('logout', [AuthController::class, 'logout']);
     });
@@ -64,7 +68,8 @@ Route::prefix('auth')->group(function () {
 // -------------------------------------------------------------------------
 
 // GRUPO DE ACCESO DE LECTURA (GET) - Roles: user, therapist, admin
-Route::middleware(['auth:api', 'role:user,therapist,admin'])->group(function () {
+// Middleware 'active' aplicado aquí
+Route::middleware(['auth:api', 'active', 'role:user,therapist,admin'])->group(function () {
     
     // CATEGORIES: Acceso de lectura (index, show)
     Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
@@ -106,7 +111,8 @@ Route::middleware(['auth:api', 'role:user,therapist,admin'])->group(function () 
 
 
 // GRUPO DE ACCESO DE ESCRITURA (POST, PUT, DELETE) - Roles: therapist, admin
-Route::middleware(['auth:api', 'role:therapist,admin'])->group(function () {
+// Middleware 'active' aplicado aquí
+Route::middleware(['auth:api', 'active', 'role:therapist,admin'])->group(function () {
 
     // CATEGORIES: Acceso de escritura
     Route::apiResource('categories', CategoryController::class)->except(['index', 'show']);
