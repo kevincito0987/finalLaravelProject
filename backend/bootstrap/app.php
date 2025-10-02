@@ -3,6 +3,7 @@
 use App\Http\Middleware\ForceJsonResponse;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Middleware\VerifySupabaseToken;
+use App\Http\Middleware\CheckActive; // ASUMIDO: Importa tu middleware
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -33,6 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'role' => RoleMiddleware::class,
+            'active' => CheckActive::class, // NUEVO: Alias para el middleware de verificación de actividad
             'scopes' => CheckToken::class,  // TODOS
             'scope'  => CheckTokenForAnyScope::class,
         ]);
