@@ -10,7 +10,8 @@ use App\Http\Controllers\LessonController;
 use App\Http\Controllers\LessonCardController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\EvaluationController; 
-use App\Http\Controllers\EvaluationQuestionController; 
+use App\Http\Controllers\EvaluationQuestionController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserLessonController;
 use App\Http\Controllers\UserProgressController; // ¡Importación necesaria!
 use Illuminate\Support\Facades\Route;
@@ -19,6 +20,8 @@ Route::get('/health', fn() => ['ok' => true]);
 Route::get('/health-any-auth', fn() => ['ok' => true])->middleware(['auth:api', 'can:view-health']);
 Route::get('/health-admin', fn() => ['ok' => true])->middleware(['auth:api', 'can:view-health-admin']);
 
+    // CARDS AND USERS: Acceso de lectura
+    Route::get('/reports/usage',[ReportController::class,'report']);
 
 Route::prefix('posts')->group(function () {
     Route::middleware(['throttle:api', 'auth:api', 'role:user,therapist,admin'])->group(function () {
