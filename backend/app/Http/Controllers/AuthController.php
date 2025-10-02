@@ -62,18 +62,29 @@ class AuthController extends Controller
      * )
      * )
      * ),
-     * @OA\Response(response=401, description="Credenciales inválidas")
+     * @OA\Response(response=401, description="Credenciales inválidas o cuenta inactiva")
      * )
      */
     public function login(LoginRequest $request)
     {
         $data = $request->validated(); 
         
+        // 1. Intento de autenticación con credenciales
         if (!Auth::attempt($request->only('email', 'password'))) {
             return $this->error('Credenciales invalidas', 401);
         }
 
         $user = $request->user();
+        
+        // 2. REQUISITO: Verificación del estado 'is_active' del usuario
+        if (!$user->is_active) {
+            // Si el usuario existe pero está inactivo, cerramos la sesión recién creada 
+            Auth::logout();
+            
+            return $this->error('Tu cuenta ha sido desactivada. Contacta al administrador.', 401);
+        }
+
+        // 3. Si las credenciales son válidas Y el usuario está activo, se emite el token.
         $token = $user->createToken('api-token')->accessToken;
 
         return $this->success([
@@ -128,11 +139,10 @@ class AuthController extends Controller
             $data['password']
         );
         
-        // 2. Cargar el modelo Eloquent del usuario recién creado
+        // 2. Cargar el modelo Eloquent del usuario recién creado para el Mailable.
         $userModel = Auth::getProvider()->retrieveById($userEntity->id);
         
-        // CORRECCIÓN: Se usa el modelo recién creado ($userModel) para el correo, 
-        // ya que la ruta de registro suele ser pública y $request->user() sería NULL.
+        // Enviar correo
         Mail::mailer('real')->to($userEntity->email)->queue(new UserRegisteredMail($userModel));
 
         return $this->success([
@@ -257,9 +267,6 @@ class AuthController extends Controller
     {
         $data = $request->validated();
         
-        // El creador es el usuario autenticado (aunque no lo usaremos en el mailer)
-        // $creatorUserModel = $request->user(); 
-        
         $userEntity = $this->createAdminService->execute(
             $data['name'],
             $data['email'],
@@ -267,8 +274,7 @@ class AuthController extends Controller
             'therapist' // Rol específico
         );
 
-        // CORRECCIÓN: Para evitar el TypeError (NULL dado a un constructor que espera App\Models\User),
-        // y por lógica de negocio, pasamos el modelo del terapeuta recién creado al Mailable.
+        // CORRECCIÓN: Para el Mailable, obtenemos el modelo de Eloquent completo.
         $therapistModel = Auth::getProvider()->retrieveById($userEntity->id);
         
         // Notificación: Se pasa el modelo del terapeuta recién creado
