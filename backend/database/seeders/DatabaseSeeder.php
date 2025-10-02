@@ -38,7 +38,8 @@ class DatabaseSeeder extends Seeder
             EvaluationQuestionSeeder::class,
             UserLessonSeeder::class,
             LessonCardSeeder::class,
-            UserProgressSeeder::class
+            UserProgressSeeder::class,
+            UserActiveSeeder::class, // Nuevo seeder para usuarios activos/inactivos
         ]);
     }
 }
