@@ -1782,6 +1782,7 @@
 											}
 										}
 									],
+									"lineColor": "#00A9FF",
 									"font": "Arial;13;0",
 									"parentStyle": false,
 									"head": {
@@ -1956,6 +1957,7 @@
 											}
 										}
 									],
+									"lineColor": "#2B2BFF",
 									"font": "Arial;13;0",
 									"parentStyle": false,
 									"head": {
@@ -2042,6 +2044,7 @@
 											}
 										}
 									],
+									"lineColor": "#952BFF",
 									"font": "Arial;13;0",
 									"parentStyle": false,
 									"head": {
@@ -2128,6 +2131,7 @@
 											}
 										}
 									],
+									"lineColor": "#952BFF",
 									"font": "Arial;13;0",
 									"parentStyle": false,
 									"head": {
@@ -2214,6 +2218,7 @@
 											}
 										}
 									],
+									"lineColor": "#952BFF",
 									"font": "Arial;13;0",
 									"parentStyle": false,
 									"head": {
@@ -2300,6 +2305,7 @@
 											}
 										}
 									],
+									"lineColor": "#952BFF",
 									"font": "Arial;13;0",
 									"parentStyle": false,
 									"head": {
@@ -2386,6 +2392,7 @@
 											}
 										}
 									],
+									"lineColor": "#2B2BFF",
 									"font": "Arial;13;0",
 									"parentStyle": false,
 									"head": {
@@ -2472,6 +2479,7 @@
 											}
 										}
 									],
+									"lineColor": "#2B2BFF",
 									"font": "Arial;13;0",
 									"parentStyle": false,
 									"head": {
@@ -2558,6 +2566,7 @@
 											}
 										}
 									],
+									"lineColor": "#2B2BFF",
 									"font": "Arial;13;0",
 									"parentStyle": false,
 									"head": {
@@ -2644,6 +2653,7 @@
 											}
 										}
 									],
+									"lineColor": "#2B71FF",
 									"font": "Arial;13;0",
 									"parentStyle": false,
 									"head": {
@@ -2730,6 +2740,7 @@
 											}
 										}
 									],
+									"lineColor": "#2B71FF",
 									"font": "Arial;13;0",
 									"parentStyle": false,
 									"head": {
@@ -2817,6 +2828,7 @@
 											}
 										}
 									],
+									"lineColor": "#FF2B95",
 									"font": "Arial;13;0",
 									"parentStyle": false,
 									"head": {
@@ -2903,6 +2915,7 @@
 											}
 										}
 									],
+									"lineColor": "#FF2B2B",
 									"font": "Arial;13;0",
 									"parentStyle": false,
 									"head": {
@@ -2989,6 +3002,7 @@
 											}
 										}
 									],
+									"lineColor": "#FF2B2B",
 									"font": "Arial;13;0",
 									"parentStyle": false,
 									"head": {
@@ -3075,6 +3089,7 @@
 											}
 										}
 									],
+									"lineColor": "#FF602B",
 									"font": "Arial;13;0",
 									"parentStyle": false,
 									"head": {
@@ -3161,6 +3176,7 @@
 											}
 										}
 									],
+									"lineColor": "#2B71FF",
 									"font": "Arial;13;0",
 									"parentStyle": false,
 									"head": {
@@ -3247,6 +3263,7 @@
 											}
 										}
 									],
+									"lineColor": "#FF00FF",
 									"font": "Arial;13;0",
 									"parentStyle": false,
 									"head": {

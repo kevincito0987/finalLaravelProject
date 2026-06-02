@@ -1,307 +1,271 @@
-# 📚 Diseño de Base de Datos para Plataforma de Comunicación 🗣️
+# 📚 Diseño de Base de Datos para Plataforma de Comunicación e Inclusión Lenguaje 🗣️
 
-Este documento describe el Modelo Entidad-Relación (MER) de nuestra plataforma. Su diseño sigue rigurosamente la **Quinta Forma Normal (5FN)**, garantizando una arquitectura de datos robusta, escalable y sin redundancias. Cada tabla y relación ha sido optimizada para un rendimiento profesional.
+Este documento describe el Modelo Entidad-Relación (MER) definitivo de nuestra plataforma interactiva de comunicación y aprendizaje para personas con trastornos del lenguaje en Colombia. Su diseño sigue rigurosamente las reglas de normalización hasta la **Cuarta Forma Normal (4NF)**, aislando de manera independiente las relaciones multivaloradas multimedia, de localización y los canales de interacción sensorial para garantizar una arquitectura de datos robusta, escalable y sin redundancias.
 
-------
-
-
+Toda la estructura multimedia de almacenamiento de rutas (`paths` y `URLs`) ha sido configurada con el tipo de dato **`TEXT`** para reflejar con exactitud el modelado técnico y dar soporte a URLs extensas firmadas en la nube.
 
 ## 🔑 Entidades Principales
 
 ### 1. `roles` 📜
 
-Esta tabla es el corazón de la gestión de permisos. Define y categoriza los niveles de acceso para cada usuario.
+Esta tabla gestiona los niveles de acceso y perfiles de seguridad fundamentales de la aplicación.
 
-- **Propósito**: Controlar qué partes de la aplicación puede ver o modificar un usuario.
+- **Propósito**: Controlar los privilegios funcionales de los actores del sistema (ej: Administradores, Terapeutas, Cuidadores, Pacientes).
 
-| Campo         | Descripción                                        | Propiedades                       |
-| ------------- | -------------------------------------------------- | --------------------------------- |
-| **role_id**   | Identificador único y primario del rol.            | `PK`, `BigInt`, `autoincremental` |
-| **role_name** | El nombre funcional del rol (ej: 'admin', 'user'). | `String`, `único`                 |
+| **Campo** | **Descripción**                                   | **Propiedades**                    |
+| --------- | ------------------------------------------------- | ---------------------------------- |
+| **id**    | Identificador único y primario del rol.           | `PK`, `INTEGER`, `autoincremental` |
+| **name**  | Nombre único del rol administrativo o de usuario. | `VARCHAR(50)`, `único`             |
 
 **Relación:**
 
 - **Uno a Muchos (`1:N`)** con la tabla `users`. 🧑‍🤝‍🧑
-  - **Explicación**: Un solo rol, como 'user' o 'admin', puede ser asignado a **múltiples** usuarios.
-  - **Ejemplo**: El `role_id` `1` corresponde al rol 'admin'. Al crear un nuevo administrador, su registro en la tabla `users` recibirá el `role_id` `1`. Esto le otorgará acceso automático a todas las funcionalidades exclusivas para administradores.
+  - **Explicación**: Un único rol del sistema puede ser asignado a múltiples usuarios de la plataforma de forma individual.
+  - **Ejemplo**: El rol 'admin' posee el `id` `1`. Al registrar a los desarrolladores o terapeutas principales en el panel de control, sus registros en la tabla `users` heredarán el `role_id` `1`, otorgándoles middleware de protección de rutas automático.
 
 ### 2. `users` 🧑‍💻
 
-Aquí se almacena toda la información vital de los usuarios de la plataforma, incluyendo su identidad visual.
+Almacena la identidad, credenciales de acceso y la personalización visual de los usuarios de la plataforma.
 
-- **Propósito**: Autenticar y personalizar la experiencia de cada usuario.
+- **Propósito**: Autenticar las sesiones y asociar el progreso cognitivo a una persona específica.
 
-| Campo                  | Descripción                                                  | Propiedades                       |
-| ---------------------- | ------------------------------------------------------------ | --------------------------------- |
-| **user_id**            | Identificador primario y único del usuario.                  | `PK`, `BigInt`, `autoincremental` |
-| **role_id**            | Clave foránea que lo asocia con un rol en la tabla `roles`.  | `FK`, `BigInt`                    |
-| **name**               | Nombre completo del usuario para una experiencia personalizada. | `String`                          |
-| **email**              | Correo electrónico, clave para el inicio de sesión.          | `String`, `único`                 |
-| **password**           | Contraseña cifrada de forma segura.                          | `String`                          |
-| **profile_image_path** | Ruta del archivo de la imagen de perfil del usuario.         | `String`                          |
+| **Campo**              | **Descripción**                                              | **Propiedades**                    |
+| ---------------------- | ------------------------------------------------------------ | ---------------------------------- |
+| **id**                 | Identificador primario y único del usuario.                  | `PK`, `INTEGER`, `autoincremental` |
+| **role_id**            | Clave foránea que asocia al usuario con sus permisos de rol. | `FK`, `INTEGER`                    |
+| **name**               | Nombre completo del usuario, cuidador o paciente.            | `VARCHAR(255)`                     |
+| **email**              | Correo electrónico único para el inicio de sesión seguro.    | `VARCHAR(255)`, `único`            |
+| **password**           | Hash de la contraseña cifrada de forma segura.               | `VARCHAR(255)`                     |
+| **profile_photo_path** | Ruta relativa al storage para la foto de perfil del usuario. | `TEXT`, `nullable`                 |
 
 **Relación:**
 
 - **Muchos a Uno (`N:1`)** con la tabla `roles`.
-  - **Explicación**: Varios usuarios pueden tener el mismo `role_id`, vinculándolos de vuelta a un único rol. Cada usuario está asociado de forma individual a un solo rol.
-  - **Ejemplo**: Los usuarios 'Juan' y 'María' tienen un `role_id` de `2`, que corresponde al rol 'Terapeuta'. Ambos pueden acceder a las funcionalidades de terapeuta sin que la información del rol se duplique en cada registro.
+  - **Explicación**: Múltiples usuarios de la fundación o entorno clínico comparten las mismas propiedades del rol sin duplicar datos.
+  - **Ejemplo**: Los pacientes 'Carlos' y 'Diana' tienen asignado el `role_id` `2` ('user'). Ambos comparten las restricciones de rutas del middleware pero mantienen su progreso aislado.
 
-### 3. `communication_methods` 🗣️
+### 3. `communication_methods` 📡
 
-Define los diferentes tipos de interacción que las tarjetas pueden tener, ya sean visuales, auditivas o táctiles.
+Define los diferentes tipos de interacción sensorial adaptados a las condiciones de los pacientes (TEA, afasia, disartria) bajo el esquema del patrón Strategy.
 
-- **Propósito**: Categorizar las tarjetas según la forma en que el usuario interactúa con ellas.
+- **Propósito**: Permitir el filtrado dinámico en el Frontend (plantilla Habita) según el canal sensorial preferido del usuario.
 
-| Campo           | Descripción                                                  | Propiedades                       |
-| --------------- | ------------------------------------------------------------ | --------------------------------- |
-| **method_id**   | Identificador único del método.                              | `PK`, `BigInt`, `autoincremental` |
-| **method_name** | El nombre descriptivo del método (ej: 'visual', 'auditivo'). | `String`, `único`                 |
+| **Campo**          | **Descripción**                                              | **Propiedades**                    |
+| ------------------ | ------------------------------------------------------------ | ---------------------------------- |
+| **id**             | Identificador único del método sensorial.                    | `PK`, `INTEGER`, `autoincremental` |
+| **name**           | Nombre del canal (ej: 'visual', 'auditivo', 'tactil').       | `VARCHAR(50)`, `único`             |
+| **strategy_class** | Namespace de la clase que implementa la lógica algorítmica en PHP. | `VARCHAR(255)`                     |
 
 **Relación:**
 
-- **Uno a Muchos (`1:N`)** con la tabla `cards`. 🃏
-  - **Explicación**: Un solo método de comunicación (ej. 'auditivo') puede aplicarse a **muchas** tarjetas, pero cada tarjeta está vinculada a un único método.
-  - **Ejemplo**: El `method_id` `3` corresponde al método 'visual'. Un administrador puede crear una lección seleccionando todas las tarjetas que tienen ese `method_id`, asegurando que todas las tarjetas de la lección sean de tipo visual.
+- **Muchos a Muchos (`N:M`)** con la tabla `cards` a través de la tabla pivote `card_communication_methods`. 🖐️
+  - **Explicación**: Un método sensorial engloba múltiples tarjetas adaptadas, y una misma tarjeta puede ser idónea para más de un canal sensorial de forma independiente.
+  - **Ejemplo**: El método 'visual' (id `1`) mapea todas las tarjetas con pictogramas e imágenes grandes para usuarios con deficiencia auditiva o autismo severo.
 
 ### 4. `categories` 🏷️
 
-Organiza las tarjetas en temas coherentes (ej: 'Frutas', 'Números').
+Organiza las lecciones e interacciones en temas coherentes y estructurados.
 
-- **Propósito**: Facilitar la navegación, búsqueda y creación de lecciones basadas en temas específicos.
+- **Propósito**: Clasificar temáticamente el entorno de comunicación alternativa para facilitar la navegación, búsqueda y creación de lecciones (ej: 'Necesidades Básicas', 'Alimentos').
 
-| Campo             | Descripción                          | Propiedades                       |
-| ----------------- | ------------------------------------ | --------------------------------- |
-| **category_id**   | Identificador único de la categoría. | `PK`, `BigInt`, `autoincremental` |
-| **category_name** | El nombre de la categoría.           | `String`, `único`                 |
+| **Campo**       | **Descripción**                               | **Propiedades**                    |
+| --------------- | --------------------------------------------- | ---------------------------------- |
+| **id**          | Identificador único de la categoría.          | `PK`, `INTEGER`, `autoincremental` |
+| **name**        | Nombre representativo de la categoría.        | `VARCHAR(100)`                     |
+| **description** | Detalle clínico o pedagógico de la categoría. | `TEXT`, `nullable`                 |
 
 **Relación:**
 
-- **Uno a Muchos (`1:N`)** con la tabla `cards`. 📁
-  - **Explicación**: Una sola categoría (ej. 'Animales') puede agrupar a **muchas** tarjetas, pero cada tarjeta solo pertenece a una categoría.
-  - **Ejemplo**: Un administrador busca crear una lección de "Vocabulario de la casa". En lugar de buscar tarjetas una por una, el sistema le permite seleccionar todas las tarjetas de la `category_name` 'Objetos del hogar', ahorrando tiempo y asegurando la coherencia del contenido.
+- **Uno a Muchos (`1:N`)** con la tabla `lessons`. 📁
+  - **Explicación**: Una categoría madre puede agrupar a múltiples lecciones lógicas de aprendizaje secuencial.
+  - **Ejemplo**: La categoría 'Emociones' (id `3`) contiene las lecciones individuales "Expresar Alegría" y "Manejo de Frustración".
 
-------
-
-
-
-## 🗂️ Entidades de Contenido
+## 🗂️ Entidades de Contenido Multimedial y Localización
 
 ### 5. `cards` 🃏
 
-Contiene la información principal de las tarjetas, independiente del idioma.
+Representación central abstracta de las tarjetas de comunicación (Flashcards), independizada de la traducción idiomática para cumplir la **4ta Forma Normal (4NF)**.
 
-- **Propósito**: Ser la representación central de cada tarjeta física o digital.
+- **Propósito**: Consolidar la identidad interactiva de la tarjeta, su recurso visual universal (imagen de fondo interactiva) y su simulación de hardware RFID mediante códigos únicos.
 
-| Campo                | Descripción                                                  | Propiedades                       |
-| -------------------- | ------------------------------------------------------------ | --------------------------------- |
-| **card_id**          | Identificador único de la tarjeta.                           | `PK`, `BigInt`, `autoincremental` |
-| **uuid**             | Código único (simulación de RFID) para la interacción.       | `String`, `único`                 |
-| **image_path**       | Ruta de la imagen principal de la tarjeta.                   | `String`                          |
-| **method_id**        | Clave foránea que enlaza con el método de comunicación.      | `FK`, `BigInt`                    |
-| **category_id_card** | Clave foránea que enlaza con la categoría a la que pertenece la tarjeta. | `FK`, `BigInt`                    |
+| **Campo**                 | **Descripción**                                              | **Propiedades**                    |
+| ------------------------- | ------------------------------------------------------------ | ---------------------------------- |
+| **id**                    | Identificador único de la tarjeta de comunicación.           | `PK`, `INTEGER`, `autoincremental` |
+| **uuid**                  | Código UUID universal simulado para el escaneo o proximidad RFID. | `VARCHAR(36)`, `único`             |
+| **background_image_path** | Ruta/URL de la imagen interactiva de fondo para renderizar en el contenedor. | `TEXT`, `nullable`                 |
 
 **Relación:**
 
-- **Muchos a Uno (`N:1`)** con la tabla `communication_methods`.
-  - **Explicación**: Múltiples tarjetas pueden estar asociadas con un solo método de comunicación.
-  - **Ejemplo**: La tarjeta 'manzana' y la tarjeta 'plátano' tienen el mismo `method_id` que las vincula al método 'visual'.
-- **Muchos a Uno (`N:1`)** con la tabla `categories`.
-  - **Explicación**: Múltiples tarjetas pueden pertenecer a una sola categoría.
-  - **Ejemplo**: La tarjeta 'manzana' y la tarjeta 'plátano' tienen el mismo `category_id` que las vincula a la categoría 'Frutas'.
-- **Uno a Muchos (`1:N`)** con la tabla `card_translations`.
-  - **Explicación**: Una sola tarjeta puede tener **muchas** traducciones asociadas, una por cada idioma.
-  - **Ejemplo**: La tarjeta 'manzana' tiene un `card_translations` para 'Spanish', uno para 'English', etc., cada uno con su `key_phrase` y `audio_path` correspondientes.
-- **Muchos a Muchos (`N:M`)** con la tabla `lessons`.
-  - **Explicación**: Una tarjeta puede estar en muchas lecciones, y una lección puede contener muchas tarjetas. Esta relación se gestiona a través de la tabla intermedia `lesson_cards`.
-  - **Ejemplo**: La tarjeta de la 'manzana' se usa en la lección "Frutas", pero también en la lección "Alimentos saludables".
+- **Uno a Muchos (`1:N`)** con la tabla `card_translations`. 🌍
+  - **Explicación**: Una tarjeta abstracta de fondo posee múltiples traducciones de audios y textos según Laravel Localization de manera atómica.
+  - **Ejemplo**: La tarjeta con `id` `5` (que muestra una manzana) tiene una traducción en español ("Manzana") y otra en inglés ("Apple"), aislando el cambio de idioma del recurso de almacenamiento.
+- **Muchos a Muchos (`N:M`)** con la tabla `lessons` a través de la tabla intermedia `lesson_cards`.
+  - **Explicación**: Una tarjeta puede reutilizarse a lo largo de múltiples módulos de aprendizaje diarios o de refuerzo.
+- **Muchos a Muchos (`N:M`)** con la tabla `communication_methods` a través de `card_communication_methods`.
 
 ### 6. `card_translations` 🗣️💬
 
-Almacena las frases y audios traducidos para cada tarjeta, manteniendo el contenido dinámico separado del estático.
+Almacena la capa semántica y de audio de las tarjetas por código de idioma, implementando el soporte multilenguaje requerido por la aplicación.
 
-- **Propósito**: Mantener el contenido dinámico y traducible separado del contenido estático de las tarjetas.
+- **Propósito**: Proveer internacionalización limpia y archivos de voz para la reproducción automática multisensorial al interactuar con el recurso.
 
-| Campo                   | Descripción                                     | Propiedades                       |
-| ----------------------- | ----------------------------------------------- | --------------------------------- |
-| **card_translation_id** | Identificador único del registro.               | `PK`, `BigInt`, `autoincremental` |
-| **card_id_translation** | Clave foránea que enlaza con `cards`.           | `FK`, `BigInt`                    |
-| **language_code**       | Código del idioma.                              | `String`                          |
-| **key_phrase**          | La frase principal de la tarjeta en ese idioma. | `Text`                            |
-| **audio_path**          | Ruta del archivo de audio para la frase.        | `String`                          |
-| **Clave Única**         | `(card_id, language_code)`                      |                                   |
+| **Campo**         | **Descripción**                                              | **Propiedades**                    |
+| ----------------- | ------------------------------------------------------------ | ---------------------------------- |
+| **id**            | Identificador único del registro de traducción.              | `PK`, `INTEGER`, `autoincremental` |
+| **card_id**       | Clave foránea que enlaza la traducción con su tarjeta base.  | `FK`, `INTEGER`                    |
+| **language_code** | Código del idioma bajo estándar ISO (ej: 'es', 'en').        | `VARCHAR(5)`                       |
+| **key_phrase**    | Palabra o frase de comunicación que leerá o escuchará el paciente. | `VARCHAR(255)`                     |
+| **audio_path**    | Ruta/URL del archivo de audio almacenado en el storage para reproducción. | `TEXT`, `nullable`                 |
+| **Clave Única**   | Restricción compuesta para evitar duplicar un idioma en una misma tarjeta. | `UNIQUE(card_id, language_code)`   |
 
 **Relación:**
 
 - **Muchos a Uno (`N:1`)** con la tabla `cards`.
-  - **Explicación**: Cada traducción pertenece a una única tarjeta, pero una tarjeta puede tener **muchas** traducciones.
-  - **Ejemplo**: La traducción para el español (`language_code = 'es'`) y la traducción para el inglés (`language_code = 'en'`) para la tarjeta de la 'manzana' apuntan al mismo `card_id` de la tabla `cards`.
+  - **Explicación**: Cada traducción e instrucción por voz pertenece estrictamente a una única tarjeta del sistema.
+  - **Ejemplo**: El registro con `language_code = 'es'` mapea el texto "Quiero agua" y su respectivo audio `.mp3` en español hacia la tarjeta base de solicitud de hidratación.
 
-------
+### 7. `card_communication_methods` 🔀
 
+Tabla pivote intermedia que rompe la relación de muchos a muchos entre las tarjetas y sus canales sensoriales preferidos.
 
+- **Propósito**: Ejecutar la normalización de la base de datos evitando la redundancia de colecciones u opciones en vectores, cumpliendo la 4NF de dependencias multivaloradas independientes.
+
+| **Campo**     | **Descripción**                                              | **Propiedades**       |
+| ------------- | ------------------------------------------------------------ | --------------------- |
+| **card_id**   | Clave foránea constituyente vinculada a la tarjeta interactiva. | `PK`, `FK`, `INTEGER` |
+| **method_id** | Clave foránea constituyente vinculada al método sensorial.   | `PK`, `FK`, `INTEGER` |
 
 ## 🎯 Entidades de Lecciones y Evaluaciones
 
-### 7. `lessons` ✍️
+### 8. `lessons` ✍️
 
-Define las lecciones disponibles para los usuarios.
+Estructura las unidades didácticas o de entrenamiento diario que la plataforma asignará de forma automatizada al iniciar sesión.
 
-- **Propósito**: Organizar el contenido de la aplicación en unidades de aprendizaje coherentes.
+- **Propósito**: Organizar el contenido de la aplicación en unidades de aprendizaje secuenciales y coherentes.
 
-| Campo           | Descripción                        | Propiedades                       |
-| --------------- | ---------------------------------- | --------------------------------- |
-| **lesson_id**   | Identificador único de la lección. | `PK`, `BigInt`, `autoincremental` |
-| **lesson_name** | Título de la lección.              | `String`                          |
-| **description** | Breve descripción de la lección.   | `Text`                            |
-| **lesson_type** | Tipo de lección.                   | `String`                          |
-
-**Relación:**
-
-- **Muchos a Muchos (`N:M`)** con la tabla `cards` a través de la tabla `lesson_cards`.
-  - **Explicación**: Una lección puede contener **muchas** tarjetas, y una misma tarjeta puede ser parte de **muchas** lecciones.
-  - **Ejemplo**: El administrador puede crear una nueva lección (ej: "Vocales") y asociarle un conjunto de tarjetas (`card_a`, `card_e`, etc.) a través de la tabla `lesson_cards`. La tarjeta `card_a` también puede ser usada en otra lección, "Abecedario".
-
-### 8. `lesson_cards` 🧩
-
-Es una tabla pivote que asocia las tarjetas a las lecciones y define el orden en que se presentan.
-
-- **Propósito**: Establecer la relación `N:M` entre `lessons` y `cards`, y definir el orden de las tarjetas dentro de cada lección.
-
-| Campo                        | Descripción                                     | Propiedades    |
-| ---------------------------- | ----------------------------------------------- | -------------- |
-| **lesson_id_sesion**         | Enlaza con la lección.                          | `FK`, `BigInt` |
-| **card_id_sesion**           | Enlaza con la tarjeta.                          | `FK`, `BigInt` |
-| **order_in_lesson**          | La posición de la tarjeta dentro de la lección. | `Integer`      |
-| **Clave Primaria Compuesta** | `(lesson_id, card_id)`                          |                |
+| **Campo**       | **Descripción**                                              | **Propiedades**                    |
+| --------------- | ------------------------------------------------------------ | ---------------------------------- |
+| **id**          | Identificador único de la lección del sistema.               | `PK`, `INTEGER`, `autoincremental` |
+| **category_id** | Clave foránea que vincula la lección con su categoría contenedora. | `FK`, `INTEGER`                    |
+| **title**       | Título de la unidad didáctica (ej: 'Saludos de Cortesía').   | `VARCHAR(255)`                     |
 
 **Relación:**
 
-- **Muchos a Uno (`N:1`)** con la tabla `lessons`.
-  - **Explicación**: Varios registros en esta tabla se vinculan a una sola lección, permitiendo que una lección tenga múltiples tarjetas asociadas.
-  - **Ejemplo**: La lección `1` tiene múltiples entradas en `lesson_cards`, cada una con un `card_id` diferente para las tarjetas que contiene.
-- **Muchos a Uno (`N:1`)** con la tabla `cards`.
-  - **Explicación**: Varios registros en esta tabla se vinculan a una sola tarjeta, permitiendo que una tarjeta se use en múltiples lecciones.
-  - **Ejemplo**: La tarjeta `10` está presente en la lección `1` y en la lección `5`, por lo que ambos registros en `lesson_cards` apuntan al mismo `card_id` `10`.
+- **Muchos a Muchos (`N:M`)** con la tabla `cards` a través de la tabla intermedia `lesson_cards`.
+  - **Explicación**: Una lección agrupa un set secuencial de flashcards de comunicación, y una flashcard puede servir de refuerzo en múltiples lecciones.
+- **Uno a Muchos (`1:N`)** con la tabla `evaluations`. 📝
+  - **Explicación**: Una lección posee cuestionarios interactivos asociados para auditar el avance cognitivo del alumno.
+  - **Ejemplo**: La lección "Objetos del Aula" tiene asignada su respectiva evaluación diagnóstica multimedia al final del recorrido.
 
-### 9. `evaluations` 📝
+### 9. `lesson_cards` 🧩
 
-Almacena las evaluaciones. Una lección de tipo 'evaluacion' tendrá un registro en esta tabla.
+Tabla pivote de desambiguación `N:M` que gestiona las tarjetas que componen cada lección y define su flujo secuencial.
 
-- **Propósito**: Definir una prueba de conocimiento asociada a una lección.
+- **Propósito**: Controlar el orden jerárquico de visualización interactiva para el usuario dentro del módulo de aprendizaje.
 
-| Campo                    | Descripción                            | Propiedades                       |
-| ------------------------ | -------------------------------------- | --------------------------------- |
-| **evaluation_id**        | Identificador único.                   | `PK`, `BigInt`, `autoincremental` |
-| **lesson_id_evaluation** | Enlaza con la lección correspondiente. | `FK`, `BigInt`, `único`           |
+| **Campo**           | **Descripción**                                              | **Propiedades**       |
+| ------------------- | ------------------------------------------------------------ | --------------------- |
+| **lesson_id**       | Clave foránea constituyente vinculada a la lección.          | `PK`, `FK`, `INTEGER` |
+| **card_id**         | Clave foránea constituyente vinculada a la tarjeta.          | `PK`, `FK`, `INTEGER` |
+| **order_in_lesson** | Orden numérico consecutivo para la presentación en el frontend. | `SMALLINT`            |
 
-**Relación:**
+### 10. `evaluations` 📝
 
-- **Uno a Uno (`1:1`)** con la tabla `lessons`. 📋
-  - **Explicación**: Cada lección de tipo 'evaluacion' puede tener una y solo una evaluación asociada. El campo `lesson_id` es único para asegurar que no se creen evaluaciones duplicadas.
-  - **Ejemplo**: Al finalizar una lección, la aplicación verifica si la `lesson_id` tiene un registro en esta tabla. Si es así, se inicia el módulo de evaluación.
+Representa el contenedor de la prueba de conocimiento o test interactivo adjunto a una lección completada.
 
-### 10. `evaluation_questions` ❓
+- **Propósito**: Agrupar preguntas para emitir métricas cuantitativas del progreso del paciente.
 
-Contiene las preguntas de cada evaluación.
-
-- **Propósito**: Almacenar las preguntas específicas que se harán en una evaluación.
-
-| Campo                      | Descripción                                            | Propiedades                       |
-| -------------------------- | ------------------------------------------------------ | --------------------------------- |
-| **question_id**            | Identificador único de la pregunta.                    | `PK`, `BigInt`, `autoincremental` |
-| **evaluation_id_question** | Enlaza con la evaluación a la que pertenece.           | `FK`, `BigInt`                    |
-| **card_id_evaluation**     | Enlaza con la tarjeta a la que se refiere la pregunta. | `FK`, `BigInt`                    |
-| **question_text**          | El texto de la pregunta.                               | `Text`                            |
-| **correct_answer**         | La respuesta correcta esperada.                        | `String`                          |
-| **options**                | Las opciones de respuesta.                             | `JSON`                            |
+| **Campo**     | **Descripción**                                              | **Propiedades**                    |
+| ------------- | ------------------------------------------------------------ | ---------------------------------- |
+| **id**        | Identificador primario de la evaluación.                     | `PK`, `INTEGER`, `autoincremental` |
+| **lesson_id** | Clave foránea que conecta la prueba con la lección de origen. | `FK`, `INTEGER`                    |
+| **title**     | Nombre descriptivo del examen interactivo.                   | `VARCHAR(255)`                     |
 
 **Relación:**
 
-- **Muchos a Uno (`N:1`)** con la tabla `evaluations`.
-  - **Explicación**: Una evaluación puede tener **muchas** preguntas, pero cada pregunta solo pertenece a una evaluación.
-  - **Ejemplo**: Cuando un usuario inicia una evaluación, la aplicación carga todas las preguntas asociadas a esa `evaluation_id`.
+- **Uno a Muchos (`1:N`)** con la tabla `evaluation_questions`. ❓
+  - **Explicación**: Una evaluación está integrada por múltiples preguntas de opción múltiple u opcionales con imágenes.
+- **Uno a Muchos (`1:N`)** con la tabla `user_evaluations`.
+  - **Explicación**: Una misma evaluación recopila los diferentes intentos realizados por los alumnos de la plataforma a lo largo del tiempo.
 
-## 📈 Entidades de Progreso del Usuario
+### 11. `evaluation_questions` 🖼️❓
 
-### 11. `user_lessons` ✅
+Almacena las interrogantes de la prueba, permitiendo de forma opcional el despliegue de multimedia accesible (imágenes) bajo la arquitectura de Atributo Opcional Controlado por Estado.
 
-Registra las lecciones que los usuarios han completado.
+- **Propósito**: Soportar preguntas con apoyos visuales para niños o pacientes con dificultades cognitivas agudas (TEA).
 
-- **Propósito**: Llevar un registro del avance del usuario a nivel de lección.
-
-| Campo                        | Descripción                      | Propiedades    |
-| ---------------------------- | -------------------------------- | -------------- |
-| **user_id_lesson**           | Enlaza con el usuario.           | `FK`, `BigInt` |
-| **lesson_id_lesson**         | Enlaza con la lección.           | `FK`, `BigInt` |
-| **completed_at**             | Marca de tiempo de finalización. | `Timestamp`    |
-| **Clave Primaria Compuesta** | `(user_id, lesson_id)`           |                |
-
-**Relación:**
-
-- **Muchos a Muchos (`N:M`)** entre la tabla `users` y la tabla `lessons`.
-  - **Explicación**: Un usuario puede completar **muchas** lecciones, y una lección puede ser completada por **muchos** usuarios. Esta tabla de unión registra cada instancia de finalización.
-  - **Ejemplo**: Permite al panel de administrador generar un reporte de "lecciones completadas" por usuario y al usuario ver su progreso en la plataforma.
-
-### 12. `user_progress` 📊
-
-Registra el uso y progreso del usuario con tarjetas individuales.
-
-- **Propósito**: Recopilar datos sobre la interacción del usuario con cada tarjeta, útil para análisis de comportamiento y personalización.
-
-| Campo                | Descripción                                              | Propiedades                       |
-| -------------------- | -------------------------------------------------------- | --------------------------------- |
-| **progress_id**      | Identificador único del registro de progreso.            | `PK`, `BigInt`, `autoincremental` |
-| **user_id_progress** | Enlaza con el usuario.                                   | `FK`, `BigInt`                    |
-| **card_id_progress** | Enlaza con la tarjeta.                                   | `FK`, `BigInt`                    |
-| **use_count**        | Contador del número de veces que se ha usado la tarjeta. | `Integer`, `defecto 0`            |
-| **last_used_at**     | Fecha y hora del último uso.                             | `Timestamp`                       |
-| **Clave Única**      | `(user_id, card_id)`                                     |                                   |
+| **Campo**               | **Descripción**                                              | **Propiedades**                    |
+| ----------------------- | ------------------------------------------------------------ | ---------------------------------- |
+| **id**                  | Identificador único de la pregunta.                          | `PK`, `INTEGER`, `autoincremental` |
+| **evaluation_id**       | Clave foránea vinculada a la evaluación contenedora.         | `FK`, `INTEGER`                    |
+| **question_text**       | Enunciado o instrucción de la pregunta interactiva.          | `TEXT`                             |
+| **question_image_path** | Campo opcional (`TEXT`). Si contiene ruta, el frontend dibuja la imagen de apoyo; si es `NULL`, muestra texto limpio. | `TEXT`, `nullable`                 |
+| **correct_answer**      | Cadena de texto exacta que representa la solución correcta esperada. | `VARCHAR(255)`                     |
 
 **Relación:**
 
-- **Muchos a Muchos (`N:M`)** entre las tablas `users` y `cards`.
-  - **Explicación**: Un usuario interactúa con **muchas** tarjetas, y una tarjeta es utilizada por **muchos** usuarios. Esta tabla registra el historial de uso para cada par usuario-tarjeta.
-  - **Ejemplo**: Cuando un usuario interactúa con una tarjeta, este registro se actualiza, lo que permite al sistema identificar qué tarjetas son más utilizadas o si se necesita reforzar alguna.
+- **Uno a Muchos (`1:N`)** con la tabla `user_evaluation_answers`.
+  - **Explicación**: Almacena de forma histórica cada respuesta individual dada a esta pregunta en específico para reportes avanzados de error.
 
-### 13. `user_review_items` 🔄
+## 📈 Entidades de Progreso y Métricas del Estudiante
 
-Gestiona una lista de tarjetas que el usuario necesita repasar, basada en su rendimiento.
+### 12. `user_lessons` 📊
 
-- **Propósito**: Personalizar las lecciones de refuerzo.
+Tabla intermedia para la asignación y control de estados de las lecciones diarias asignadas automáticamente mediante la capa de Servicios en el backend.
 
-| Campo                | Descripción                          | Propiedades                       |
-| -------------------- | ------------------------------------ | --------------------------------- |
-| **review_id**        | Identificador único del ítem.        | `PK`, `BigInt`, `autoincremental` |
-| **user_id_review**   | Enlaza con el usuario.               | `FK`, `BigInt`                    |
-| **card_id_review**   | Enlaza con la tarjeta.               | `FK`, `BigInt`                    |
-| **review_date**      | Fecha en que se marcó para revisión. | `Date`                            |
-| **status**           | Estado de la revisión.               | `String`                          |
-| **last_reviewed_at** | Fecha de la última revisión.         | `Timestamp`                       |
-| **Clave Única**      | `(user_id, card_id)`                 |                                   |
+- **Propósito**: Mapear qué lecciones tiene asignadas o completadas un usuario específico de forma histórica.
+
+| **Campo**       | **Descripción**                                             | **Propiedades**                    |
+| --------------- | ----------------------------------------------------------- | ---------------------------------- |
+| **id**          | Identificador único del registro de asignación.             | `PK`, `INTEGER`, `autoincremental` |
+| **user_id**     | Clave foránea vinculada al estudiante.                      | `FK`, `INTEGER`                    |
+| **lesson_id**   | Clave foránea vinculada a la lección asignada.              | `FK`, `INTEGER`                    |
+| **status**      | Estado actual de la lección (ej: 'assigned', 'completed').  | `VARCHAR(20)`                      |
+| **assigned_at** | Marca de tiempo de la asignación automática por middleware. | `TIMESTAMP`                        |
+
+### 13. `user_card_interactions` 🏷️🔊
+
+Registra cada evento interactivo en tiempo real del paciente con las flashcards (clics, reproducciones de audio o escaneos UUID/RFID).
+
+- **Propósito**: Alimentar la analítica de uso del terapeuta para determinar el nivel de comunicación alternativa y configurar de forma automatizada los módulos de refuerzo.
+
+| **Campo**            | **Descripción**                                              | **Propiedades**                    |
+| -------------------- | ------------------------------------------------------------ | ---------------------------------- |
+| **id**               | Identificador del log de la interacción.                     | `PK`, `INTEGER`, `autoincremental` |
+| **user_id**          | Clave foránea que identifica al usuario que interactuó.      | `FK`, `INTEGER`                    |
+| **card_id**          | Clave foránea vinculada a la tarjeta accionada.              | `FK`, `INTEGER`                    |
+| **interaction_type** | Canal del evento (ej: 'rfid_scan' para tarjetas físicas, 'click'). | `VARCHAR(50)`                      |
+| **interacted_at**    | Fecha y hora exacta de la interacción sensorial.             | `TIMESTAMP`                        |
+
+### 14. `user_evaluations` 💯
+
+Modela el intento global de un examen completado por un usuario, guardando la trazabilidad cuantitativa de su calificación.
+
+- **Propósito**: Almacenar los puntajes de las evaluaciones para reportes de progreso en el panel administrativo.
+
+| **Campo**         | **Descripción**                                              | **Propiedades**                    |
+| ----------------- | ------------------------------------------------------------ | ---------------------------------- |
+| **id**            | Identificador del intento de evaluación.                     | `PK`, `INTEGER`, `autoincremental` |
+| **user_id**       | Clave foránea que identifica al alumno que rindió la prueba. | `FK`, `INTEGER`                    |
+| **evaluation_id** | Clave foránea vinculada al test realizado.                   | `FK`, `INTEGER`                    |
+| **score**         | Calificación numérica obtenida (ej: 4.50, 5.00).             | `DECIMAL(5,2)`                     |
+| **completed_at**  | Marca de tiempo del fin de la evaluación.                    | `TIMESTAMP`                        |
 
 **Relación:**
 
-- **Muchos a Muchos (`N:M`)** entre las tablas `users` y `cards`.
-  - **Explicación**: Un usuario tiene **muchas** tarjetas para repasar, y una tarjeta puede ser marcada para repaso por **muchos** usuarios.
-  - **Ejemplo**: Si el usuario responde incorrectamente a una pregunta de la evaluación, se crea un registro en esta tabla. La aplicación puede entonces crear dinámicamente una lección de "refuerzo" con las tarjetas de `status = 'pendiente'`.
+- **Uno a Muchos (`1:N`)** con la tabla `user_evaluation_answers`.
+  - **Explicación**: Se conecta directo con el desglose detallado de las respuestas seleccionadas por el alumno en este intento específico.
 
-### 14. `user_evaluation_answers` 💯
+### 15. `user_evaluation_answers` 📝❌
 
-Almacena las respuestas de los usuarios a cada pregunta de la evaluación.
+Detalla la respuesta seleccionada para cada pregunta en un intento de evaluación, registrando el éxito o fallo mediante una bandera booleana (`TINYINT` en StarUML).
 
-- **Propósito**: Analizar el rendimiento del usuario en las evaluaciones.
+- **Propósito**: Auditar minuciosamente el rendimiento pregunta por pregunta para el control y retroalimentación de los cuidadores.
 
-| Campo                  | Descripción                                | Propiedades                       |
-| ---------------------- | ------------------------------------------ | --------------------------------- |
-| **answer_id**          | Identificador único de la respuesta.       | `PK`, `BigInt`, `autoincremental` |
-| **user_id_answer**     | Enlaza con el usuario que respondió.       | `FK`, `BigInt`                    |
-| **question_id_answer** | Enlaza con la pregunta de la evaluación.   | `FK`, `BigInt`                    |
-| **user_answer**        | La respuesta proporcionada por el usuario. | `String`                          |
-| **is_correct**         | Indica si la respuesta fue correcta.       | `Boolean`                         |
-| **answered_at**        | Fecha y hora de la respuesta.              | `Timestamp`                       |
-
-**Relación:**
-
-- **Muchos a Muchos (`N:M`)** con la tabla `users` y la tabla `evaluation_questions`.
-  - **Explicación**: Un usuario puede responder a **muchas** preguntas, y una pregunta puede ser respondida por **muchos** usuarios.
-  - **Ejemplo**: Al final de una evaluación, la aplicación recorre esta tabla para contar las respuestas correctas e incorrectas, y así calcular la puntuación del usuario en la lección.
+| **Campo**              | **Descripción**                                              | **Propiedades**                    |
+| ---------------------- | ------------------------------------------------------------ | ---------------------------------- |
+| **id**                 | Identificador primario de la respuesta guardada.             | `PK`, `INTEGER`, `autoincremental` |
+| **user_evaluation_id** | Clave foránea que la asocia al intento global en `user_evaluations`. | `FK`, `INTEGER`                    |
+| **question_id**        | Clave foránea que referencia a la pregunta respondida.       | `FK`, `INTEGER`                    |
+| **user_answer**        | Texto o respuesta ingresada/seleccionada por el usuario.     | `VARCHAR(255)`                     |
+| **is_correct**         | Representación booleana de StarUML ($0$ para incorrecto, $1$ para correcto). | `TINYINT(1)`                       |
