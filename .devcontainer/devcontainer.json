@@ -12,6 +12,11 @@
     "ghcr.io/devcontainers/features/common-utils:2": {
       "nonFreePackages": true,
       "username": "vscode"
+    },
+    // SOLUCIÓN AL ERROR DPKG: Habilita comandos Docker mapeando el socket de tu Ubuntu local
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "version": "latest",
+      "enableNonRootDocker": "true"
     }
   },
   "customizations": {
@@ -24,7 +29,9 @@
         "vivaxy.vscode-conventional-commits",
         "amiralizadeh9480.laravel-extra-intellisense",
         "cweijan.vscode-mysql-client2",
-        "postman.postman-for-vscode"
+        "postman.postman-for-vscode",
+        // Agregada para que el debugger de Xdebug funcione visualmente en VS Code
+        "xdebug.php-debug"
       ],
       "settings": {
         "terminal.integrated.shell.linux": "/bin/bash",
