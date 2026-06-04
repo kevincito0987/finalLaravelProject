@@ -16,6 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(prepend: [
             \App\Presentation\Http\Middleware\SetLocaleMiddleware::class,
         ]);
+        
+        // 🔑 AGREGADO: Registramos el alias para usarlo cómodamente en las rutas
+        $middleware->alias([
+            'role' => \App\Presentation\Http\Middleware\RoleMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
