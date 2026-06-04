@@ -13,13 +13,13 @@ services:
     environment:
       - TZ=UTC
     ports:
-      - "8001:8000"
+      - "8000:8000"
     depends_on:
       - db
       - pgsql
       - redis
       - mailpit
-      - libretranslate 
+      - libretranslate
 
   # Servicio de MySQL
   db:
@@ -49,7 +49,7 @@ services:
       - pgdata-laravel11:/var/lib/postgresql/data
     ports:
       - "5433:5432"
-  
+
   # Servicio de Redis
   redis:
     image: redis:7
@@ -65,14 +65,15 @@ services:
       - "8025:8025" # UI
       - "1025:1025" # SMTP
 
-  # Servicio de LibreTranslate (CORREGIDO para evitar reinicios)
+  # Servicio de LibreTranslate (Optimizado para 8GB RAM y libre de Keys)
   libretranslate:
     image: libretranslate/libretranslate:latest
     container_name: project-laravel-libretranslate
     ports:
       - "5000:5000"
-    # La sección environment se omite intencionalmente porque no necesitamos variables aquí.
-    command: ["libretranslate", "--api-keys"] # Activa el modo de gestión de claves
+    environment:
+      - LT_LOAD_ONLY=es,en # 🧠 Carga solo Español e Inglés para proteger tus 8GB de RAM
+      - LT_REQUIRE_API_KEY=false # 🔓 Desactiva la exigencia de contraseñas/keys de forma interna
     volumes:
       - ./libretranslate_data:/root/.local/share/libretranslate
     restart: unless-stopped

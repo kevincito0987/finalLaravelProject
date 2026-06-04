@@ -37,7 +37,7 @@ return [
 
     'mailers' => [
 
-        'mailpit' => [
+        'smtp' => [
             'transport' => 'smtp',
             'scheme' => env('MAIL_SCHEME'),
             'url' => env('MAIL_URL'),
@@ -46,20 +46,8 @@ return [
             'username' => env('MAIL_USERNAME'),
             'password' => env('MAIL_PASSWORD'),
             'timeout' => null,
-            'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url(env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
+            'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
-
-        'real' => [
-            'transport' => 'smtp',
-            'host' => env('MAIL_HOST_REAL', 'smtp.gmail.com'),
-            'port' => env('MAIL_PORT_REAL', 587),
-            'username' => env('MAIL_USERNAME_REAL'),
-            'password' => env('MAIL_PASSWORD_REAL'),
-            'encryption' => env('MAIL_ENCRYPTION_REAL', 'tls'),
-            'timeout' => null,
-            'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url(env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
-        ],
-
 
         'ses' => [
             'transport' => 'ses',
@@ -97,6 +85,7 @@ return [
                 'smtp',
                 'log',
             ],
+            'retry_after' => 60,
         ],
 
         'roundrobin' => [
@@ -105,6 +94,7 @@ return [
                 'ses',
                 'postmark',
             ],
+            'retry_after' => 60,
         ],
 
     ],
@@ -122,7 +112,7 @@ return [
 
     'from' => [
         'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', 'Example'),
+        'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
 ];

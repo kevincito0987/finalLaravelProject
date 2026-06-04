@@ -1,95 +1,58 @@
-# 🗣️🧠 Backend: Clean Architecture con Laravel (ComunicaTech)🗣️🧠
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-Este es el backend de la Plataforma Interactiva de Comunicación y Aprendizaje, construido sobre una arquitectura robusta para garantizar la escalabilidad, la mantenibilidad y la testabilidad del sistema. 🚀
+<p align="center">
+<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+</p>
 
-## 🏛️ Patrones de Diseño & Arquitectura 🛡️
+## About Laravel
 
-El corazón de este backend es la **Arquitectura Limpia (Clean Architecture)**. Este patrón divide la aplicación en capas concéntricas, donde cada capa interna no conoce los detalles de las capas externas. Esto asegura que la lógica de negocio principal sea independiente de la tecnología, facilitando el cambio de bases de datos, frameworks o cualquier dependencia externa sin afectar las reglas del negocio.
+Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-### 📚 Principios Clave de la Arquitectura Limpia
+- [Simple, fast routing engine](https://laravel.com/docs/routing).
+- [Powerful dependency injection container](https://laravel.com/docs/container).
+- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
+- [Robust background job processing](https://laravel.com/docs/queues).
+- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-- **Independencia de Frameworks:** La lógica central (Entidades y Casos de Uso) no depende de Laravel. Si en el futuro se necesita cambiar a otro framework (ej. Symfony), el núcleo de la aplicación permanece intacto.
-- **Independencia de la Base de Datos:** La lógica no está atada a MySQL o PostgreSQL. Puedes cambiar la base de datos sin reescribir las reglas de negocio.
-- **Testabilidad:** Cada capa se puede probar de forma aislada, sin necesidad de bases de bases de datos o servidores web.
+Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-### 🧩 Implementación en Laravel
+## Learning Laravel
 
-Se utilizarán los siguientes patrones para implementar Clean Architecture en Laravel:
+Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
 
-- **Patrón de Repositorio (`Repository Pattern`):** Para separar la lógica de acceso a la base de datos de la lógica de negocio. Los controladores interactuarán con una interfaz de repositorio, no directamente con Eloquent.
-- **Patrón de Estrategia (`Strategy Pattern`):** Como prototipo para manejar los diferentes métodos de comunicación (visual, auditivo, táctil), garantizando que la lógica de negocio pueda cambiar de un método a otro de forma dinámica y sin acoplamiento.
-- **Servicios (`Services`):** Se crearán clases de servicio para encapsular la lógica de negocio compleja que no pertenece a los modelos o controladores, como la gestión de lecciones o el registro de progreso.
+In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
 
-## 📂 Estructura de Carpetas 🌳
+You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
 
-La organización refleja las capas de la Arquitectura Limpia, manteniendo el orden y la claridad del proyecto.
+## Agentic Development
 
-```
-.Backend
-├── app/ 📂                     # 🧠 El núcleo de la aplicación con la Arquitectura Limpia
-│   ├── Console/ 🧠                # El núcleo de la aplicación que gestiona conexion con buckets de almacenamiento.
-│   ├── Core/ 🧠                # El núcleo de la aplicación, independiente de Laravel
-│   │   ├── Entities/ 🛡️        # Las reglas de negocio (tarjetas, usuarios, etc.)
-│   │   ├── Repositories/ 🗄️    # Interfaces para la capa de persistencia
-│   │   ├── Services/ ⚙️         # Lógica de negocio reusable
-│   │   └── Interfaces/ ♟️        # Implementaciones del Repository con interfaces
-│   │   └── Strategies/ ♟️        # Implementaciones del Strategy Pattern
-│   ├── Http/ 🌐                # La capa de comunicación (Controllers, Requests)
-│   │   ├── Controllers/ 🌐      # Controladores que manejan las peticiones
-│   │   ├── Middlewares/ 🔑      # Lógica para filtrar peticiones HTTP
-│   │   └── Requests/ 📝         # Validaciones y autorización de peticiones
-│   ├── Providers/ 🤝           # Binding de interfaces a implementaciones
-│   ├── Console/ 💻             # Comandos de consola personalizados
-│   ├── Models/ 📊              # Modelos de Eloquent
-│   ├── Mail/ 📧                # Notificaciones por correo electrónico
-│   ├── Services/ 📡            # Servicios de terceros y utilidades
-│   ├── Traits/ 🧬              # Lógica reutilizable entre clases
-│   ├── Jobs/ 👷                # Procesos que se ejecutan en segundo plano
-│   ├── Events/ 📢              # Eventos para desacoplar la lógica
-│   └── Listeners/ 👂           # Oyentes de los eventos
-├── bootstrap/ 🚀               # ⚙️ Archivos para inicializar el framework y la carga automática
-├── config/ ⚙️                  # ⚙️ Todos los archivos de configuración
-├── database/ 🗄️                # 💾 Migraciones, seeders y factorías para la base de datos
-├── lang/ 🌐                    # 🗣️ Archivos de localización (traducciones)
-├── public/ 🌎                  # 📦 Archivos públicos (CSS, JS, imágenes, etc.)
-├── resources/ 🎨               # 🖼️ Archivos de vistas y assets sin compilar
-├── routes/ 🛣️                  # 🧭 Todas las definiciones de rutas web y API
-├── storage/ 📦                 # 💾 Archivos generados (logs, cache, etc.)
-├── tests/ ✅                   # 🧪 Pruebas unitarias y de características
-├── vendor/ 📦                  # 📦 Dependencias de Composer
-├── .env ⚙️                     # 🔑 Variables de entorno
-├── .env.example ⚙️             # 🔑 Ejemplo de variables de entorno
-├── .editorconfig ✍️             # 📝 Configuración de estilo del editor
-├── .gitattributes ⚙️           # 📝 Configuración de Git
-├── .gitignore 👻               # 📝 Archivos y carpetas ignorados por Git
-├── artisan 💻                  # 🧙 Comando de línea para Laravel
-├── composer.json 🎼            # 📦 Dependencias de PHP
-├── composer.lock 🔒            # 📦 Versiones exactas de las dependencias
-├── postcss.config.js ⚙️        # ⚙️ Configuración de PostCSS
-├── tailwind.config.js ⚙️       # ⚙️ Configuración de Tailwind CSS
-├── vite.config.js ⚙️           # ⚙️ Configuración de Vite
-├── package.json 📦             # 📦 Dependencias de Node (para frontend)
-├── phpunit.xml 🧪              # 🧪 Configuración para pruebas PHPUnit
-└── README.md 📖                # 📝 Este mismo archivo
+Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+
+```bash
+composer require laravel/boost --dev
+
+php artisan boost:install
 ```
 
-## 🛠️ Tecnologías Principales 💻
+Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
 
-- **Framework:** Laravel 11 ✨
-- **Base de datos:** MySQL / PostgreSQL / Supabase 🗄️
-- **Docker:** Para el entorno de desarrollo y despliegue 🐳
-- **Autenticación (OAuth 2 & JWT):** Para inicio de sesión con Google y GitHub. 🔑
-- **Multilenguaje:** Laravel Localization 🗣️
-- **Traducción:** `libre-translate` 📖
-- **Documentación API:** Swagger API 📝
-- **Correos:** Laravel Mail 📧
-- **Almacenamiento:** Laravel File Storage 📁
-- **Validaciones:** Validaciones a nivel de Form Request 🛡️
+## Contributing
 
-## 🧑‍💻 Desarrollador Principal 👨‍💻
+Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
-- **kevincito0987**: [GitHub](https://github.com/kevincito0987) 🚀
+## Code of Conduct
 
-## ✨ Frase Estelar ✨
+In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
-**La arquitectura es la base de un proyecto duradero. Construir con lógica sólida nos permite crear un mundo digital que perdura y crece con cada necesidad. 🏗️**
+## Security Vulnerabilities
+
+If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+
+## License
+
+The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).

@@ -41,7 +41,7 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => env('APP_URL').'/storage',
+            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,
@@ -59,18 +59,6 @@ return [
             'throw' => false,
             'report' => false,
         ],
-        'supabase' => [
-            'driver' => 's3',
-            'key' => env('SUPABASE_KEY'),
-            'secret' => env('SUPABASE_SECRET'),
-            'region' => 'us-east-2',
-            'bucket' => env('SUPABASE_BUCKET'),
-            'endpoint' => env('SUPABASE_ENDPOINT'),
-            'use_path_style_endpoint' => true,
-            'url' => env('SUPABASE_PUBLIC_URL'),
-        ],
-
-
 
     ],
 
