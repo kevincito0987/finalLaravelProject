@@ -2,31 +2,52 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Passport\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Los atributos que son asignables en masa.
      */
-    protected function casts(): array
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'role_id',
+        'profile_photo_path',
+        'mfa_secret',
+        'is_mfa_enabled',
+    ];
+
+    /**
+     * Atributos ocultos para la serialización (Protección OWASP estándar).
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+        'mfa_secret',
+    ];
+
+    /**
+     * Casteo de atributos nativos.
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'is_mfa_enabled' => 'boolean',
+        // ⚠️ Nota: Se remueve 'password' => 'hashed' para delegar el control criptográfico al Password Value Object.
+    ];
+
+    /**
+     * Relación: Un Usuario pertenece a un Rol
+     */
+    public function role(): BelongsTo
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->belongsTo(Role::class, 'role_id');
     }
 }
